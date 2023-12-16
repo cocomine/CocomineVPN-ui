@@ -1,0 +1,212 @@
+@import "bootstrap/scss/bootstrap";
+
+body{
+    color: #fff;
+}
+
+/* content */
+.content{
+    .row{
+        min-height: 100%;
+    }
+}
+
+.flag{
+    object-fit: cover;
+    border-radius: 20px;
+    width: 100%;
+    height: 100%;
+
+    &.tw{
+        object-position: left;
+    }
+}
+
+.statusMark{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+
+    &.online{
+        background-color: lawngreen;
+    }
+
+    &.offline{
+        background-color: $danger;
+    }
+}
+
+.providerIcon{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    transform: translate(50%, 50%);
+}
+
+.offlineDimDark{
+    opacity: .5;
+    border-radius: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1;
+    background-color: black;
+}
+
+.spinner{
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    padding: 1.1rem;
+    z-index: 2;
+    justify-content: center;
+
+    .spinner-border{
+        width: 100%;
+        height: 100%;
+    }
+}
+
+/* loading-screen */
+.loading-screen{
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #2f2f2f;
+    transition: opacity .5s ease-in-out;
+}
+
+/* anime-background */
+.anime-background{
+    position: fixed;
+    z-index: -20;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+
+    &:before {
+        content: '';
+        background-color: black;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: .6;
+        z-index: 1;
+    }
+
+    .anime-background-img{
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-size: cover;
+        width: 100%;
+        height: 100%;
+        transition: opacity 1s ease-in-out;
+
+        &.img1{
+            background-image: url("./assets/paperwall_2.webp");
+        }
+
+        &.img2{
+            background-image: url("./assets/paperwall_3.webp");
+        }
+
+        &.img3{
+            background-image: url("./assets/paperwall_4.webp");
+        }
+    }
+}
+
+.FlagHover{
+    transform: translate(0, 0);
+    transition: transform .4s ease-out;
+    cursor: pointer;
+
+    &:hover{
+        transform: translate(5px, 5px);
+    }
+}
+
+/* bubbles start */
+.bubbles {
+    position: fixed;
+    z-index: -10;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+
+    .bubble {
+        position: absolute;
+        left: var(--bubble-left-offset);
+        bottom: calc(0px - var(--bubble-size));
+        display: block;
+        width: var(--bubble-size);
+        height: var(--bubble-size);
+        border-radius: 50%;
+        animation: float-up var(--bubble-float-duration) var(--bubble-float-delay) ease-in infinite;
+        transition: opacity .5s ease-out;
+
+        &::before {
+            position: absolute;
+            content: '';
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: hsla(183, 100%, 85%, 0.3);
+            border-radius: inherit;
+            animation: var(--bubble-sway-type) var(--bubble-sway-duration) var(--bubble-sway-delay) ease-in-out alternate infinite;
+            box-shadow: 0 0 5px 0 rgba(183, 100%, 85%, 0.3);
+
+        }
+    }
+}
+
+@keyframes float-up {
+    to {
+        transform: translateY(-175vh);
+    }
+}
+
+@keyframes sway-left-to-right {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes sway-right-to-left {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-100%);
+    }
+}
+/* bubbles end */
