@@ -1,7 +1,9 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {Col, Container, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
+import {toast} from "react-toastify";
+import 'react-toastify/dist/ReactToastify.min.css';
 
 type country = "TW" | "JP"
 type provider = "google" | "azure"
@@ -38,65 +40,85 @@ const processingStatusText = [
     "creating",
     "deallocating"
 ]
+const API_URL = "https://api.cocomine.cc"
 
-const Menu: React.FC<{onLoad?: () => void}> = ({onLoad = () => null}) => {
-    const [vm_data, setVMData] = useState<VMData[]>([{
-        _name: "test",
-        _status: "STOPPING",
-        _id: "test",
-        _zone: "test",
-        _url: "test",
-        _country: "TW",
-        _profiles: [{
-            "type": "OpenVPN",
-            "filename": "test"
-        }],
-        _provider: "google",
-        _isPowerOn: false
-    },
-        {
-            _name: "test2",
-            _status: "test2",
-            _id: "test2",
-            _zone: "test2",
-            _url: "test2",
-            _country: "JP",
-            _profiles: [{
-                "type": "OpenVPN",
-                "filename": "test2"
-            }],
-            _provider: "azure",
-            _isPowerOn: true
-        }]);
+const Menu: React.FC<{ onLoad?: () => void }> = ({onLoad = () => null}) => {
+    const [vm_data, setVMData] = useState<VMData[]>([]);
     const [userProfile, setUserProfile] = useState<userProfile>({email: "test", username: "test", ip: "test"});
-    const [nextUpdateInterval, setNextUpdateInterval] = useState("--:--");
-    const [lastUpdate, setLastUpdate] = useState("--:--");
-    const [nextUpdate, setNextUpdate] = useState(moment().add(1, "minutes"));
+    const [nextUpdateInterval, setNextUpdateInterval] = useState("00:00");
+    const [lastUpdate, setLastUpdate] = useState("00:00");
+    const [nextUpdate, setNextUpdate] = useState(moment());
 
+    // fetch vm data
+    const fetchVMData = useCallback(async (abortController: AbortController ) => {
+        const res = await fetch(`${API_URL}/vpn`, {
+            method: "GET",
+            credentials: "include",
+            signal: abortController.signal
+        })
+        const data = await res.json()
+        console.log(data); //debug
+
+        setVMData(data.data);
+        setLastUpdate(moment(data.last_update).format("HH:mm"));
+        setNextUpdate(moment(data.next_update));
+    }, [])
+
+    // fetch data on mount
     useEffect(() => {
-        //todo: network request
-        setLastUpdate(moment().format("HH:mm"));
+        const abortController = new AbortController();
 
-        const id = setInterval(() => {
+        fetchVMData(abortController).then(() => {
+            // get user profile
+            fetch(`${API_URL}/profile`, {
+                method: "GET",
+                credentials: "include",
+                signal: abortController.signal
+            }).then(res => {
+                return res.json()
+            }).then(async data => {
+                setUserProfile({email: data.data.email, username: data.data.name, ip: data.data.ip});
+                onLoad(); // data loaded
+            });
+        }).catch(err => {
+            console.error(err)
+            err.name !== "AbortError" && toast.error("無法取得資料，請稍後再試");
+        });
+
+        return () => abortController.abort();
+    }, [fetchVMData, onLoad]);
+
+    // update timeInterval every second
+    useEffect(() => {
+        const abortController = new AbortController();
+        const id = setInterval(async () => {
             const diff = nextUpdate.diff(moment())
 
-            if(diff <= 0) {
-                //todo: network request
-                setNextUpdate(moment().add(1, "minutes"));
+            // update data if next update time is passed
+            if (diff < 0) {
+                await fetchVMData(abortController).catch(err => {
+                    console.error(err)
+                    err.name !== "AbortError" && toast.error("無法取得資料，請稍後再試");
+                    setNextUpdate(moment().add(10, "seconds")); // retry after 10 seconds
+                });
                 return
             }
+
             setNextUpdateInterval(moment(diff).format("mm:ss"));
         }, 1000);
 
-        return () => clearInterval(id);
-    }, [nextUpdate]);
+        return () => {
+            clearInterval(id);
+            abortController.abort();
+        };
+    }, [fetchVMData, nextUpdate]);
 
     return (
         <Row className="justify-content-around justify-content-md-start align-content-center g-5 py-3 mx-1">
             <Col xs={12}>
                 <h1>Welcome {userProfile.username} !</h1>
             </Col>
-            {vm_data.map((vm, i) => <Flag key={i} vm_data={vm}/>)}
+            {vm_data.map((vm) => <Flag key={vm._id} vm_data={vm}/>)}
             <Col xs={12} className="text-end">
                 <p>
                     最後更新: {lastUpdate} <br/>
@@ -133,14 +155,14 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
     }, [data._provider]);
 
     const statusMark = useMemo(() => {
-        if(data._isPowerOn)
+        if (data._isPowerOn)
             return <div className="statusMark online"></div>;
 
         return <div className="statusMark offline"></div>;
     }, [data._isPowerOn]);
 
     const spinner = useMemo(() => {
-        if(processingStatusText.includes(data._status))
+        if (processingStatusText.includes(data._status))
             return <div className="spinner"><Spinner animation="border"/></div>;
 
         return null;

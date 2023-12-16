@@ -3,19 +3,30 @@ import './App.scss';
 import {Col, Container, Row} from "react-bootstrap";
 import {Menu} from "./ui";
 import loading from "./assets/loading.svg";
+import {ToastContainer} from "react-toastify";
 
 function App() {
     const [loading, setLoading] = useState(true);
 
     return (
-        <div className="h-100">
+        <>
             <Container className="content h-100">
                 <Menu onLoad={() => setLoading(false)}/>
             </Container>
             <Bubbles/>
             <AnimeBackground/>
             <LoadingScreen display={loading}/>
-        </div>
+            <ToastContainer position="bottom-right"
+                            autoClose={5000}
+                            hideProgressBar={false}
+                            newestOnTop={false}
+                            closeOnClick
+                            rtl={false}
+                            pauseOnFocusLoss
+                            draggable
+                            pauseOnHover
+                            theme="colored"/>
+        </>
     );
 }
 
@@ -77,14 +88,14 @@ const Bubble: React.FC<{ delay: number }> = ({delay}) => {
     )
 }
 
-const LoadingScreen: React.FC<{display: boolean}> = ({display}) => {
+const LoadingScreen: React.FC<{ display: boolean }> = ({display}) => {
     const [displayStat, setDisplayStat] = useState(0);
 
     useEffect(() => {
-        if(!display) {
+        if (!display) {
             setDisplayStat(1);
             setTimeout(() => setDisplayStat(2), 500);
-        }else {
+        } else {
             setDisplayStat(0);
         }
     }, [display]);
