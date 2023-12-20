@@ -5,7 +5,7 @@ import moment from "moment";
 import {toast} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
 import {Link, useLoaderData} from "react-router-dom";
-import {API_URL} from "./App";
+import {API_URL, toastHttpError} from "./App";
 
 type country = "TW" | "JP"
 type provider = "google" | "azure"
@@ -13,6 +13,7 @@ type profile = {
     "type": "OpenVPN" | "SoftEther",
     "filename": string
 }
+type readOnlyMode = "startOnly" | "stopOnly" | "readOnly" | "disable"
 type VMData = {
     _name: string;
     _status: string;
@@ -23,6 +24,7 @@ type VMData = {
     _profiles: profile[]
     _provider: provider
     _isPowerOn: boolean
+    _readonly: readOnlyMode
 }
 type userProfile = {
     email: string;
@@ -43,19 +45,21 @@ const processingStatusText = [
     "deallocating"
 ]
 
-const Menu: React.FC = () => {
-    const {vpnData, userProfile} = useLoaderData() as {vpnData: any, userProfile: userProfile};
+const Menu: React.FC<{
+    data: { data: VMData[], next_update: string, last_update: string },
+    userProfile: userProfile
+}> = ({data, userProfile}) => {
     const [vm_data, setVMData] = useState<VMData[]>([]);
     const [nextUpdateInterval, setNextUpdateInterval] = useState("00:00");
     const [lastUpdate, setLastUpdate] = useState("00:00");
     const [nextUpdate, setNextUpdate] = useState(moment());
 
-    // fetch data on mount
+    // fetch data when data is changed
     useEffect(() => {
-        setVMData(vpnData.data);
-        setNextUpdate(moment(vpnData.next_update));
-        setLastUpdate(moment(vpnData.last_update).format("HH:mm"));
-    }, []);
+        setVMData(data.data);
+        setNextUpdate(moment(data.next_update));
+        setLastUpdate(moment(data.last_update).format("HH:mm"));
+    }, [data]);
 
     // update timeInterval every second
     useEffect(() => {
@@ -65,11 +69,16 @@ const Menu: React.FC = () => {
 
             // update data if next update time is passed
             if (diff < 0) {
-                const vpnData = await fetchVPNData(abortController).catch(err => {
+                let vpnData;
+                try {
+                    vpnData = await fetchVPNData(abortController);
+                } catch (err: any) {
                     console.error(err)
-                    err.name !== "AbortError" && toast.error("無法取得資料，請稍後再試");
+                    if (err.name !== "AbortError") toastHttpError(err.status)
                     setNextUpdate(moment().add(10, "seconds")); // retry after 10 seconds
-                });
+                    return;
+                }
+
                 setVMData(vpnData.data);
                 setLastUpdate(moment(vpnData.last_update).format("HH:mm"));
                 setNextUpdate(moment(vpnData.next_update));
@@ -103,9 +112,15 @@ const Menu: React.FC = () => {
     );
 }
 
+/**
+ * Flag element for menu
+ * @param vm_data VM data
+ * @constructor
+ */
 const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
     const [data, setData] = useState<VMData>(vm_data);
 
+    // flag image element for menu item (memoized) (only update when data._country is changed)
     const flag = useMemo(() => {
         switch (data._country) {
             case "TW":
@@ -117,6 +132,7 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
         }
     }, [data._country]);
 
+    // provider image element for menu item (memoized) (only update when data._provider is changed)
     const provider = useMemo(() => {
         switch (data._provider) {
             case "google":
@@ -128,6 +144,7 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
         }
     }, [data._provider]);
 
+    // status mark element for menu item (memoized) (only update when data._isPowerOn is changed)
     const statusMark = useMemo(() => {
         if (data._isPowerOn)
             return <div className="statusMark online"></div>;
@@ -135,20 +152,43 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
         return <div className="statusMark offline"></div>;
     }, [data._isPowerOn]);
 
+    // spinner element for menu item (memoized) (only update when data._status is changed)
     const spinner = useMemo(() => {
         if (processingStatusText.includes(data._status))
-            return <div className="spinner"><Spinner animation="border"/></div>;
+            return (
+                <>
+                    <div className="spinner"><Spinner animation="border"/></div>
+                    <div className="offlineDimDark"></div>
+                </>
+            );
 
         return null;
     }, [data._status]);
 
+    // update data when vm_data is changed
     useEffect(() => {
         setData(vm_data)
     }, [vm_data]);
 
-    return (
-        <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-5 mx-lg-4">
-            <Link to={`/${data._id}`}>
+    if (spinner === null) {
+        return (
+            <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-5 mx-lg-4">
+                <Link to={`/${data._id}`}>
+                    <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
+                        <div>
+                            {flag}
+                            {provider}
+                            {statusMark}
+                            {!data._isPowerOn ? <div className="offlineDimDark"></div> : null}
+                            {spinner}
+                        </div>
+                    </Ratio>
+                </Link>
+            </Col>
+        )
+    } else {
+        return (
+            <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-5 mx-lg-4">
                 <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
                     <div>
                         {flag}
@@ -158,37 +198,52 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
                         {spinner}
                     </div>
                 </Ratio>
-            </Link>
-        </Col>
-    )
+            </Col>
+        )
+    }
 }
 
+/**
+ * Loader for menu
+ * @constructor
+ */
 const loader = async () => {
     const vpnData = await fetchVPNData()
     const userProfile = await fetchProfileData();
-    console.log(vpnData, userProfile) //debug
-    return {vpnData, userProfile: {email: userProfile.data.email, username: userProfile.data.name, ip: userProfile.data.ip}}
+    console.debug(vpnData, userProfile) //debug
+    return {
+        vpnData,
+        userProfile: {email: userProfile.data.email, username: userProfile.data.name, ip: userProfile.data.ip}
+    }
 }
 
+/**
+ * Fetch VPN data
+ * @param abortController AbortController
+ */
 const fetchVPNData = async (abortController: AbortController = new AbortController()) => {
     const res = await fetch(`${API_URL}/vpn`, {
         method: "GET",
         credentials: "include",
         signal: abortController.signal
     })
-    if(!res.ok) throw res;
+    if (!res.ok) throw res;
     return await res.json()
 }
 
+/**
+ * Fetch profile data
+ * @param abortController AbortController
+ */
 const fetchProfileData = async (abortController: AbortController = new AbortController()) => {
     const res = await fetch(`${API_URL}/profile`, {
         method: "GET",
         credentials: "include",
         signal: abortController.signal
     })
-    if(!res.ok) throw res;
+    if (!res.ok) throw res;
     return await res.json()
 }
 
 export {Menu, loader, fetchVPNData, fetchProfileData};
-export type { VMData, userProfile, profile, country, provider };
+export type {VMData, userProfile, profile, country, provider};

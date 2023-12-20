@@ -91,10 +91,12 @@ body {
     }
 }
 
-@mixin test($color){
+/* powerBtn */
+@mixin powerBtn($color){
     border-radius: 50%;
     box-shadow: 0 0 0 0 var(--bs-btn-bg);
     animation: pulse 1.5s infinite;
+    transition: transform .2s ease-in-out;
 
     img{
         width: 80%;
@@ -103,6 +105,10 @@ body {
 
     &:active, &:disabled {
         animation: none;
+    }
+
+    &:active {
+        transform: scale(0.9);
     }
 
     svg{
@@ -144,12 +150,14 @@ body {
 
 .powerBtn {
     &.btn-danger{
-        @include test(red);
+        @include powerBtn(red);
     }
     &.btn-success {
-        @include test(limegreen);
+        @include powerBtn(limegreen);
     }
 }
+
+
 
 @keyframes pulse {
     0% {

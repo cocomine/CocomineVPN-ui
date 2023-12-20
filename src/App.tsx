@@ -1,20 +1,74 @@
-import React, {CSSProperties, useEffect, useMemo, useState} from 'react';
+import React, {CSSProperties, useCallback, useEffect, useMemo, useState} from 'react';
 import './App.scss';
 import {Col, Container, Row} from "react-bootstrap";
-import {Menu} from "./Menu";
+import {fetchVPNData, Menu, userProfile, VMData} from "./Menu";
 import loading from "./assets/loading.svg";
-import {ToastContainer} from "react-toastify";
-import {isRouteErrorResponse, Outlet, useNavigation, useRouteError} from "react-router-dom";
+import {toast, ToastContainer} from "react-toastify";
+import {
+    isRouteErrorResponse,
+    Outlet,
+    useLoaderData,
+    useLocation,
+    useNavigate,
+    useNavigation,
+    useRouteError
+} from "react-router-dom";
 
 const API_URL = "https://api.cocomine.cc"
 
+interface IstatusUpdateCallback{
+    (promise:Promise<VMData>, target_power: boolean):void
+}
+type ContextType = {
+    statusUpdateCallback: IstatusUpdateCallback
+}
+
 function App() {
     const navigation = useNavigation();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const {vpnData, userProfile} = useLoaderData() as {vpnData: any, userProfile: userProfile};
+    const [data, setData] = useState(vpnData);
+
+    // force update status
+    const forceUpDateStatus = useCallback(async () => {
+        let data
+        try{
+            data = await fetchVPNData()
+        }catch (err: any) {
+            console.error(err)
+            if(err.name !== "AbortError") toastHttpError(err.status)
+            return
+        }
+        setData(data)
+    },[]);
+
+    // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
+    const statusUpdateCallback = useCallback<IstatusUpdateCallback>(async (promise, target) => {
+        await forceUpDateStatus()
+        try {
+            await toast.promise(promise, {
+                    pending: `正在${target ? '開機' : '關機'}中...`,
+                    success: '節點已成功' + (target ? '開機' : '關機') + '!',
+                    error: '節點' + (target ? '開機' : '關機') + '失敗!',
+                }
+            );
+        }catch (e){
+            console.error(e)
+        } finally {
+            await forceUpDateStatus()
+        }
+    }, []);
+
+    // set title
+    useEffect(() => {
+        if(location.pathname === "/") document.title = "Home - VPN Manager"
+    }, [location]);
 
     return (
         <>
             <Container className="content h-100" data-bs-theme="dark">
-                <Menu />
+                <Menu data={data} userProfile={userProfile}/>
             </Container>
             <Bubbles/>
             <AnimeBackground/>
@@ -29,7 +83,7 @@ function App() {
                             draggable
                             pauseOnHover
                             theme="colored"/>
-            <Outlet />
+            <Outlet context={{statusUpdateCallback} satisfies ContextType}/>
         </>
     );
 }
@@ -94,6 +148,10 @@ const AnimeBackground: React.FC = () => {
     )
 }
 
+/**
+ * Bubbles background animation
+ * @constructor
+ */
 const Bubbles: React.FC = () => {
     const count = 20;
 
@@ -104,6 +162,11 @@ const Bubbles: React.FC = () => {
     )
 }
 
+/**
+ * Bubble background animation element
+ * @param delay Spawn delay time
+ * @constructor
+ */
 const Bubble: React.FC<{ delay: number }> = ({delay}) => {
     const [isClicked, setIsClicked] = useState(0);
     const defaultStyle = useMemo(() => ({
@@ -133,6 +196,11 @@ const Bubble: React.FC<{ delay: number }> = ({delay}) => {
     )
 }
 
+/**
+ * Loading screen
+ * @param display display or not
+ * @constructor
+ */
 const LoadingScreen: React.FC<{ display: boolean }> = ({display}) => {
     const [displayStat, setDisplayStat] = useState(0);
 
@@ -157,5 +225,39 @@ const LoadingScreen: React.FC<{ display: boolean }> = ({display}) => {
     )
 }
 
+/**
+ * Toast http error
+ * @param status http status code
+ */
+const toastHttpError = (status: number) => {
+    switch (status) {
+        case 400:
+            toast.error("你給的資料我不明白 你肯定沒有錯?",)
+            break;
+        case 404:
+            toast.error("這裡不存在任何東西! 你確定去對地方了?", {containerId: 1})
+            break;
+        case 403:
+            toast.error("你不可以看這個東西!")
+            break;
+        case 401:
+            toast.error("我不知道你是誰 你能告訴我嗎!")
+            break;
+        case 500:
+            toast.error("我出現問題了! 稍後再試一試")
+            break;
+        case 504:
+            toast.error("網絡出現問題! 檢查一下")
+            break;
+        case 502:
+            toast.error("太多人了! 稍後再試一試")
+            break;
+        default:
+            toast.error("出事啦! 發生了一些不能遇見的錯誤! 不如再試一試?")
+    }
+}
+
 export default App;
-export {API_URL, ErrorScreen};
+export {API_URL, ErrorScreen, LoadingScreen, toastHttpError};
+export type { IstatusUpdateCallback, ContextType };
+

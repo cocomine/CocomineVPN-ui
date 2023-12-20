@@ -1,12 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.scss';
-import App, {ErrorScreen} from './App';
+import App, {ErrorScreen, LoadingScreen} from './App';
 import reportWebVitals from './reportWebVitals';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import {loader} from "./Menu";
-import {Action, ErrorElement, loader as actionLoader} from "./action";
+import {Action, ChooseProfile, ErrorElement, loader as actionLoader} from "./action";
 
+// create router
 const router = createBrowserRouter([
     {
         path: '/',
@@ -18,7 +19,14 @@ const router = createBrowserRouter([
                 path: ':id',
                 loader: actionLoader,
                 element: <Action />,
-                errorElement: <ErrorElement />
+                errorElement: <ErrorElement />,
+                children: [
+                    {
+                        path: 'profile',
+                        element: <ChooseProfile />,
+                        errorElement: <ErrorElement />,
+                    }
+                ]
             }
         ]
     }
@@ -29,7 +37,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
     <React.StrictMode>
-        <RouterProvider router={router} />
+        <RouterProvider router={router} fallbackElement={<LoadingScreen display={true}/>} />
     </React.StrictMode>
 );
 
