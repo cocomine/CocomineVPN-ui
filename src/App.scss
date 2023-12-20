@@ -1,4 +1,4 @@
-@import "bootstrap/scss/bootstrap";
+@import "~bootstrap/scss/bootstrap";
 
 body{
     color: #fff;
@@ -79,6 +79,20 @@ body{
     }
 }
 
+.FlagHover{
+    transform: translate(0, 0);
+    transition: transform .4s ease-out;
+
+    &:hover{
+        transform: translate(5px, 5px);
+    }
+}
+
+/* overwrite modal BG */
+.modal-content{
+    background-color: var(--bs-body-bg);
+}
+
 /* loading-screen */
 .loading-screen{
     position: fixed;
@@ -88,8 +102,13 @@ body{
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background-color: #2f2f2f;
+    background-color: rgba(47, 47, 47, 0.5);
     transition: opacity .5s ease-in-out;
+}
+
+.error-screen{
+    @extend .loading-screen;
+    background-color: rgba(47, 47, 47);
 }
 
 /* anime-background */
@@ -134,16 +153,6 @@ body{
         &.img3{
             background-image: url("./assets/paperwall_4.webp");
         }
-    }
-}
-
-.FlagHover{
-    transform: translate(0, 0);
-    transition: transform .4s ease-out;
-    cursor: pointer;
-
-    &:hover{
-        transform: translate(5px, 5px);
     }
 }
 

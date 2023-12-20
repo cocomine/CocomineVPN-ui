@@ -1,21 +1,24 @@
 import React, {CSSProperties, useEffect, useMemo, useState} from 'react';
 import './App.scss';
 import {Col, Container, Row} from "react-bootstrap";
-import {Menu} from "./ui";
+import {Menu} from "./Menu";
 import loading from "./assets/loading.svg";
 import {ToastContainer} from "react-toastify";
+import {isRouteErrorResponse, Outlet, useNavigation, useRouteError} from "react-router-dom";
+
+const API_URL = "https://api.cocomine.cc"
 
 function App() {
-    const [loading, setLoading] = useState(true);
+    const navigation = useNavigation();
 
     return (
         <>
-            <Container className="content h-100">
-                <Menu onLoad={() => setLoading(false)}/>
+            <Container className="content h-100" data-bs-theme="dark">
+                <Menu />
             </Container>
             <Bubbles/>
             <AnimeBackground/>
-            <LoadingScreen display={loading}/>
+            <LoadingScreen display={navigation.state === "loading"}/>
             <ToastContainer position="bottom-right"
                             autoClose={5000}
                             hideProgressBar={false}
@@ -26,7 +29,49 @@ function App() {
                             draggable
                             pauseOnHover
                             theme="colored"/>
+            <Outlet />
         </>
+    );
+}
+
+const ErrorScreen: React.FC = () => {
+    const error = useRouteError();
+    const error_Elm = useMemo(() => {
+        if (isRouteErrorResponse(error)) {
+            if (error.status === 400) {
+                return (<><h1>404</h1><p>你給的資料我不明白 你肯定沒有錯?</p></>)
+            }
+            if (error.status === 404) {
+                return (<><h1>404</h1><p>這裡不存在任何東西! 你確定去對地方了?</p></>)
+            }
+            if (error.status === 403) {
+                return (<><h1>403</h1><p>你不可以看這個東西!</p></>)
+            }
+            if (error.status === 401) {
+                return (<><h1>401</h1><p>我不知道你是誰 你能告訴我嗎!</p></>)
+            }
+            if (error.status === 500) {
+                return (<><h1>500</h1><p>我出現問題了! 稍後再試一試</p></>)
+            }
+            if (error.status === 504) {
+                return (<><h1>504</h1><p>網絡出現問題! 檢查一下</p></>)
+            }
+            if (error.status === 502) {
+                return (<><h1>502</h1><p>太多人了! 稍後再試一試</p></>)
+            }
+        }
+        return (<><h1>出事啦!</h1><p>發生了一些不能遇見的錯誤! 不如再試一試?</p></>)
+    }, [error]);
+    console.log(error)
+
+    return (
+        <div className="error-screen">
+            <Row className="h-100 justify-content-center align-items-center">
+                <Col xs={12} className="text-center">
+                    {error_Elm}
+                </Col>
+            </Row>
+        </div>
     );
 }
 
@@ -100,9 +145,8 @@ const LoadingScreen: React.FC<{ display: boolean }> = ({display}) => {
         }
     }, [display]);
 
-    if (displayStat === 2) return null; // disappear
     return (
-        <div className="loading-screen" style={{opacity: displayStat !== 0 ? 0 : 1}}>
+        <div className="loading-screen" style={{opacity: displayStat !== 0 ? 0 : 1, display: displayStat === 2 ? "none" : undefined}}>
             <Row className="h-100 justify-content-center align-items-center">
                 <Col xs={12} className="text-center">
                     <img src={loading} alt="Loading..."/>
@@ -114,3 +158,4 @@ const LoadingScreen: React.FC<{ display: boolean }> = ({display}) => {
 }
 
 export default App;
+export {API_URL, ErrorScreen};
