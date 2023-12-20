@@ -1,28 +1,40 @@
 @import "~bootstrap/scss/bootstrap";
 
-body{
+$bootstrap-icons-font-dir: "~bootstrap-icons/font/fonts";
+@import "~bootstrap-icons/font/bootstrap-icons";
+
+body {
     color: #fff;
 }
 
 /* content */
-.content{
-    .row{
+.content {
+    .row {
         min-height: 100%;
     }
 }
 
-.flag{
+.flag {
     object-fit: cover;
     border-radius: 20px;
     width: 100%;
     height: 100%;
 
-    &.tw{
+    &.tw {
         object-position: left;
     }
 }
 
-.statusMark{
+.flagHover {
+    transform: translate(0, 0);
+    transition: transform .4s ease-out;
+
+    &:hover {
+        transform: translate(5px, 5px);
+    }
+}
+
+.statusMark {
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -32,16 +44,16 @@ body{
     z-index: 2;
     transform: translate(-50%, -50%);
 
-    &.online{
-        background-color: lawngreen;
+    &.online {
+        background-color: limegreen;
     }
 
-    &.offline{
+    &.offline {
         background-color: $danger;
     }
 }
 
-.providerIcon{
+.providerIcon {
     width: 40px;
     height: 40px;
     position: absolute;
@@ -51,7 +63,7 @@ body{
     transform: translate(50%, 50%);
 }
 
-.offlineDimDark{
+.offlineDimDark {
     opacity: .5;
     border-radius: 20px;
     position: absolute;
@@ -63,7 +75,7 @@ body{
     background-color: black;
 }
 
-.spinner{
+.spinner {
     position: absolute;
     top: 0;
     left: 0;
@@ -73,28 +85,88 @@ body{
     z-index: 2;
     justify-content: center;
 
-    .spinner-border{
+    .spinner-border {
         width: 100%;
         height: 100%;
     }
 }
 
-.FlagHover{
-    transform: translate(0, 0);
-    transition: transform .4s ease-out;
+@mixin test($color){
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 var(--bs-btn-bg);
+    animation: pulse 1.5s infinite;
 
-    &:hover{
-        transform: translate(5px, 5px);
+    img{
+        width: 80%;
+        height: 80%;
+    }
+
+    &:active, &:disabled {
+        animation: none;
+    }
+
+    svg{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+
+        #anime{
+            stroke-dashoffset: 313;
+            stroke-dasharray: 313;
+            opacity: 0;
+            stroke: white;
+
+            &:active:not(.loading){
+                opacity: 1;
+                stroke-dashoffset: 0;
+                stroke: $color;
+                transition: stroke-dashoffset 2s linear, stroke 2s linear;
+            }
+
+            &.loading{
+                @keyframes loadCircle {
+                    0%{
+                        stroke-dashoffset: 0;
+                    }
+                    100%{
+                        stroke-dashoffset: -313-313;
+                    }
+                }
+                animation: loadCircle 1.5s infinite linear;
+                opacity: 1;
+            }
+        }
+    }
+}
+
+.powerBtn {
+    &.btn-danger{
+        @include test(red);
+    }
+    &.btn-success {
+        @include test(limegreen);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 var(--bs-btn-bg);
+    }
+    100% {
+        box-shadow: 0 0 0 20px rgba(var(--bs-primary-rgb), 0);
     }
 }
 
 /* overwrite modal BG */
-.modal-content{
+.modal-content {
     background-color: var(--bs-body-bg);
 }
 
 /* loading-screen */
-.loading-screen{
+.loading-screen {
     position: fixed;
     z-index: 100;
     top: 0;
@@ -106,13 +178,14 @@ body{
     transition: opacity .5s ease-in-out;
 }
 
-.error-screen{
+/* error-screen */
+.error-screen {
     @extend .loading-screen;
     background-color: rgba(47, 47, 47);
 }
 
 /* anime-background */
-.anime-background{
+.anime-background {
     position: fixed;
     z-index: -20;
     top: 0;
@@ -133,7 +206,7 @@ body{
         z-index: 1;
     }
 
-    .anime-background-img{
+    .anime-background-img {
         position: absolute;
         top: 0;
         left: 0;
@@ -142,15 +215,15 @@ body{
         height: 100%;
         transition: opacity 1s ease-in-out;
 
-        &.img1{
+        &.img1 {
             background-image: url("./assets/paperwall_2.webp");
         }
 
-        &.img2{
+        &.img2 {
             background-image: url("./assets/paperwall_3.webp");
         }
 
-        &.img3{
+        &.img3 {
             background-image: url("./assets/paperwall_4.webp");
         }
     }
@@ -218,4 +291,5 @@ body{
         transform: translateX(-100%);
     }
 }
+
 /* bubbles end */

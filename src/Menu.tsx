@@ -1,10 +1,10 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
-import {Col, Container, Modal, Ratio, Row, Spinner} from "react-bootstrap";
+import React, {useEffect, useMemo, useState} from "react";
+import {Col, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
 import {toast} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
-import {BrowserRouter, Link, Route, Routes, useLoaderData} from "react-router-dom";
+import {Link, useLoaderData} from "react-router-dom";
 import {API_URL} from "./App";
 
 type country = "TW" | "JP"
@@ -149,15 +149,15 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
     return (
         <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-5 mx-lg-4">
             <Link to={`/${data._id}`}>
-            <Ratio aspectRatio="1x1" onClick={() => null} className="FlagHover">
-                <div>
-                    {flag}
-                    {provider}
-                    {statusMark}
-                    {!data._isPowerOn ? <div className="offlineDimDark"></div> : null}
-                    {spinner}
-                </div>
-            </Ratio>
+                <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
+                    <div>
+                        {flag}
+                        {provider}
+                        {statusMark}
+                        {!data._isPowerOn ? <div className="offlineDimDark"></div> : null}
+                        {spinner}
+                    </div>
+                </Ratio>
             </Link>
         </Col>
     )

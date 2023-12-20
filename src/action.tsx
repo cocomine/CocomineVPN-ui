@@ -1,17 +1,18 @@
-import React, {useEffect, useState} from 'react';
-import {Button, Col, Modal, Row} from "react-bootstrap";
-import {isRouteErrorResponse, Navigate, useLoaderData, useNavigate, useParams, useRouteError} from "react-router-dom";
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {Button, Col, Modal, Ratio, Row} from "react-bootstrap";
+import {Navigate, useLoaderData, useNavigate} from "react-router-dom";
 import {VMData} from "./Menu";
 import {API_URL} from "./App";
 import {toast} from "react-toastify";
+import power from "./assets/power.svg";
 
 const Action: React.FC = () => {
-    const {VMData} = useLoaderData() as {VMData: VMData};
+    const {VMData} = useLoaderData() as { VMData: VMData };
     const navigate = useNavigate();
     const [show, setShow] = useState(true);
 
     useEffect(() => {
-        if(show) return
+        if (show) return
 
         const id = setTimeout(() => navigate("/"), 200);
         return () => clearTimeout(id);
@@ -21,13 +22,14 @@ const Action: React.FC = () => {
         <>
             <Modal show={show} centered onHide={() => setShow(false)} data-bs-theme="dark">
                 <Modal.Header closeButton>
-                    <Modal.Title>{VMData._name}</Modal.Title>
+                    <Modal.Title>你想? <small style={{color: "darkgray", fontSize: "x-small"}}>({VMData._name})</small></Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <h6>你想?</h6>
                     <Row>
                         <Col>
-                            <PowerControl isPower={VMData._isPowerOn} action={(action) => {} } />
+                            <PowerControl isPower={VMData._isPowerOn} action={(action) => { console.log(action)
+                            }}/>
                         </Col>
                         <Col className="border-start">
                             <p className="text-center">下載設定檔</p>
@@ -40,21 +42,72 @@ const Action: React.FC = () => {
     );
 }
 
-const PowerControl: React.FC<{isPower: boolean, action: (power: boolean) => void}> = ({isPower, action}) => {
+const PowerControl: React.FC<{ isPower: boolean, action: (power: boolean) => void }> = ({isPower, action}) => {
+    const timeout = useRef<NodeJS.Timeout|null>(null)
+    const [loading, setLoading] = useState(false) // loading state
 
-    if(isPower) {
+    // on mouse down start timeout for long press event
+    const onMouseDown = useCallback(() => {
+        timeout.current = setTimeout(() => {
+            setLoading(true)
+            action(!isPower)
+        }, 2000)
+    }, [action, isPower]);
+
+    // on mouse up clear timeout for long press event
+    const onMouseUp = useCallback(() => {
+        if (timeout.current) {
+            clearTimeout(timeout.current)
+            timeout.current = null
+        }
+    },[]);
+
+    if (isPower) {
         return (
-            <Button onClick={() => action(true)} variant="link" className="w-100">
-                <div className="powerBtn start"></div>
-                <p className="text-center">關閉節點</p>
-            </Button>
+            <>
+                <Ratio aspectRatio="1x1" className="">
+                    <Button variant="danger" className="powerBtn" onMouseDown={onMouseDown} onMouseUp={onMouseUp} onTouchStart={onMouseDown} onTouchEnd={onMouseUp} disabled={loading}>
+                        <img src={power} alt="power icon" />
+                        <svg viewBox="0 0 100 100" className="loading">
+                            <defs>
+                                <circle id="stroke" cx="50" cy="50" r="50"/>
+
+                                <clipPath id="clipPath">
+                                    <use xlinkHref="#stroke"/>
+                                </clipPath>
+                            </defs>
+
+                            <use xlinkHref="#stroke" clipPath="url(#clipPath)" fill="transparent" strokeLinecap="round"
+                                 strokeWidth="5" id="anime" className={(loading ? "loading" : undefined)}/>
+                        </svg>
+                    </Button>
+                </Ratio>
+                <p className="text-center pt-2">長按關閉節點</p>
+            </>
         );
     }
 
     return (
-        <Button onClick={() => action(true)} variant="link" className="w-100">
-            <p className="text-center">啟動節點</p>
-        </Button>
+        <>
+            <Ratio aspectRatio="1x1" className="">
+                <Button variant="success" className="powerBtn" onMouseDown={onMouseDown} onMouseUp={onMouseUp} onTouchStart={onMouseDown} onTouchEnd={onMouseUp} disabled={loading}>
+                    <img src={power} alt="power icon" />
+                    <svg viewBox="0 0 100 100" className="loading">
+                        <defs>
+                            <circle id="stroke" cx="50" cy="50" r="50"/>
+
+                            <clipPath id="clipPath">
+                                <use xlinkHref="#stroke"/>
+                            </clipPath>
+                        </defs>
+
+                        <use xlinkHref="#stroke" clipPath="url(#clipPath)" fill="transparent" strokeLinecap="round"
+                             strokeWidth="5" id="anime" className={(loading ? "loading" : undefined)}/>
+                    </svg>
+                </Button>
+            </Ratio>
+            <p className="text-center pt-2">長按啟動節點</p>
+        </>
     );
 }
 
@@ -64,7 +117,7 @@ const loader = async ({params}) => {
         const VMData = await fetchVMData(params.id);
         console.log(VMData)
         return {VMData: VMData.data}
-    }catch (e: any) {
+    } catch (e: any) {
         switch (e.status) {
             case 400:
                 toast.error("你給的資料我不明白 你肯定沒有錯?",)
@@ -95,17 +148,17 @@ const loader = async ({params}) => {
 }
 
 const fetchVMData = async (vm_id: string, abortController: AbortController = new AbortController()) => {
-    const res = await fetch(API_URL + "/vpn/"+vm_id, {
+    const res = await fetch(API_URL + "/vpn/" + vm_id, {
         method: "GET",
         credentials: "include",
         signal: abortController.signal
     });
-    if(!res.ok) throw res;
+    if (!res.ok) throw res;
     return await res.json();
 }
 
 const ErrorElement: React.FC = () => {
-    return (<Navigate to="/" replace={true} />);
+    return (<Navigate to="/" replace={true}/>);
 }
 
 export {Action, loader, fetchVMData, ErrorElement};
