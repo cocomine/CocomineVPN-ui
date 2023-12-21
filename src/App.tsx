@@ -4,15 +4,7 @@ import {Col, Container, Row} from "react-bootstrap";
 import {fetchVPNData, Menu, userProfile, VMData} from "./Menu";
 import loading from "./assets/loading.svg";
 import {toast, ToastContainer} from "react-toastify";
-import {
-    isRouteErrorResponse,
-    Outlet,
-    useLoaderData,
-    useLocation,
-    useNavigate,
-    useNavigation,
-    useRouteError
-} from "react-router-dom";
+import {isRouteErrorResponse, Outlet, useLoaderData, useLocation, useNavigation, useRouteError} from "react-router-dom";
 
 const API_URL = "https://vpn.cocomine.cc/api"
 
@@ -26,7 +18,6 @@ type ContextType = {
 function App() {
     const navigation = useNavigation();
     const location = useLocation();
-    const navigate = useNavigate();
     const {vpnData, userProfile} = useLoaderData() as {vpnData: any, userProfile: userProfile};
     const [data, setData] = useState(vpnData);
 

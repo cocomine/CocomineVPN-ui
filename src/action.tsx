@@ -229,7 +229,7 @@ const ChooseProfile: React.FC = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <Row className={"g-5 justify-content-center"}>
-                        {VMData._profiles.map((profile, index) => <Profile key={profile.filename} profile={profile} vm_id={VMData._id}/>)}
+                        {VMData._profiles.map((profile) => <Profile key={profile.filename} profile={profile} vm_id={VMData._id}/>)}
                     </Row>
                 </Modal.Body>
             </Modal>

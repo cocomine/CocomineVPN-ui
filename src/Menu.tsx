@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Col, Ratio, Row, Spinner} from "react-bootstrap";
+import {Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
@@ -105,6 +105,12 @@ const Menu: React.FC<{
                         最後更新: {lastUpdate} <br/>
                         距離下次更新: {nextUpdateInterval}
                     </p>
+                </Col>
+                <Col xs={12}>
+                    <Button variant="link" href="https://github.com/cocomine/cocomine_vpnapi_ui" target="_blank"
+                            rel="noopener noreferrer">
+                        <i className="bi bi-github me-2"></i>Github
+                    </Button>
                 </Col>
             </Row>
         </>
