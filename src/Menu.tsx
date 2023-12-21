@@ -65,6 +65,7 @@ const Menu: React.FC<{
     useEffect(() => {
         const abortController = new AbortController();
         let count5time = 0;
+
         const id = setInterval(async () => {
             const diff = nextUpdate.diff(moment())
 
@@ -93,7 +94,7 @@ const Menu: React.FC<{
                     if (processingStatusText.includes(vm._status)) {
                         // update data if individual VM is under processing
                         try {
-                            const vmData = await fetchVMData(vm._id, abortController);
+                            const vmData = await fetchVMData(vm._id, abortController, true);
                             setVMData((prev) => {
                                 const index = prev.findIndex((value) => value._id === vmData.data._id);
                                 prev[index] = vmData.data;
@@ -131,10 +132,19 @@ const Menu: React.FC<{
                     </p>
                 </Col>
                 <Col xs={12}>
-                    <Button variant="link" href="https://github.com/cocomine/cocomine_vpnapi_ui" target="_blank"
-                            rel="noopener noreferrer">
-                        <i className="bi bi-github me-2"></i>Github
-                    </Button>
+                    <Row className="justify-content-between">
+                        <Col xs="auto">
+                            <span className="pe-3">Build by © {moment().format("yyyy")} <a
+                                href="https://github.com/cocomine" target="_blank"
+                                rel="noopener noreferrer">cocomine</a>.</span>
+                        </Col>
+                        <Col xs="auto">
+                            <Button variant="link" href="https://github.com/cocomine/cocomine_vpnapi_ui" target="_blank"
+                                    rel="noopener noreferrer">
+                                <i className="bi bi-github me-2"></i>Source Code on Github
+                            </Button>
+                        </Col>
+                    </Row>
                 </Col>
             </Row>
         </>

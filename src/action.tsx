@@ -52,7 +52,7 @@ const Action: React.FC = () => {
             const id = setInterval(async () => {
                 let data
                 try {
-                    const res = await fetchVMData(VMData._id)
+                    const res = await fetchVMData(VMData._id, undefined, true)
                     data = res.data as VMData
                 } catch (e) {
                     clearInterval(id)
@@ -300,10 +300,11 @@ const loader = async ({params}) => {
  * Fetch VM data from API
  * @param vm_id VM id
  * @param abortController AbortController
+ * @param patch update data or not
  */
-const fetchVMData = async (vm_id: string, abortController: AbortController = new AbortController()) => {
+const fetchVMData = async (vm_id: string, abortController: AbortController = new AbortController(), patch = false) => {
     const res = await fetch(API_URL + "/vpn/" + vm_id, {
-        method: "GET",
+        method: patch ? "PATCH" : "GET",
         credentials: "include",
         signal: abortController.signal
     });

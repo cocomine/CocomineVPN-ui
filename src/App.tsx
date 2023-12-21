@@ -5,12 +5,14 @@ import {fetchVPNData, Menu, userProfile, VMData} from "./Menu";
 import loading from "./assets/loading.svg";
 import {toast, ToastContainer} from "react-toastify";
 import {isRouteErrorResponse, Outlet, useLoaderData, useLocation, useNavigation, useRouteError} from "react-router-dom";
+import Lottie from "lottie-react";
 
 const API_URL = "https://vpn.cocomine.cc/api"
 
-interface IstatusUpdateCallback{
-    (promise:Promise<VMData>, target_power: boolean):void
+interface IstatusUpdateCallback {
+    (promise: Promise<VMData>, target_power: boolean): void
 }
+
 type ContextType = {
     statusUpdateCallback: IstatusUpdateCallback
 }
@@ -18,21 +20,21 @@ type ContextType = {
 function App() {
     const navigation = useNavigation();
     const location = useLocation();
-    const {vpnData, userProfile} = useLoaderData() as {vpnData: any, userProfile: userProfile};
+    const {vpnData, userProfile} = useLoaderData() as { vpnData: any, userProfile: userProfile };
     const [data, setData] = useState(vpnData);
 
     // force update status
     const forceUpDateStatus = useCallback(async () => {
         let data
-        try{
+        try {
             data = await fetchVPNData()
-        }catch (err: any) {
+        } catch (err: any) {
             console.error(err)
-            if(err.name !== "AbortError") toastHttpError(err.status)
+            if (err.name !== "AbortError") toastHttpError(err.status)
             return
         }
         setData(data)
-    },[]);
+    }, []);
 
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
     const statusUpdateCallback = useCallback<IstatusUpdateCallback>(async (promise, target) => {
@@ -44,7 +46,7 @@ function App() {
                     error: '節點' + (target ? '開機' : '關機') + '失敗!',
                 }
             );
-        }catch (e){
+        } catch (e) {
             console.error(e)
         } finally {
             await forceUpDateStatus()
@@ -53,7 +55,7 @@ function App() {
 
     // set title
     useEffect(() => {
-        if(location.pathname === "/") document.title = "Home - VPN Manager"
+        if (location.pathname === "/") document.title = "Home - VPN Manager"
     }, [location]);
 
     return (
@@ -83,29 +85,82 @@ const ErrorScreen: React.FC = () => {
     const error = useRouteError();
     const error_Elm = useMemo(() => {
         if (isRouteErrorResponse(error)) {
-            if (error.status === 400) {
-                return (<><h1>404</h1><p>你給的資料我不明白 你肯定沒有錯?</p></>)
-            }
-            if (error.status === 404) {
-                return (<><h1>404</h1><p>這裡不存在任何東西! 你確定去對地方了?</p></>)
-            }
-            if (error.status === 403) {
-                return (<><h1>403</h1><p>你不可以看這個東西!</p></>)
-            }
-            if (error.status === 401) {
-                return (<><h1>401</h1><p>我不知道你是誰 你能告訴我嗎!</p></>)
-            }
-            if (error.status === 500) {
-                return (<><h1>500</h1><p>我出現問題了! 稍後再試一試</p></>)
-            }
-            if (error.status === 504) {
-                return (<><h1>504</h1><p>網絡出現問題! 檢查一下</p></>)
-            }
-            if (error.status === 502) {
-                return (<><h1>502</h1><p>太多人了! 稍後再試一試</p></>)
+            switch (error.status) {
+                case 400:
+                    return (<>
+                        <h1>400</h1>
+                        <Row className="justify-content-center">
+                            <Lottie animationData={require("./assets/400.json")}
+                                    style={{width: "400px", height: "300px"}}/>
+                        </Row>
+                        <p>你給的資料我不明白 你肯定沒有錯?</p>
+                    </>);
+                case 404:
+                    return (<>
+                        <h1>404</h1>
+                        <Row className="justify-content-center">
+                            <Lottie animationData={require("./assets/404.json")}
+                                    style={{width: "500px", height: "250px"}}/>
+                        </Row>
+                        <p>這裡不存在任何東西! 你確定去對地方了?</p>
+                    </>);
+                case 403:
+                    return (<>
+                        <h1>403</h1>
+                        <Row className="justify-content-center">
+                            <Lottie animationData={require("./assets/403.json")}
+                                    style={{width: "400px", height: "300px"}}/>
+                        </Row>
+                        <p>你不可以看這個東西!</p>
+                    </>);
+                case 401:
+                    return (<>
+                        <h1>401</h1>
+                        <Row className="justify-content-center">
+                            <Lottie animationData={require("./assets/403.json")}
+                                    style={{width: "400px", height: "300px"}}/>
+                        </Row>
+                        <p>我不知道你是誰 你能告訴我嗎!</p>
+                    </>);
+                case 500:
+                    return (<>
+                        <h1>500</h1>
+                        <Row className="justify-content-center">
+                            <Lottie animationData={require("./assets/500.json")}
+                                    style={{width: "300px", height: "300px"}}/>
+                        </Row>
+                        <p>我出現問題了! 稍後再試一試</p>
+                    </>);
+                case 504:
+                    return (<>
+                        <h1>504</h1>
+                        <Row className="justify-content-center">
+                            <Lottie animationData={require("./assets/500.json")}
+                                    style={{width: "300px", height: "300px"}}/>
+                        </Row>
+                        <p>網絡出現問題! 檢查一下</p>
+                    </>);
+                case 502:
+                    return (<>
+                        <h1>502</h1>
+                        <Row className="justify-content-center">
+                            <Lottie animationData={require("./assets/500.json")}
+                                    style={{width: "300px", height: "300px"}}/>
+                        </Row>
+                        <p>太多人了! 稍後再試一試</p>
+                    </>);
+                default:
+                    return (<><h1>Error</h1><p>未知錯誤</p></>);
             }
         }
-        return (<><h1>出事啦!</h1><p>發生了一些不能遇見的錯誤! 不如再試一試?</p></>)
+        return (<>
+            <h1>出事啦!</h1>
+            <Row className="justify-content-center">
+                <Lottie animationData={require("./assets/403.json")}
+                        style={{width: "400px", height: "300px"}}/>
+            </Row>
+            <p>發生了一些不能遇見的錯誤! 不如再試一試?</p>
+        </>)
     }, [error]);
     console.log(error)
 
@@ -205,7 +260,8 @@ const LoadingScreen: React.FC<{ display: boolean }> = ({display}) => {
     }, [display]);
 
     return (
-        <div className="loading-screen" style={{opacity: displayStat !== 0 ? 0 : 1, display: displayStat === 2 ? "none" : undefined}}>
+        <div className="loading-screen"
+             style={{opacity: displayStat !== 0 ? 0 : 1, display: displayStat === 2 ? "none" : undefined}}>
             <Row className="h-100 justify-content-center align-items-center">
                 <Col xs={12} className="text-center">
                     <img src={loading} alt="Loading..."/>
@@ -250,5 +306,5 @@ const toastHttpError = (status: number) => {
 
 export default App;
 export {API_URL, ErrorScreen, LoadingScreen, toastHttpError};
-export type { IstatusUpdateCallback, ContextType };
+export type {IstatusUpdateCallback, ContextType};
 

@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import {loader} from "./Menu";
 import {Action, ChooseProfile, ErrorElement, loader as actionLoader} from "./action";
+import figlet from "figlet";
 
 // create router
 const router = createBrowserRouter([
@@ -35,6 +36,22 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
+
+figlet.defaults({fontPath: "/ascii-fonts"});
+figlet.text('Cocomine VPN Manager', {
+    font: 'ANSI Shadow',
+    horizontalLayout: 'full',
+    verticalLayout: 'full',
+    width: 80,
+    whitespaceBreak: true
+}, function (err, data) {
+    if (err) {
+        console.error(err);
+        return;
+    }
+    console.log(data);
+});
+
 root.render(
     <React.StrictMode>
         <RouterProvider router={router} fallbackElement={<LoadingScreen display={true}/>} />
