@@ -5,6 +5,7 @@ import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
 import {Link} from "react-router-dom";
 import {API_URL, toastHttpError} from "./App";
+import {fetchVMData} from "./action";
 
 type country = "TW" | "JP"
 type provider = "google" | "azure"
@@ -83,6 +84,23 @@ const Menu: React.FC<{
                 setNextUpdate(moment(vpnData.next_update));
                 return;
             }
+
+            // check what VM is under processing
+            vm_data.forEach((vm) => {
+                if (processingStatusText.includes(vm._status)) {
+                    // update data if individual VM is under processing
+                    fetchVMData(vm._id, abortController).then((vmData) => {
+                        setVMData((prev) => {
+                            const index = prev.findIndex((value) => value._id === vmData._id);
+                            prev[index] = vmData;
+                            return [...prev];
+                        });
+                    }).catch((err: any) => {
+                        console.error(err)
+                        if (err.name !== "AbortError") toastHttpError(err.status)
+                    });
+                }
+            })
 
             setNextUpdateInterval(moment(diff).format("mm:ss"));
         }, 1000);

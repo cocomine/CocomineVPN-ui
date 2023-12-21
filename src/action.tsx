@@ -49,24 +49,27 @@ const Action: React.FC = () => {
         // update status until status changed or try count > 10 times
         const promise = new Promise<VMData>((resolve, reject) => {
             let tryCount = 0
-            setInterval(async () => {
+            const id = setInterval(async () => {
                 let data
                 try {
                     const res = await fetchVMData(VMData._id)
                     data = res.data as VMData
                 } catch (e) {
+                    clearInterval(id)
                     return reject(e)
                 }
 
                 if (data._isPowerOn === power) {
+                    clearInterval(id)
                     return resolve(data)
                 }
-                if (tryCount > 10) {
+                if (tryCount > 20) {
+                    clearInterval(id)
                     return reject(data)
                 }
                 tryCount++
                 console.debug("tryCount: " + tryCount) //debug
-            }, 10000)
+            }, 5000)
         });
         statusUpdateCallback(promise, power)
     }, [VMData, navigate, statusUpdateCallback]);
