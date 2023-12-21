@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
 import {Button, Col, Modal, Ratio, Row} from "react-bootstrap";
 import {
     Navigate,
@@ -9,7 +9,7 @@ import {
     useOutletContext,
     Outlet, useLocation, Link
 } from "react-router-dom";
-import {VMData} from "./Menu";
+import {profile, VMData} from "./Menu";
 import {API_URL, ContextType, toastHttpError} from "./App";
 import {toast} from "react-toastify";
 import power from "./assets/power.svg";
@@ -97,7 +97,7 @@ const Action: React.FC = () => {
     return (
         <>
             {location.pathname === '/' + VMData._id &&
-                <Modal show={show} centered onHide={() => navigate("..")} data-bs-theme="dark">
+                <Modal show={show} centered onHide={() => navigate("..")}>
                     <Modal.Header closeButton>
                         <Modal.Title>你想? <small
                             style={{color: "darkgray", fontSize: "x-small"}}>({VMData._name})</small></Modal.Title>
@@ -108,8 +108,8 @@ const Action: React.FC = () => {
                                 <PowerControl isPower={VMData._isPowerOn} action={powerAction}/>
                             </Col>
                             <Col className="border-start">
-                                <Link to={`${location.pathname}/profile`}>
-                                    <img src={tools} alt="Config file" className="w-100"/>
+                                <Link to={`${location.pathname}/profile`} className="chooseProfile_btn">
+                                    <img src={tools} alt="Config file" className="w-100" draggable={false}/>
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
                             </Col>
@@ -198,32 +198,66 @@ const ChooseProfile: React.FC = () => {
     const [show, setShow] = useState(true);
     const {VMData} = useOutletContext<{ VMData: VMData }>()
 
+    // set title
     useEffect(() => {
         document.title = VMData._name + " Profile - VPN Manager"
-        console.log(VMData) //debug
     }, []);
+
+    // block navigation when modal is open
+    let blocker = useBlocker(() => {
+        setShow(false)
+        return true
+    });
+
+    // redirect to home page after modal close animation
+    useEffect(() => {
+        if (show) return
+        const id = setTimeout(() => {
+            if (blocker.state === "blocked") blocker.proceed()
+        }, 150);
+        return () => clearTimeout(id);
+    }, [show, blocker]);
 
     return (
         <>
-            <Modal show={show} centered onHide={() => navigate("..")} data-bs-theme="dark">
+            <Modal show={show} centered onHide={() => navigate("..")} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>下載設定檔 <small
-                        style={{color: "darkgray", fontSize: "x-small"}}>({VMData._name})</small></Modal.Title>
+                    <Modal.Title>下載設定檔 <small style={{color: "darkgray", fontSize: "x-small"}}>
+                        ({VMData._name})
+                    </small></Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Row>
-                        <Col>
-                            <p className="text-center">下載設定檔1</p>
-                        </Col>
-                        <Col className="border-start">
-                            <p className="text-center">下載設定檔2</p>
-                        </Col>
+                    <Row className={"g-5 justify-content-center"}>
+                        {VMData._profiles.map((profile, index) => <Profile key={profile.filename} profile={profile} vm_id={VMData._id}/>)}
                     </Row>
                 </Modal.Body>
             </Modal>
         </>
     );
 };
+
+const Profile: React.FC<{profile: profile, vm_id: string}> = ({profile, vm_id}) => {
+    const [data, setData] = useState<profile>(profile);
+
+    const profileImg = useMemo(() => {
+        if(data.type === "OpenVPN") return (<img src={require("./assets/openvpn.webp")} alt="OpenVPN" className="w-100 rounded-5" draggable={false}/>)
+        if(data.type === "SoftEther") return (<img src={require("./assets/softether.webp")} alt="WireGuard" className="w-100 rounded-5" draggable={false}/>)
+    }, [data]);
+
+    // update data when profile changed
+    useEffect(() => {
+        setData(profile)
+    }, [profile]);
+
+    return (
+        <Col xl={2} lg={3} md={4} sm={5} xs={6}>
+            <a href={API_URL+'/vpn/'+vm_id+'/profile/?type='+data.type} download={data.filename} className="chooseProfile_btn">
+                {profileImg}
+                <p className="text-center pt-2">{data.type}</p>
+            </a>
+        </Col>
+    )
+}
 
 // @ts-ignore
 const loader = async ({params}) => {

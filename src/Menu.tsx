@@ -124,9 +124,9 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
     const flag = useMemo(() => {
         switch (data._country) {
             case "TW":
-                return <img src={require("./assets/tw.webp")} alt="TW Flag" className="flag tw"/>;
+                return <img src={require("./assets/tw.webp")} alt="TW Flag" className="flag tw" draggable={false}/>;
             case "JP":
-                return <img src={require("./assets/jp.webp")} alt="JP Flag" className="flag"/>;
+                return <img src={require("./assets/jp.webp")} alt="JP Flag" className="flag" draggable={false}/>;
             default:
                 return null;
         }

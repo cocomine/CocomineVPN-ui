@@ -14,7 +14,7 @@ import {
     useRouteError
 } from "react-router-dom";
 
-const API_URL = "https://api.cocomine.cc"
+const API_URL = "https://vpn.cocomine.cc/api"
 
 interface IstatusUpdateCallback{
     (promise:Promise<VMData>, target_power: boolean):void
