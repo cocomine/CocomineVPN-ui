@@ -92,13 +92,22 @@ body {
 }
 
 /* powerBtn */
-@mixin powerBtn($color){
+@mixin powerBtn($color) {
     border-radius: 50%;
     box-shadow: 0 0 0 0 var(--bs-btn-bg);
     animation: pulse 1.5s infinite;
     transition: transform .2s ease-in-out;
 
-    img{
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 var(--bs-btn-bg);
+        }
+        100% {
+            box-shadow: 0 0 0 20px rgba(var(--bs-primary-rgb), 0);
+        }
+    }
+
+    img {
         width: 80%;
         height: 80%;
     }
@@ -111,7 +120,7 @@ body {
         transform: scale(0.9);
     }
 
-    svg{
+    svg {
         position: absolute;
         top: 0;
         left: 0;
@@ -119,25 +128,25 @@ body {
         height: 100%;
         transform: rotate(-90deg);
 
-        #anime{
+        #anime {
             stroke-dashoffset: 313;
             stroke-dasharray: 313;
             opacity: 0;
             stroke: white;
 
-            &:active:not(.loading){
+            &:active:not(.loading) {
                 opacity: 1;
                 stroke-dashoffset: 0;
                 stroke: $color;
                 transition: stroke-dashoffset 2s linear, stroke 2s linear;
             }
 
-            &.loading{
+            &.loading {
                 @keyframes loadCircle {
-                    0%{
+                    0% {
                         stroke-dashoffset: 0;
                     }
-                    100%{
+                    100% {
                         stroke-dashoffset: -313-313;
                     }
                 }
@@ -149,35 +158,68 @@ body {
 }
 
 .powerBtn {
-    &.btn-danger{
+    &.btn-danger {
         @include powerBtn(red);
     }
+
     &.btn-success {
         @include powerBtn(limegreen);
     }
 }
 
-/* chooseProfile_btn */
-.chooseProfile_btn{
-    img{
-        transition: opacity .2s ease-in-out, transform .2s ease-in-out;
+.profileImg {
+    width: 100%;
+    height: auto;
+}
 
-        &:hover{
-            opacity: 0.7;
+/* download-anime */
+.download-anime {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 99999;
+    transform: translate(0, 0);
+    opacity: 0.8;
+    animation: a .2s ease-in-out forwards;
+
+    img {
+        width: 100%;
+        height: auto;
+        transform: translate(0, 0) scale(1);
+        animation: b .2s ease-in-out forwards;
+
+        @keyframes b {
+            from{
+                transform: translate(0, 0) scale(1);
+            }
+            to{
+                transform: translate(0, var(--top)) scale(0.2);
+            }
         }
+    }
 
-        &:active{
-            transform: scale(0.9);
+    @keyframes a {
+        from{
+            transform: translate(0, 0);
+        }
+        to{
+            transform: translate(var(--right), 0);
         }
     }
 }
 
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 var(--bs-btn-bg);
-    }
-    100% {
-        box-shadow: 0 0 0 20px rgba(var(--bs-primary-rgb), 0);
+/* chooseProfile_btn */
+.chooseProfile_btn {
+    img {
+        transition: opacity .2s ease-in-out, transform .2s ease-in-out;
+
+        &:hover {
+            opacity: 0.7;
+        }
+
+        &:active {
+            transform: scale(0.9);
+        }
     }
 }
 

@@ -2,9 +2,8 @@ import React, {useEffect, useMemo, useState} from "react";
 import {Col, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
-import {toast} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
-import {Link, useLoaderData} from "react-router-dom";
+import {Link} from "react-router-dom";
 import {API_URL, toastHttpError} from "./App";
 
 type country = "TW" | "JP"

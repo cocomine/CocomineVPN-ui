@@ -1,13 +1,14 @@
-import React, {useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Button, Col, Modal, Ratio, Row} from "react-bootstrap";
 import {
+    Link,
     Navigate,
-    useBeforeUnload,
-    useLoaderData,
-    useNavigate,
+    Outlet,
     useBlocker,
-    useOutletContext,
-    Outlet, useLocation, Link
+    useLoaderData,
+    useLocation,
+    useNavigate,
+    useOutletContext
 } from "react-router-dom";
 import {profile, VMData} from "./Menu";
 import {API_URL, ContextType, toastHttpError} from "./App";
@@ -68,7 +69,7 @@ const Action: React.FC = () => {
             }, 10000)
         });
         statusUpdateCallback(promise, power)
-    }, []);
+    }, [VMData, navigate, statusUpdateCallback]);
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -92,7 +93,7 @@ const Action: React.FC = () => {
             document.title = VMData._name + " - VPN Manager"
             setShow(true)
         }
-    }, [location]);
+    }, [location, VMData]);
 
     return (
         <>
@@ -201,7 +202,7 @@ const ChooseProfile: React.FC = () => {
     // set title
     useEffect(() => {
         document.title = VMData._name + " Profile - VPN Manager"
-    }, []);
+    }, [VMData]);
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -238,10 +239,12 @@ const ChooseProfile: React.FC = () => {
 
 const Profile: React.FC<{profile: profile, vm_id: string}> = ({profile, vm_id}) => {
     const [data, setData] = useState<profile>(profile);
+    const a_ref = useRef<any>(null);
+    const [show, setShow] = useState<JSX.Element | null>(null);
 
     const profileImg = useMemo(() => {
-        if(data.type === "OpenVPN") return (<img src={require("./assets/openvpn.webp")} alt="OpenVPN" className="w-100 rounded-5" draggable={false}/>)
-        if(data.type === "SoftEther") return (<img src={require("./assets/softether.webp")} alt="WireGuard" className="w-100 rounded-5" draggable={false}/>)
+        if(data.type === "OpenVPN") return (<img src={require("./assets/openvpn.webp")} alt="OpenVPN" className="rounded-5 profileImg" draggable={false}/>)
+        if(data.type === "SoftEther") return (<img src={require("./assets/softether.webp")} alt="WireGuard" className="rounded-5 profileImg" draggable={false}/>)
     }, [data]);
 
     // update data when profile changed
@@ -249,12 +252,32 @@ const Profile: React.FC<{profile: profile, vm_id: string}> = ({profile, vm_id}) 
         setData(profile)
     }, [profile]);
 
+    const onClick = useCallback(() => {
+        const img = a_ref.current.children[0] as HTMLElement
+        const style = {
+            top: img.getBoundingClientRect().top + "px",
+            left: img.getBoundingClientRect().left + "px",
+            width: img.getBoundingClientRect().width + "px",
+            height: img.getBoundingClientRect().height + "px",
+            "--right": (window.innerWidth - img.getBoundingClientRect().left) + "px",
+            "--top": '-' + (window.innerHeight - img.getBoundingClientRect().top) + "px"
+        }
+
+        setShow(<div className='download-anime active' style={style}>{profileImg}</div>)
+
+        setTimeout(() => {
+            setShow(null)
+        }, 200);
+    }, [a_ref.current, profileImg])
+
     return (
-        <Col xl={2} lg={3} md={4} sm={5} xs={6}>
-            <a href={API_URL+'/vpn/'+vm_id+'/profile/?type='+data.type} download={data.filename} className="chooseProfile_btn">
+        <Col xl={2} lg={3} md={4} sm={5} xs={6} className="">
+            <a href={API_URL + '/vpn/' + vm_id + '/profile/?type=' + data.type} download={data.filename}
+               className="chooseProfile_btn position-relative" onClick={onClick} ref={a_ref}>
                 {profileImg}
                 <p className="text-center pt-2">{data.type}</p>
             </a>
+            {show}
         </Col>
     )
 }
