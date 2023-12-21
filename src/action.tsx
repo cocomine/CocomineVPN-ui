@@ -91,7 +91,6 @@ const Action: React.FC = () => {
 
     // set title
     useEffect(() => {
-        console.log(location) //debug
         if (location.pathname === '/' + VMData._id) {
             document.title = VMData._name + " - VPN Manager"
             setShow(true)

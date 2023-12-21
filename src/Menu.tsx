@@ -64,6 +64,7 @@ const Menu: React.FC<{
     // update timeInterval every second
     useEffect(() => {
         const abortController = new AbortController();
+        let count5time = 0;
         const id = setInterval(async () => {
             const diff = nextUpdate.diff(moment())
 
@@ -85,22 +86,27 @@ const Menu: React.FC<{
                 return;
             }
 
-            // check what VM is under processing
-            vm_data.forEach((vm) => {
-                if (processingStatusText.includes(vm._status)) {
-                    // update data if individual VM is under processing
-                    fetchVMData(vm._id, abortController).then((vmData) => {
-                        setVMData((prev) => {
-                            const index = prev.findIndex((value) => value._id === vmData._id);
-                            prev[index] = vmData;
-                            return [...prev];
-                        });
-                    }).catch((err: any) => {
-                        console.error(err)
-                        if (err.name !== "AbortError") toastHttpError(err.status)
-                    });
+            // evey 5 seconds, check update data
+            if (count5time >= 5) {
+                // check what VM is under processing
+                for (const vm of vm_data) {
+                    if (processingStatusText.includes(vm._status)) {
+                        // update data if individual VM is under processing
+                        try {
+                            const vmData = await fetchVMData(vm._id, abortController);
+                            setVMData((prev) => {
+                                const index = prev.findIndex((value) => value._id === vmData.data._id);
+                                prev[index] = vmData.data;
+                                return [...prev];
+                            });
+                        } catch (err: any) {
+                            console.error(err)
+                            if (err.name !== "AbortError") toastHttpError(err.status)
+                        }
+                    }
                 }
-            })
+            }
+            count5time = (count5time + 1) % 6;
 
             setNextUpdateInterval(moment(diff).format("mm:ss"));
         }, 1000);
@@ -109,7 +115,7 @@ const Menu: React.FC<{
             clearInterval(id);
             abortController.abort();
         };
-    }, [nextUpdate]);
+    }, [nextUpdate, vm_data]);
 
     return (
         <>
