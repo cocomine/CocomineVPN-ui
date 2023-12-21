@@ -1,19 +1,35 @@
 {
   "short_name": "VPN Manager",
-  "name": "VPN Manager is a web application that allows you to manage VPN node.",
+  "name": "VPN Manager",
+  "description": "VPN Manager is a web application that allows you to manage VPN node.",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "16.png",
+      "type": "image/png",
+      "sizes": "16x16"
     },
     {
-      "src": "logo192.png",
+      "src": "24.png",
+      "type": "image/png",
+      "sizes": "24x24"
+    },
+    {
+      "src": "32.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "64.png",
+      "type": "image/png",
+      "sizes": "64x64"
+    },
+    {
+      "src": "192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "logo512.png",
+      "src": "512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
@@ -21,5 +37,21 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#2F2F2FFF",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "screenshots": [
+    {
+      "src": "screenshot1.webp",
+      "type": "image/webp",
+      "sizes": "1125x2436",
+      "form_factor": "narrow",
+      "label": "Homescreen"
+    },
+    {
+      "src": "screenshot2.webp",
+      "type": "image/webp",
+      "sizes": "1920x1080",
+      "form_factor": "wide",
+      "label": "Homescreen"
+    }
+  ]
 }

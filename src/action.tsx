@@ -268,7 +268,7 @@ const Profile: React.FC<{profile: profile, vm_id: string}> = ({profile, vm_id}) 
         setTimeout(() => {
             setShow(null)
         }, 200);
-    }, [a_ref.current, profileImg])
+    }, [profileImg])
 
     return (
         <Col xl={2} lg={3} md={4} sm={5} xs={6} className="">
