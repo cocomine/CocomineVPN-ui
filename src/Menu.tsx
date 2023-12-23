@@ -10,9 +10,10 @@ import {fetchVMData} from "./action";
 type country = "TW" | "JP"
 type provider = "google" | "azure"
 type profile = {
-    "type": "OpenVPN" | "SoftEther",
+    "type": "OpenVPN" | "SoftEther" | "SS",
     "name": string,
     "filename": string
+    "url"?: string
 }
 type readOnlyMode = "startOnly" | "stopOnly" | "readOnly" | "disable"
 type VMData = {

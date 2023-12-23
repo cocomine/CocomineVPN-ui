@@ -176,7 +176,12 @@ const PowerControl: React.FC<{ isPower: boolean, action: (power: boolean) => voi
         <>
             <Ratio aspectRatio="1x1">
                 <Button variant="success" className="powerBtn" onMouseDown={onMouseDown} onMouseUp={onMouseUp}
-                        onTouchStart={onMouseDown} onTouchEnd={onMouseUp} disabled={loading}>
+                        onTouchStart={onMouseDown} onTouchEnd={onMouseUp} disabled={loading}
+                        onContextMenu={e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        }}>
                     <img src={power} alt="power icon"/>
                     <svg viewBox="0 0 100 100" className="loading">
                         <defs>
@@ -232,7 +237,8 @@ const ChooseProfile: React.FC = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <Row className={"g-5 justify-content-center"}>
-                        {VMData._profiles.map((profile) => <Profile key={profile.filename} profile={profile} vm_id={VMData._id}/>)}
+                        {VMData._profiles.map((profile) => <Profile key={profile.filename} profile={profile}
+                                                                    vm_id={VMData._id}/>)}
                     </Row>
                 </Modal.Body>
             </Modal>

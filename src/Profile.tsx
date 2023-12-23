@@ -1,7 +1,8 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {Col} from "react-bootstrap";
+import {Col, Form, Modal, Row} from "react-bootstrap";
 import {API_URL} from "./App";
 import {profile} from "./Menu";
+import {QRCodeSVG} from "qrcode.react";
 
 const Profile: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}) => {
     const [data, setData] = useState<profile>(profile);
@@ -12,6 +13,8 @@ const Profile: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}
                 return (<OpenVPN profile={profile} vm_id={vm_id}/>)
             case "SoftEther":
                 return (<SoftEther profile={profile} vm_id={vm_id}/>)
+            case "SS":
+                return (<SS profile={profile}/>)
         }
     }, [data, profile, vm_id]);
 
@@ -115,6 +118,49 @@ const SoftEther: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_i
                 <p className="text-center pt-2">{data.name}</p>
             </a>
             {show}
+        </>
+    )
+}
+
+const SS: React.FC<{ profile: profile }> = ({profile}) => {
+    const [data, setData] = useState<profile>(profile);
+    const [show, setShow] = useState(false);
+
+    // update data when profile changed
+    useEffect(() => {
+        setData(profile)
+    }, [profile]);
+
+    // download animation
+    const onClick = useCallback((e: any) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        setShow(true)
+    }, [])
+
+    return (
+        <>
+            <a href="#" onClick={onClick}>
+                <img src={require("./assets/SS.webp")} alt="WireGuard" className="rounded-5 profileImg"
+                     draggable={false}/>
+                <p className="text-center pt-2">{data.name}</p>
+            </a>
+            <Modal show={show} onHide={() => setShow(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>{profile.name}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row className="justify-content-center gy-2">
+                        <Col xs={"auto"}>
+                            <QRCodeSVG value={profile.url || ''} includeMargin={true} size={218}/>
+                        </Col>
+                        <Col xs={12}>
+                            <Form.Control readOnly={true} value={profile.url || ''}/>
+                        </Col>
+                    </Row>
+                </Modal.Body>
+            </Modal>
         </>
     )
 }

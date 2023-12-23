@@ -50,6 +50,7 @@ figlet.text('Cocomine VPN Manager', {
         return;
     }
     console.log(data);
+    console.log("App version: 1.6")
 });
 
 root.render(
