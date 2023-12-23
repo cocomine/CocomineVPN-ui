@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Button, Col, Modal, Ratio, Row} from "react-bootstrap";
 import {
     Link,
@@ -10,11 +10,12 @@ import {
     useNavigate,
     useOutletContext
 } from "react-router-dom";
-import {profile, VMData} from "./Menu";
+import {VMData} from "./Menu";
 import {API_URL, ContextType, toastHttpError} from "./App";
 import {toast} from "react-toastify";
 import power from "./assets/power.svg";
 import tools from "./assets/tools.svg";
+import Profile from "./Profile";
 
 const Action: React.FC = () => {
     const {VMData} = useLoaderData() as { VMData: VMData };
@@ -238,51 +239,6 @@ const ChooseProfile: React.FC = () => {
         </>
     );
 };
-
-const Profile: React.FC<{profile: profile, vm_id: string}> = ({profile, vm_id}) => {
-    const [data, setData] = useState<profile>(profile);
-    const a_ref = useRef<any>(null);
-    const [show, setShow] = useState<JSX.Element | null>(null);
-
-    const profileImg = useMemo(() => {
-        if(data.type === "OpenVPN") return (<img src={require("./assets/openvpn.webp")} alt="OpenVPN" className="rounded-5 profileImg" draggable={false}/>)
-        if(data.type === "SoftEther") return (<img src={require("./assets/softether.webp")} alt="WireGuard" className="rounded-5 profileImg" draggable={false}/>)
-    }, [data]);
-
-    // update data when profile changed
-    useEffect(() => {
-        setData(profile)
-    }, [profile]);
-
-    const onClick = useCallback(() => {
-        const img = a_ref.current.children[0] as HTMLElement
-        const style = {
-            top: img.getBoundingClientRect().top + "px",
-            left: img.getBoundingClientRect().left + "px",
-            width: img.getBoundingClientRect().width + "px",
-            height: img.getBoundingClientRect().height + "px",
-            "--right": (window.innerWidth - img.getBoundingClientRect().left) + "px",
-            "--top": '-' + (window.innerHeight - img.getBoundingClientRect().top) + "px"
-        }
-
-        setShow(<div className='download-anime active' style={style}>{profileImg}</div>)
-
-        setTimeout(() => {
-            setShow(null)
-        }, 200);
-    }, [profileImg])
-
-    return (
-        <Col xl={2} lg={3} md={4} sm={5} xs={6} className="">
-            <a href={API_URL + '/vpn/' + vm_id + '/profile/?type=' + data.type} download={data.filename}
-               className="chooseProfile_btn position-relative" onClick={onClick} ref={a_ref}>
-                {profileImg}
-                <p className="text-center pt-2">{data.type}</p>
-            </a>
-            {show}
-        </Col>
-    )
-}
 
 // @ts-ignore
 const loader = async ({params}) => {

@@ -7,7 +7,15 @@ import {toast, ToastContainer} from "react-toastify";
 import {isRouteErrorResponse, Outlet, useLoaderData, useLocation, useNavigation, useRouteError} from "react-router-dom";
 import Lottie from "lottie-react";
 
-const API_URL = "https://vpn.cocomine.cc/api"
+const NODE_ENV = process.env.NODE_ENV || 'development';
+let API_URL: string;
+if (NODE_ENV === 'development') {
+    console.log("Development mode")
+    API_URL = "http://localhost:8088" //for test
+} else {
+    console.log("Production mode")
+    API_URL = "https://vpn.cocomine.cc/api" //for production
+}
 
 interface IstatusUpdateCallback {
     (promise: Promise<VMData>, target_power: boolean): void

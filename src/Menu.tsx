@@ -11,6 +11,7 @@ type country = "TW" | "JP"
 type provider = "google" | "azure"
 type profile = {
     "type": "OpenVPN" | "SoftEther",
+    "name": string,
     "filename": string
 }
 type readOnlyMode = "startOnly" | "stopOnly" | "readOnly" | "disable"
