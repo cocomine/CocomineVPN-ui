@@ -1,8 +1,9 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {Col, Form, Modal, Row} from "react-bootstrap";
+import {Button, Col, Form, InputGroup, Modal, Row} from "react-bootstrap";
 import {API_URL} from "./App";
 import {profile} from "./Menu";
 import {QRCodeSVG} from "qrcode.react";
+import {toast} from "react-toastify";
 
 const Profile: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}) => {
     const [data, setData] = useState<profile>(profile);
@@ -139,26 +140,36 @@ const SS: React.FC<{ profile: profile }> = ({profile}) => {
         setShow(true)
     }, [])
 
+    const onCopy = useCallback(async () => {
+        await navigator.clipboard.writeText(profile.url || '')
+        toast.success('已複製')
+    }, [])
+
     return (
         <>
-            <a href="#" onClick={onClick}>
+            <Button variant={"link"} onClick={onClick} className={'p-0 border-0'}>
                 <img src={require("./assets/SS.webp")} alt="WireGuard" className="rounded-5 profileImg"
                      draggable={false}/>
                 <p className="text-center pt-2">{data.name}</p>
-            </a>
+            </Button>
             <Modal show={show} onHide={() => setShow(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>{profile.name}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Row className="justify-content-center gy-2">
+                    <span>掃描以下QR code</span>
+                    <Row className="justify-content-center mb-3">
                         <Col xs={"auto"}>
                             <QRCodeSVG value={profile.url || ''} includeMargin={true} size={218}/>
                         </Col>
-                        <Col xs={12}>
-                            <Form.Control readOnly={true} value={profile.url || ''}/>
-                        </Col>
                     </Row>
+
+                    <span>或複製以下連結</span>
+                    <InputGroup>
+                        <Form.Control readOnly={true} value={profile.url || ''}/>
+                        <Button onClick={onCopy} variant="outline-secondary"><i
+                            className="bi bi-clipboard"></i></Button>
+                    </InputGroup>
                 </Modal.Body>
             </Modal>
         </>
