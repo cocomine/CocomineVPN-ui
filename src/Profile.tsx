@@ -147,11 +147,11 @@ const SS: React.FC<{ profile: profile }> = ({profile}) => {
 
     return (
         <>
-            <Button variant={"link"} onClick={onClick} className={'p-0 border-0'}>
+            <a href="#" onClick={onClick}>
                 <img src={require("./assets/SS.webp")} alt="WireGuard" className="rounded-5 profileImg"
                      draggable={false}/>
                 <p className="text-center pt-2">{data.name}</p>
-            </Button>
+            </a>
             <Modal show={show} onHide={() => setShow(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>{profile.name}</Modal.Title>
