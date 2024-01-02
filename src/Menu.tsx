@@ -6,8 +6,9 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import {Link} from "react-router-dom";
 import {API_URL, toastHttpError} from "./App";
 import {fetchVMData} from "./action";
+import us_flag from "./assets/us.svg";
 
-type country = "TW" | "JP"
+type country = "TW" | "JP" | "US"
 type provider = "google" | "azure"
 type profile = {
     "type": "OpenVPN" | "SoftEther" | "SS",
@@ -165,9 +166,12 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
     const flag = useMemo(() => {
         switch (data._country) {
             case "TW":
-                return <img src={require("./assets/tw.webp")} alt="TW Flag" className="flag tw" draggable={false}/>;
+                return <img src={require("./assets/tw.webp")} alt="TW Flag" className="flag fit-left"
+                            draggable={false}/>;
             case "JP":
                 return <img src={require("./assets/jp.webp")} alt="JP Flag" className="flag" draggable={false}/>;
+            case "US":
+                return <img src={us_flag} alt="JP Flag" className="flag fit-left" draggable={false}/>;
             default:
                 return null;
         }
