@@ -8,7 +8,7 @@ import {API_URL, toastHttpError} from "./App";
 import {fetchVMData} from "./action";
 import us_flag from "./assets/us.svg";
 
-type country = "TW" | "JP" | "US"
+type country = "TW" | "JP" | "US" | "HK" | string
 type provider = "google" | "azure"
 type profile = {
     "type": "OpenVPN" | "SoftEther" | "SS",
@@ -172,6 +172,8 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
                 return <img src={require("./assets/jp.webp")} alt="JP Flag" className="flag" draggable={false}/>;
             case "US":
                 return <img src={us_flag} alt="JP Flag" className="flag fit-left" draggable={false}/>;
+            case "HK":
+                return <img src={require('./assets/hk.webp')} alt="HK Flag" className="flag" draggable={false}/>;
             default:
                 return null;
         }
