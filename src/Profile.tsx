@@ -143,7 +143,7 @@ const SS: React.FC<{ profile: profile }> = ({profile}) => {
     const onCopy = useCallback(async () => {
         await navigator.clipboard.writeText(profile.url || '')
         toast.success('已複製')
-    }, [])
+    }, [profile.url])
 
     return (
         <>
