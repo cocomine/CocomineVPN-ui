@@ -25,7 +25,7 @@ const Profile: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}
     }, [profile]);
 
     return (
-        <Col xl={2} lg={3} md={4} sm={5} xs={6} className="">
+        <Col xl={2} lg={3} md={4} sm={5} xs={6}>
             {elm}
         </Col>
     )
@@ -54,7 +54,7 @@ const OpenVPN: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}
         }
 
         setShow(<div className='download-anime active' style={style}>
-            <img src={require("./assets/openvpn.webp")} alt="OpenVPN" className="rounded-5 profileImg"
+            <img src={require("./assets/openvpn.webp")} alt="OpenVPN" className="rounded-4 profileImg"
                  draggable={false}/>
         </div>)
 
@@ -68,7 +68,7 @@ const OpenVPN: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}
             <a href={API_URL + '/vpn/' + vm_id + '/profile/?type=' + data.type} download={data.filename}
                rel="noreferrer noopener"
                className="chooseProfile_btn position-relative" onClick={onClick}>
-                <img src={require("./assets/openvpn.webp")} alt="OpenVPN" className="rounded-5 profileImg"
+                <img src={require("./assets/openvpn.webp")} alt="OpenVPN" className="rounded-4 profileImg"
                      draggable={false} ref={a_ref}/>
                 <p className="text-center pt-2">{data.name}</p>
             </a>
@@ -100,7 +100,7 @@ const SoftEther: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_i
         }
 
         setShow(<div className='download-anime active' style={style}>
-            <img src={require("./assets/softether.webp")} alt="WireGuard" className="rounded-5 profileImg"
+            <img src={require("./assets/softether.webp")} alt="SoftEther" className="rounded-4 profileImg"
                  draggable={false}/>
         </div>)
 
@@ -114,7 +114,7 @@ const SoftEther: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_i
             <a href={API_URL + '/vpn/' + vm_id + '/profile/?type=' + data.type} download={data.filename}
                rel="noreferrer noopener"
                className="chooseProfile_btn position-relative" onClick={onClick}>
-                <img src={require("./assets/softether.webp")} alt="WireGuard" className="rounded-5 profileImg"
+                <img src={require("./assets/softether.webp")} alt="SoftEther" className="rounded-4 profileImg"
                      draggable={false} ref={a_ref}/>
                 <p className="text-center pt-2">{data.name}</p>
             </a>
@@ -148,7 +148,7 @@ const SS: React.FC<{ profile: profile }> = ({profile}) => {
     return (
         <>
             <a href="#" onClick={onClick}>
-                <img src={require("./assets/SS.webp")} alt="WireGuard" className="rounded-5 profileImg"
+                <img src={require("./assets/SS.webp")} alt="ShadowSocks" className="rounded-4 profileImg"
                      draggable={false}/>
                 <p className="text-center pt-2">{data.name}</p>
             </a>

@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
+import {Button, Col, OverlayTrigger, Ratio, Row, Spinner, Tooltip, TooltipProps} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
@@ -7,6 +7,7 @@ import {Link} from "react-router-dom";
 import {API_URL, toastHttpError} from "./App";
 import {fetchVMData} from "./action";
 import us_flag from "./assets/us.svg";
+import download_svg from "./assets/download.svg";
 
 type country = "TW" | "JP" | "US" | "HK" | string
 type provider = "google" | "azure"
@@ -121,6 +122,13 @@ const Menu: React.FC<{
         };
     }, [nextUpdate, vm_data]);
 
+    // 下載程式 tooltip
+    const renderTooltip = (props: TooltipProps) => (
+        <Tooltip id="download" {...props}>
+            下載程式
+        </Tooltip>
+    );
+
     return (
         <>
             <Row className="justify-content-around justify-content-md-start align-content-center g-5 py-3 mx-1">
@@ -128,6 +136,23 @@ const Menu: React.FC<{
                     <h1>Welcome {userProfile.username} !</h1>
                 </Col>
                 {vm_data.map((vm) => <Flag key={vm._id} vm_data={vm}/>)}
+
+
+                <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-5 mx-lg-4">
+                    <Link to={`/download`}>
+                        <OverlayTrigger placement="bottom" delay={{show: 250, hide: 400}} overlay={renderTooltip}>
+                            <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
+                                <div>
+                                    <img src={download_svg} alt="Download" className="flag"
+                                         style={{backgroundColor: "#fff", padding: "0.8rem"}}
+                                         draggable={false}/>
+                                </div>
+                            </Ratio>
+                        </OverlayTrigger>
+                    </Link>
+                </Col>
+
+
                 <Col xs={12} className="text-end">
                     <p>
                         最後更新: {lastUpdate} <br/>
@@ -162,22 +187,29 @@ const Menu: React.FC<{
 const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
     const [data, setData] = useState<VMData>(vm_data);
 
-    // flag image element for menu item (memoized) (only update when data._country is changed)
-    const flag = useMemo(() => {
+    // tooltip for menu item
+    const renderTooltip = (props: TooltipProps) => {
         switch (data._country) {
             case "TW":
-                return <img src={require("./assets/tw.webp")} alt="TW Flag" className="flag fit-left"
-                            draggable={false}/>;
+                return <Tooltip id="TW-tooltip" {...props}>
+                    台灣節點
+                </Tooltip>;
             case "JP":
-                return <img src={require("./assets/jp.webp")} alt="JP Flag" className="flag" draggable={false}/>;
+                return <Tooltip id="JP-tooltip" {...props}>
+                    日本節點
+                </Tooltip>;
             case "US":
-                return <img src={us_flag} alt="JP Flag" className="flag fit-left" draggable={false}/>;
+                return <Tooltip id="US-tooltip" {...props}>
+                    美國節點
+                </Tooltip>;
             case "HK":
-                return <img src={require('./assets/hk.webp')} alt="HK Flag" className="flag" draggable={false}/>;
+                return <Tooltip id="HK-tooltip" {...props}>
+                    香港節點
+                </Tooltip>;
             default:
                 return null;
         }
-    }, [data._country]);
+    };
 
     // provider image element for menu item (memoized) (only update when data._provider is changed)
     const provider = useMemo(() => {
@@ -212,6 +244,23 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
         return null;
     }, [data._status]);
 
+    // flag image element for menu item (memoized) (only update when data._country is changed)
+    const flag = useMemo(() => {
+        switch (data._country) {
+            case "TW":
+                return <img src={require("./assets/tw.webp")} alt="TW Flag" className="flag fit-left"
+                            draggable={false}/>;
+            case "JP":
+                return <img src={require("./assets/jp.webp")} alt="JP Flag" className="flag" draggable={false}/>;
+            case "US":
+                return <img src={us_flag} alt="JP Flag" className="flag fit-left" draggable={false}/>;
+            case "HK":
+                return <img src={require('./assets/hk.webp')} alt="HK Flag" className="flag" draggable={false}/>;
+            default:
+                return null;
+        }
+    }, [data._country]);
+
     // update data when vm_data is changed
     useEffect(() => {
         setData(vm_data)
@@ -221,15 +270,17 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
         return (
             <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-5 mx-lg-4">
                 <Link to={`/${data._id}`}>
-                    <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
-                        <div>
-                            {flag}
-                            {provider}
-                            {statusMark}
-                            {!data._isPowerOn ? <div className="offlineDimDark"></div> : null}
-                            {spinner}
-                        </div>
-                    </Ratio>
+                    <OverlayTrigger placement="bottom" delay={{show: 250, hide: 400}} overlay={renderTooltip}>
+                        <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
+                            <div>
+                                {flag}
+                                {provider}
+                                {statusMark}
+                                {!data._isPowerOn ? <div className="offlineDimDark"></div> : null}
+                                {spinner}
+                            </div>
+                        </Ratio>
+                    </OverlayTrigger>
                 </Link>
             </Col>
         )

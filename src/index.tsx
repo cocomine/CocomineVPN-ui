@@ -7,6 +7,7 @@ import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import {loader} from "./Menu";
 import {Action, ChooseProfile, ErrorElement, loader as actionLoader} from "./action";
 import figlet from "figlet";
+import {Download} from "./download";
 
 // create router
 const router = createBrowserRouter([
@@ -28,6 +29,11 @@ const router = createBrowserRouter([
                         errorElement: <ErrorElement />,
                     }
                 ]
+            },
+            {
+                path: 'download',
+                element: <Download/>,
+                errorElement: <ErrorElement/>,
             }
         ]
     }
@@ -50,7 +56,7 @@ figlet.text('Cocomine VPN Manager', {
         return;
     }
     console.log(data);
-    console.log("App version: 1.7.6")
+    console.log("App version: 1.8.0")
 });
 
 root.render(
