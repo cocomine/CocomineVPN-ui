@@ -18,7 +18,7 @@ if (NODE_ENV === 'development') {
 }
 
 interface IstatusUpdateCallback {
-    (promise: Promise<VMData>, target_power: boolean): void
+    (promise: Promise<VMData>, target_power: boolean, vm_id: string): void
 }
 
 type ContextType = {
@@ -45,20 +45,39 @@ function App() {
     }, []);
 
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
-    const statusUpdateCallback = useCallback<IstatusUpdateCallback>(async (promise, target) => {
-        await forceUpDateStatus()
-        try {
-            await toast.promise(promise, {
-                    pending: `正在${target ? '開機' : '關機'}中...`,
-                    success: '節點已成功' + (target ? '開機' : '關機') + '!',
-                    error: '節點' + (target ? '開機' : '關機') + '失敗!',
+    const statusUpdateCallback = useCallback<IstatusUpdateCallback>(async (promise, target, vm_id) => {
+        // update individual vm status
+        setData((perv: any) => {
+            let tmp = {...perv}
+            tmp.data = tmp.data.map((vm: VMData) => {
+                if (vm._id === vm_id) {
+                    vm._status = target ? "STAGING" : "STOPPING"
                 }
-            );
-        } catch (e) {
-            console.error(e)
-        } finally {
-            await forceUpDateStatus()
-        }
+                return vm
+            })
+            return tmp
+        });
+
+        // show toast message
+        await toast.promise(promise, {
+                pending: `正在${target ? '開機' : '關機'}中...`,
+                success: '節點已成功' + (target ? '開機' : '關機') + '!',
+                error: '節點' + (target ? '開機' : '關機') + '失敗!',
+            }
+        ).then((data) => {
+            // update individual vm status
+            setData((perv: any) => {
+                let tmp = {...perv}
+                tmp.data = tmp.data.map((vm: VMData) => {
+                    if (vm._id === vm_id) return data
+                    return vm
+                })
+                return tmp
+            });
+        }).catch((err) => {
+            console.error(err)
+            forceUpDateStatus() // force update all vm status
+        });
     }, [forceUpDateStatus]);
 
     // set title

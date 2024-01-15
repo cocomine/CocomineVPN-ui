@@ -57,7 +57,7 @@ const Action: React.FC = () => {
                     data = res.data as VMData
                 } catch (e) {
                     clearInterval(id)
-                    return reject(e)
+                    return reject()
                 }
 
                 if (data._isPowerOn === power) {
@@ -72,7 +72,7 @@ const Action: React.FC = () => {
                 console.debug("tryCount: " + tryCount) //debug
             }, 5000)
         });
-        statusUpdateCallback(promise, power)
+        statusUpdateCallback(promise, power, VMData._id)
     }, [VMData, navigate, statusUpdateCallback]);
 
     // block navigation when modal is open
