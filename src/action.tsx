@@ -1,15 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Button, Col, Modal, Ratio, Row} from "react-bootstrap";
-import {
-    Link,
-    Navigate,
-    Outlet,
-    useBlocker,
-    useLoaderData,
-    useLocation,
-    useNavigate,
-    useOutletContext
-} from "react-router-dom";
+import {Link, Navigate, Outlet, useBlocker, useLoaderData, useLocation, useOutletContext} from "react-router-dom";
 import {VMData} from "./Menu";
 import {API_URL, ContextType, toastHttpError} from "./App";
 import {toast} from "react-toastify";
@@ -19,7 +10,6 @@ import Profile from "./Profile";
 
 const Action: React.FC = () => {
     const {VMData} = useLoaderData() as { VMData: VMData };
-    const navigate = useNavigate();
     const location = useLocation();
     const [show, setShow] = useState(true);
     const {statusUpdateCallback} = useOutletContext<ContextType>()
@@ -44,7 +34,7 @@ const Action: React.FC = () => {
             toastHttpError(e.status)
             return
         } finally {
-            navigate("..") // redirect to home page
+            window.history.back() // redirect to home page
         }
 
         // update status until status changed or try count > 10 times
@@ -73,7 +63,7 @@ const Action: React.FC = () => {
             }, 5000)
         });
         statusUpdateCallback(promise, power, VMData._id)
-    }, [VMData, navigate, statusUpdateCallback]);
+    }, [VMData, statusUpdateCallback]);
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -101,7 +91,7 @@ const Action: React.FC = () => {
     return (
         <>
             {location.pathname === '/' + VMData._id &&
-                <Modal show={show} centered onHide={() => navigate("..")}>
+                <Modal show={show} centered onHide={() => window.history.back()}>
                     <Modal.Header closeButton>
                         <Modal.Title>你想? <small
                             style={{color: "darkgray", fontSize: "x-small"}}>({VMData._name})</small></Modal.Title>
@@ -203,7 +193,6 @@ const PowerControl: React.FC<{ isPower: boolean, action: (power: boolean) => voi
 }
 
 const ChooseProfile: React.FC = () => {
-    const navigate = useNavigate();
     const [show, setShow] = useState(true);
     const {VMData} = useOutletContext<{ VMData: VMData }>()
 
@@ -229,7 +218,7 @@ const ChooseProfile: React.FC = () => {
 
     return (
         <>
-            <Modal show={show} centered onHide={() => navigate("..")} size="lg">
+            <Modal show={show} centered onHide={() => window.history.back()} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>下載設定檔 <small style={{color: "darkgray", fontSize: "x-small"}}>
                         ({VMData._name})

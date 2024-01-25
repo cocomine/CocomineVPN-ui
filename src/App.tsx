@@ -158,6 +158,7 @@ const ErrorScreen: React.FC = () => {
                         </Row>
                         <p>我出現問題了! 稍後再試一試</p>
                     </>);
+                case 408:
                 case 504:
                     return (<>
                         <h1>504</h1>
@@ -176,8 +177,6 @@ const ErrorScreen: React.FC = () => {
                         </Row>
                         <p>太多人了! 稍後再試一試</p>
                     </>);
-                default:
-                    return (<><h1>Error</h1><p>未知錯誤</p></>);
             }
         }
         return (<>

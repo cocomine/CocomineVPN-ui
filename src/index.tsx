@@ -56,7 +56,7 @@ figlet.text('Cocomine VPN Manager', {
         return;
     }
     console.log(data);
-    console.log("App version: 1.8.0")
+    console.log("App version: 1.8.1")
 });
 
 root.render(

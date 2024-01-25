@@ -131,14 +131,12 @@ const Menu: React.FC<{
 
     return (
         <>
-            <Row className="justify-content-around justify-content-md-start align-content-center g-5 py-3 mx-1">
-                <Col xs={12}>
+            <Row className="justify-content-start align-content-center g-5 py-3 mx-1 gx-xl-4">
+                <Col xs={12} className="pt-5 pt-md-0">
                     <h1>Welcome {userProfile.username} !</h1>
                 </Col>
                 {vm_data.map((vm) => <Flag key={vm._id} vm_data={vm}/>)}
-
-
-                <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-5 mx-lg-4">
+                <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
                     <Link to={`/download`}>
                         <OverlayTrigger placement="bottom" delay={{show: 250, hide: 400}} overlay={renderTooltip}>
                             <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
@@ -151,8 +149,6 @@ const Menu: React.FC<{
                         </OverlayTrigger>
                     </Link>
                 </Col>
-
-
                 <Col xs={12} className="text-end">
                     <p>
                         最後更新: {lastUpdate} <br/>
@@ -268,7 +264,7 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
 
     if (spinner === null) {
         return (
-            <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-5 mx-lg-4">
+            <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
                 <Link to={`/${data._id}`}>
                     <OverlayTrigger placement="bottom" delay={{show: 250, hide: 400}} overlay={renderTooltip}>
                         <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
@@ -286,7 +282,7 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
         )
     } else {
         return (
-            <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-5 mx-lg-4">
+            <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
                 <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
                     <div>
                         {flag}
