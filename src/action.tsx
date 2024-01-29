@@ -1,6 +1,15 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Button, Col, Modal, Ratio, Row} from "react-bootstrap";
-import {Link, Navigate, Outlet, useBlocker, useLoaderData, useLocation, useOutletContext} from "react-router-dom";
+import {
+    Link,
+    Navigate,
+    Outlet,
+    useBlocker,
+    useLoaderData,
+    useLocation,
+    useNavigate,
+    useOutletContext
+} from "react-router-dom";
 import {VMData} from "./Menu";
 import {API_URL, ContextType, toastHttpError} from "./App";
 import {toast} from "react-toastify";
@@ -11,6 +20,7 @@ import Profile from "./Profile";
 const Action: React.FC = () => {
     const {VMData} = useLoaderData() as { VMData: VMData };
     const location = useLocation();
+    const navigate = useNavigate();
     const [show, setShow] = useState(true);
     const {statusUpdateCallback} = useOutletContext<ContextType>()
 
@@ -34,7 +44,7 @@ const Action: React.FC = () => {
             toastHttpError(e.status)
             return
         } finally {
-            window.history.back() // redirect to home page
+            navigate('..', {replace: true}) // redirect to home page
         }
 
         // update status until status changed or try count > 10 times
@@ -91,7 +101,7 @@ const Action: React.FC = () => {
     return (
         <>
             {location.pathname === '/' + VMData._id &&
-                <Modal show={show} centered onHide={() => window.history.back()}>
+                <Modal show={show} centered onHide={() => navigate('..', {replace: true})}>
                     <Modal.Header closeButton>
                         <Modal.Title>你想? <small
                             style={{color: "darkgray", fontSize: "x-small"}}>({VMData._name})</small></Modal.Title>
