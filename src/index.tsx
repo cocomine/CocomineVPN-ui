@@ -8,6 +8,7 @@ import {loader} from "./Menu";
 import {Action, ChooseProfile, ErrorElement, loader as actionLoader} from "./action";
 import figlet from "figlet";
 import {Download} from "./download";
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 // create router
 const router = createBrowserRouter([
@@ -56,7 +57,7 @@ figlet.text('Cocomine VPN Manager', {
         return;
     }
     console.log(data);
-    console.log("App version: 1.8.1")
+    console.log("App version: 1.8.2")
 });
 
 root.render(
@@ -64,6 +65,11 @@ root.render(
         <RouterProvider router={router} fallbackElement={<LoadingScreen display={true}/>} />
     </React.StrictMode>
 );
+
+// If you want your app to work offline and load faster, you can change
+// unregister() to register() below. Note this comes with some pitfalls.
+// Learn more about service workers: https://cra.link/PWA
+serviceWorkerRegistration.register();
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
