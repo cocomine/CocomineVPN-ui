@@ -73,7 +73,7 @@ const Action: React.FC = () => {
             }, 5000)
         });
         statusUpdateCallback(promise, power, VMData._id)
-    }, [VMData, statusUpdateCallback]);
+    }, [VMData, statusUpdateCallback, navigate]);
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
