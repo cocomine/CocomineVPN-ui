@@ -320,6 +320,8 @@ const fetchVPNData = async (abortController: AbortController = new AbortControll
         method: "GET",
         credentials: "include",
         signal: abortController.signal
+    }).catch((err) => {
+        throw new NetworkError(err.message);
     })
     if (!res.ok) throw res;
     return await res.json()
@@ -334,10 +336,36 @@ const fetchProfileData = async (abortController: AbortController = new AbortCont
         method: "GET",
         credentials: "include",
         signal: abortController.signal
+    }).catch((err) => {
+        throw new NetworkError(err.message);
     })
     if (!res.ok) throw res;
     return await res.json()
 }
 
-export {Menu, loader, fetchVPNData, fetchProfileData};
+/**
+ * NetworkError class that implements the Error interface.
+ * This class is used to create a custom error type for network related errors.
+ */
+class NetworkError implements Error {
+    /**
+     * The error message.
+     */
+    message: string;
+
+    /**
+     * The name of the error. Default is "NetworkError".
+     */
+    name: string = "NetworkError";
+
+    /**
+     * Constructor for the NetworkError class.
+     * @param {string} message - The error message.
+     */
+    constructor(message: string) {
+        this.message = message;
+    }
+}
+
+export {Menu, loader, fetchVPNData, fetchProfileData, NetworkError};
 export type {VMData, userProfile, profile, country, provider};

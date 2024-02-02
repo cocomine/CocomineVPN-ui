@@ -1,7 +1,7 @@
 import React, {CSSProperties, useCallback, useEffect, useMemo, useState} from 'react';
 import './App.scss';
 import {Col, Container, Row} from "react-bootstrap";
-import {fetchVPNData, Menu, userProfile, VMData} from "./Menu";
+import {fetchVPNData, Menu, NetworkError, userProfile, VMData} from "./Menu";
 import loading from "./assets/loading.svg";
 import {toast, ToastContainer} from "react-toastify";
 import {isRouteErrorResponse, Outlet, useLoaderData, useLocation, useNavigation, useRouteError} from "react-router-dom";
@@ -14,7 +14,7 @@ if (NODE_ENV === 'development') {
     API_URL = "http://localhost:8088" //for test
 } else {
     console.log("Production mode")
-    API_URL = "https://vpn.cocomine.cc/api" //for production
+    API_URL = "https://api.cocomine.cc" //for production
 }
 
 interface IstatusUpdateCallback {
@@ -179,6 +179,16 @@ const ErrorScreen: React.FC = () => {
                     </>);
             }
         }
+        if (error instanceof NetworkError) {
+            return (<>
+                <h1>網絡出現問題!</h1>
+                <Row className="justify-content-center">
+                    <Lottie animationData={require("./assets/500.json")}
+                            style={{width: "300px", height: "300px"}}/>
+                </Row>
+                <p>網絡出現問題! 檢查一下</p>
+            </>)
+        }
         return (<>
             <h1>出事啦!</h1>
             <Row className="justify-content-center">
@@ -188,7 +198,7 @@ const ErrorScreen: React.FC = () => {
             <p>發生了一些不能遇見的錯誤! 不如再試一試?</p>
         </>)
     }, [error]);
-    console.log(error)
+    console.error(error)
 
     return (
         <div className="error-screen">
