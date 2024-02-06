@@ -1,6 +1,6 @@
 import React, {CSSProperties, useCallback, useEffect, useMemo, useState} from 'react';
 import './App.scss';
-import {Col, Container, Row} from "react-bootstrap";
+import {Button, Col, Container, Row} from "react-bootstrap";
 import {fetchVPNData, Menu, NetworkError, userProfile, VMData} from "./Menu";
 import loading from "./assets/loading.svg";
 import {toast, ToastContainer} from "react-toastify";
@@ -202,9 +202,13 @@ const ErrorScreen: React.FC = () => {
 
     return (
         <div className="error-screen">
-            <Row className="h-100 justify-content-center align-items-center">
+            <Row className="h-100 justify-content-center align-content-center">
                 <Col xs={12} className="text-center">
                     {error_Elm}
+                </Col>
+                <Col xs={12} className="text-center">
+                    <Button variant="primary" className="rounded-5" onClick={() => window.location.reload()}>點我
+                        重新載入</Button>
                 </Col>
             </Row>
         </div>
