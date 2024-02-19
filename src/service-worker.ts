@@ -32,12 +32,21 @@ registerRoute(
     // Return false to exempt requests from being fulfilled by index.html.
     ({request, url}: { request: Request; url: URL }) => {
         // If this isn't a navigation, skip.
+        console.log(request, url);
         if (request.mode !== 'navigate') {
             return false;
         }
 
         // If this is a URL that starts with /_, skip.
         if (url.pathname.startsWith('/_')) {
+            return false;
+        }
+
+        if (url.pathname.startsWith('/login')) {
+            return false;
+        }
+
+        if (url.pathname.match(/\/cdn-cgi\/.*/)) {
             return false;
         }
 

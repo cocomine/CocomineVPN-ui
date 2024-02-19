@@ -205,20 +205,8 @@ const ErrorScreen: React.FC = () => {
     }, [error]);
 
     const loginCallback = useCallback(() => {
-        //get current url and fetch
-        //suppose will get 301, then get redirected url
-        //then use script to redirect
-        fetch(window.location.href, {
-            method: "GET",
-            credentials: "include",
-            redirect: "manual",
-        }).then((res) => {
-            if (res.status === 301) {
-                window.location.href = res.headers.get("Location") as string
-            }
-        }).catch((err) => {
-            console.error(err)
-        })
+        sessionStorage.setItem("redirect", window.location.pathname)
+        window.location.replace("/login")
     }, []);
 
     return (
@@ -227,7 +215,7 @@ const ErrorScreen: React.FC = () => {
                 <Col xs={12} className="text-center">
                     {error_Elm}
                 </Col>
-                {status === 401 || status === 403 &&
+                {((status === 401) || (status === 403)) &&
                     <Col xs={12} className="text-center">
                         <Button variant="primary" className="rounded-5" onClick={loginCallback}>點我
                             重新登入</Button>
@@ -237,6 +225,12 @@ const ErrorScreen: React.FC = () => {
                     <Col xs={12} className="text-center">
                         <Button variant="primary" className="rounded-5" onClick={() => window.location.reload()}>點我
                             重新載入</Button>
+                    </Col>
+                }
+                {status === 404 &&
+                    <Col xs={12} className="text-center">
+                        <Button variant="primary" className="rounded-5" onClick={() => window.location.href = "/"}>點我
+                            回到首頁</Button>
                     </Col>
                 }
             </Row>

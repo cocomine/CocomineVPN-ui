@@ -32,7 +32,8 @@ const Action: React.FC = () => {
                 credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
-                    "Cf-Access-Jwt-Assertion": TOKEN
+                    "Cf-Access-Jwt-Assertion": TOKEN,
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     target_state: power ? "START" : "STOP"
@@ -271,7 +272,8 @@ const fetchVMData = async (vm_id: string, abortController: AbortController = new
         signal: abortController.signal,
         redirect: "error",
         headers: {
-            "Cf-Access-Jwt-Assertion": TOKEN
+            "Cf-Access-Jwt-Assertion": TOKEN,
+            'X-Requested-With': 'XMLHttpRequest'
         }
     });
     if (!res.ok) throw res;

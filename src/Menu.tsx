@@ -133,7 +133,16 @@ const Menu: React.FC<{
         <>
             <Row className="justify-content-start align-content-center g-5 py-3 mx-1 gx-xl-4">
                 <Col xs={12} className="pt-5 pt-md-0">
-                    <h1>Welcome {userProfile.username} !</h1>
+                    <Row className="justify-content-between align-items-center">
+                        <Col xs="auto">
+                            <h1>Welcome {userProfile.username} !</h1>
+                        </Col>
+                        <Col xs="auto">
+                            <Button variant="danger" href="/cdn-cgi/access/logout">
+                                <i className="bi bi-box-arrow-right"></i>Logout
+                            </Button>
+                        </Col>
+                    </Row>
                 </Col>
                 {vm_data.map((vm) => <Flag key={vm._id} vm_data={vm}/>)}
                 <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
@@ -149,16 +158,20 @@ const Menu: React.FC<{
                         </OverlayTrigger>
                     </Link>
                 </Col>
-                <Col xs={12} className="text-end">
-                    <p>
-                        最後更新: {lastUpdate} <br/>
-                        距離下次更新: {nextUpdateInterval}
-                    </p>
+                <Col xs={12}>
+                    <Row className="justify-content-between align-items-center">
+                        <Col xs={12}>
+                            <p className="text-end">
+                                最後更新: {lastUpdate} <br/>
+                                距離下次更新: {nextUpdateInterval}
+                            </p>
+                        </Col>
+                    </Row>
                 </Col>
                 <Col xs={12}>
                     <Row className="justify-content-between">
-                        <Col xs="auto">
-                            <span className="pe-3">Build by © {moment().format("yyyy")} <a
+                        <Col xs="auto" className="pt-2">
+                            <span>Build by © {moment().format("yyyy")} <a
                                 href="https://github.com/cocomine" target="_blank"
                                 rel="noopener noreferrer">cocomine</a>.</span>
                         </Col>
@@ -322,7 +335,8 @@ const fetchVPNData = async (abortController: AbortController = new AbortControll
         signal: abortController.signal,
         redirect: "error",
         headers: {
-            "Cf-Access-Jwt-Assertion": TOKEN
+            "Cf-Access-Jwt-Assertion": TOKEN,
+            'X-Requested-With': 'XMLHttpRequest'
         }
     }).catch((err) => {
         throw new NetworkError(err.message);
@@ -342,7 +356,8 @@ const fetchProfileData = async (abortController: AbortController = new AbortCont
         signal: abortController.signal,
         redirect: "error",
         headers: {
-            "Cf-Access-Jwt-Assertion": TOKEN
+            "Cf-Access-Jwt-Assertion": TOKEN,
+            'X-Requested-With': 'XMLHttpRequest'
         }
     }).catch((err) => {
         throw new NetworkError(err.message);
