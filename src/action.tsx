@@ -267,7 +267,8 @@ const fetchVMData = async (vm_id: string, abortController: AbortController = new
     const res = await fetch(API_URL + "/vpn/" + vm_id, {
         method: patch ? "PATCH" : "GET",
         credentials: "include",
-        signal: abortController.signal
+        signal: abortController.signal,
+        redirect: "error"
     });
     if (!res.ok) throw res;
     return await res.json();

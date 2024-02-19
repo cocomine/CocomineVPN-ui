@@ -319,7 +319,8 @@ const fetchVPNData = async (abortController: AbortController = new AbortControll
     const res = await fetch(`${API_URL}/vpn`, {
         method: "GET",
         credentials: "include",
-        signal: abortController.signal
+        signal: abortController.signal,
+        redirect: "error"
     }).catch((err) => {
         throw new NetworkError(err.message);
     })
@@ -335,7 +336,8 @@ const fetchProfileData = async (abortController: AbortController = new AbortCont
     const res = await fetch(`${API_URL}/profile`, {
         method: "GET",
         credentials: "include",
-        signal: abortController.signal
+        signal: abortController.signal,
+        redirect: "error"
     }).catch((err) => {
         throw new NetworkError(err.message);
     })

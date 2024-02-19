@@ -37,7 +37,7 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#2F2F2FFF",
-  "background_color": "#ffffff",
+  "background_color": "#2F2F2FFF",
   "screenshots": [
     {
       "src": "screenshot1.webp",

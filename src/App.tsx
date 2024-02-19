@@ -110,8 +110,11 @@ function App() {
 
 const ErrorScreen: React.FC = () => {
     const error = useRouteError();
+    const [status, setStatus] = useState(0);
     const error_Elm = useMemo(() => {
+        console.error(error)
         if (isRouteErrorResponse(error)) {
+            setStatus(error.status)
             switch (error.status) {
                 case 400:
                     return (<>
@@ -147,7 +150,7 @@ const ErrorScreen: React.FC = () => {
                             <Lottie animationData={require("./assets/403.json")}
                                     style={{width: "400px", height: "300px"}}/>
                         </Row>
-                        <p>我不知道你是誰 你能告訴我嗎!</p>
+                        <p>你被登出了! 你需要再一次登入!!</p>
                     </>);
                 case 500:
                     return (<>
@@ -198,7 +201,23 @@ const ErrorScreen: React.FC = () => {
             <p>發生了一些不能遇見的錯誤! 不如再試一試?</p>
         </>)
     }, [error]);
-    console.error(error)
+
+    const loginCallback = useCallback(() => {
+        //get current url and fetch
+        //suppose will get 301, then get redirected url
+        //then use script to redirect
+        fetch(location.href, {
+            method: "GET",
+            credentials: "include",
+            redirect: "manual"
+        }).then((res) => {
+            if (res.status === 301) {
+                window.location.href = res.headers.get("Location") as string
+            }
+        }).catch((err) => {
+            console.error(err)
+        })
+    }, [location]);
 
     return (
         <div className="error-screen">
@@ -206,10 +225,18 @@ const ErrorScreen: React.FC = () => {
                 <Col xs={12} className="text-center">
                     {error_Elm}
                 </Col>
-                <Col xs={12} className="text-center">
-                    <Button variant="primary" className="rounded-5" onClick={() => window.location.reload()}>點我
-                        重新載入</Button>
-                </Col>
+                {status === 401 &&
+                    <Col xs={12} className="text-center">
+                        <Button variant="primary" className="rounded-5" onClick={loginCallback}>點我
+                            重新登入</Button>
+                    </Col>
+                }
+                {status === 0 &&
+                    <Col xs={12} className="text-center">
+                        <Button variant="primary" className="rounded-5" onClick={() => window.location.reload()}>點我
+                            重新載入</Button>
+                    </Col>
+                }
             </Row>
         </div>
     );
