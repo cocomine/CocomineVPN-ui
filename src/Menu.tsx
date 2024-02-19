@@ -4,7 +4,7 @@ import "./App.scss";
 import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
 import {Link} from "react-router-dom";
-import {API_URL, toastHttpError} from "./App";
+import {API_URL, toastHttpError, TOKEN} from "./App";
 import {fetchVMData} from "./action";
 import us_flag from "./assets/us.svg";
 import download_svg from "./assets/download.svg";
@@ -320,7 +320,10 @@ const fetchVPNData = async (abortController: AbortController = new AbortControll
         method: "GET",
         credentials: "include",
         signal: abortController.signal,
-        redirect: "error"
+        redirect: "error",
+        headers: {
+            "Cf-Access-Jwt-Assertion": TOKEN
+        }
     }).catch((err) => {
         throw new NetworkError(err.message);
     })
@@ -337,7 +340,10 @@ const fetchProfileData = async (abortController: AbortController = new AbortCont
         method: "GET",
         credentials: "include",
         signal: abortController.signal,
-        redirect: "error"
+        redirect: "error",
+        headers: {
+            "Cf-Access-Jwt-Assertion": TOKEN
+        }
     }).catch((err) => {
         throw new NetworkError(err.message);
     })

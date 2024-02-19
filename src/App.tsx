@@ -6,7 +6,9 @@ import loading from "./assets/loading.svg";
 import {toast, ToastContainer} from "react-toastify";
 import {isRouteErrorResponse, Outlet, useLoaderData, useLocation, useNavigation, useRouteError} from "react-router-dom";
 import Lottie from "lottie-react";
+import Cookies from "js-cookie";
 
+const TOKEN = Cookies.get('CF_Authorization') ?? "";
 const NODE_ENV = process.env.NODE_ENV || 'development';
 let API_URL: string;
 if (NODE_ENV === 'development') {
@@ -206,10 +208,10 @@ const ErrorScreen: React.FC = () => {
         //get current url and fetch
         //suppose will get 301, then get redirected url
         //then use script to redirect
-        fetch(location.href, {
+        fetch(window.location.href, {
             method: "GET",
             credentials: "include",
-            redirect: "manual"
+            redirect: "manual",
         }).then((res) => {
             if (res.status === 301) {
                 window.location.href = res.headers.get("Location") as string
@@ -217,7 +219,7 @@ const ErrorScreen: React.FC = () => {
         }).catch((err) => {
             console.error(err)
         })
-    }, [location]);
+    }, []);
 
     return (
         <div className="error-screen">
@@ -225,7 +227,7 @@ const ErrorScreen: React.FC = () => {
                 <Col xs={12} className="text-center">
                     {error_Elm}
                 </Col>
-                {status === 401 &&
+                {status === 401 || status === 403 &&
                     <Col xs={12} className="text-center">
                         <Button variant="primary" className="rounded-5" onClick={loginCallback}>點我
                             重新登入</Button>
@@ -372,6 +374,6 @@ const toastHttpError = (status: number) => {
 }
 
 export default App;
-export {API_URL, ErrorScreen, LoadingScreen, toastHttpError};
+export {API_URL, ErrorScreen, LoadingScreen, toastHttpError, TOKEN};
 export type {IstatusUpdateCallback, ContextType};
 

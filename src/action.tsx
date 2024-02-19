@@ -11,7 +11,7 @@ import {
     useOutletContext
 } from "react-router-dom";
 import {VMData} from "./Menu";
-import {API_URL, ContextType, toastHttpError} from "./App";
+import {API_URL, ContextType, toastHttpError, TOKEN} from "./App";
 import {toast} from "react-toastify";
 import power from "./assets/power.svg";
 import tools from "./assets/tools.svg";
@@ -31,7 +31,8 @@ const Action: React.FC = () => {
                 method: "PUT",
                 credentials: "include",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Cf-Access-Jwt-Assertion": TOKEN
                 },
                 body: JSON.stringify({
                     target_state: power ? "START" : "STOP"
@@ -268,7 +269,10 @@ const fetchVMData = async (vm_id: string, abortController: AbortController = new
         method: patch ? "PATCH" : "GET",
         credentials: "include",
         signal: abortController.signal,
-        redirect: "error"
+        redirect: "error",
+        headers: {
+            "Cf-Access-Jwt-Assertion": TOKEN
+        }
     });
     if (!res.ok) throw res;
     return await res.json();
