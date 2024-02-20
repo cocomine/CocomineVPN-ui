@@ -34,13 +34,7 @@
     "workbox-routing": "^6.6.0",
     "workbox-strategies": "^6.6.0",
     "workbox-streams": "^6.6.0",
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@types/figlet": "^1.5.8",
-    "@types/jest": "^27.5.2",
-    "@types/js-cookie": "^3.0.6",
-    "@types/node": "^16.18.68",
-    "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.2.17"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -67,5 +61,11 @@
     ]
   },
   "devDependencies": {
+    "@types/figlet": "^1.5.8",
+    "@types/jest": "^27.5.2",
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^16.18.68",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.17"
   }
 }
