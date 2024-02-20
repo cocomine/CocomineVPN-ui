@@ -9,9 +9,9 @@ import Lottie from "lottie-react";
 import Cookies from "js-cookie";
 import {connectWebsocket} from "./ws";
 
-const TOKEN = Cookies.get('CF_Authorization') ?? "";
+const TOKEN = Cookies.get('CF_Authorization') ?? ""; // get token from cookie
 const NODE_ENV = process.env.NODE_ENV || 'development';
-let API_URL: string;
+let API_URL: string; // API URL
 if (NODE_ENV === 'development') {
     console.warn("Development mode")
     API_URL = "http://localhost:8088"
@@ -20,10 +20,25 @@ if (NODE_ENV === 'development') {
     API_URL = "https://api.cocomine.cc" //for production
 }
 
+/**
+ * Interface for the status update callback function.
+ *
+ * @callback IstatusUpdateCallback
+ * @param {Promise<VMData>} promise - The promise that will resolve to the updated VM data.
+ * @param {boolean} target_power - The target power state. True for power on, false for power off.
+ * @param {string} vm_id - The ID of the virtual machine to update.
+ * @returns {void}
+ */
 interface IstatusUpdateCallback {
     (promise: Promise<VMData>, target_power: boolean, vm_id: string): void
 }
 
+/**
+ * Type definition for the context.
+ *
+ * @typedef {Object} ContextType
+ * @property {IstatusUpdateCallback} statusUpdateCallback - The status update callback function.
+ */
 type ContextType = {
     statusUpdateCallback: IstatusUpdateCallback
 }

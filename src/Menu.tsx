@@ -9,15 +9,49 @@ import {fetchVMData} from "./action";
 import us_flag from "./assets/us.svg";
 import download_svg from "./assets/download.svg";
 
+/**
+ * Type definition for the country.
+ * @typedef {("TW" | "JP" | "US" | "HK" | string)} country
+ */
 type country = "TW" | "JP" | "US" | "HK" | string
+/**
+ * Type definition for the provider.
+ * @typedef {("google" | "azure")} provider
+ */
 type provider = "google" | "azure"
+/**
+ * Type definition for the profile.
+ * @typedef {Object} profile
+ * @property {("OpenVPN" | "SoftEther" | "SS")} type - The type of the profile.
+ * @property {string} name - The name of the profile.
+ * @property {string} filename - The filename of the profile.
+ * @property {string} [url] - The url of the profile.
+ */
 type profile = {
     "type": "OpenVPN" | "SoftEther" | "SS",
     "name": string,
     "filename": string
     "url"?: string
 }
+/**
+ * Type definition for the read only mode.
+ * @typedef {("startOnly" | "stopOnly" | "readOnly" | "disable")} readOnlyMode
+ */
 type readOnlyMode = "startOnly" | "stopOnly" | "readOnly" | "disable"
+/**
+ * Type definition for the VM data.
+ * @typedef {Object} VMData
+ * @property {string} _name - The name of the VM.
+ * @property {string} _status - The status of the VM.
+ * @property {string} _id - The id of the VM.
+ * @property {string} _zone - The zone of the VM.
+ * @property {string} _url - The url of the VM.
+ * @property {country} _country - The country of the VM.
+ * @property {profile[]} _profiles - The profiles of the VM.
+ * @property {provider} _provider - The provider of the VM.
+ * @property {boolean} _isPowerOn - The power status of the VM.
+ * @property {readOnlyMode} _readonly - The read only mode of the VM.
+ */
 type VMData = {
     _name: string;
     _status: string;
@@ -30,6 +64,13 @@ type VMData = {
     _isPowerOn: boolean
     _readonly: readOnlyMode
 }
+/**
+ * Type definition for the user profile.
+ * @typedef {Object} userProfile
+ * @property {string} email - The email of the user.
+ * @property {string} username - The username of the user.
+ * @property {string} ip - The ip of the user.
+ */
 type userProfile = {
     email: string;
     username: string;

@@ -41,6 +41,10 @@ registerRoute(
             return false;
         }
 
+        if (url.pathname.startsWith('/login')) {
+            return false;
+        }
+
         if (url.pathname.match(/\/cdn-cgi\/.*/)) {
             return false;
         }
