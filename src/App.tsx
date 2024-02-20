@@ -7,12 +7,13 @@ import {toast, ToastContainer} from "react-toastify";
 import {isRouteErrorResponse, Outlet, useLoaderData, useLocation, useNavigation, useRouteError} from "react-router-dom";
 import Lottie from "lottie-react";
 import Cookies from "js-cookie";
+import {connectWebsocket} from "./ws";
 
 const TOKEN = Cookies.get('CF_Authorization') ?? "";
 const NODE_ENV = process.env.NODE_ENV || 'development';
 let API_URL: string;
 if (NODE_ENV === 'development') {
-    console.log("Development mode")
+    console.warn("Development mode")
     API_URL = "http://localhost:8088"
 } else {
     console.log("Production mode")
@@ -109,6 +110,8 @@ function App() {
         </>
     );
 }
+
+connectWebsocket(); // connect to websocket
 
 /**
  * Error screen
