@@ -27,7 +27,7 @@ const Action: React.FC = () => {
     // power action
     const powerAction = useCallback(async (power: boolean) => {
         try {
-            const res = await fetch(API_URL + "/vpn/" + VMData._id, {
+            await fetch(API_URL + "/vpn/" + VMData._id, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
