@@ -13,7 +13,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 let API_URL: string;
 if (NODE_ENV === 'development') {
     console.log("Development mode")
-    API_URL = "http://localhost:8088" //for test
+    API_URL = "http://localhost:8088"
 } else {
     console.log("Production mode")
     API_URL = "https://api.cocomine.cc" //for production
@@ -110,6 +110,10 @@ function App() {
     );
 }
 
+/**
+ * Error screen
+ * @constructor
+ */
 const ErrorScreen: React.FC = () => {
     const error = useRouteError();
     const [status, setStatus] = useState(0);
@@ -205,7 +209,7 @@ const ErrorScreen: React.FC = () => {
     }, [error]);
 
     const loginCallback = useCallback(() => {
-        sessionStorage.setItem("redirect", window.location.pathname)
+        sessionStorage.setItem('redirect', window.location.pathname)
         window.location.replace("/login")
     }, []);
 
@@ -238,6 +242,10 @@ const ErrorScreen: React.FC = () => {
     );
 }
 
+/**
+ * background animation
+ * @constructor
+ */
 const AnimeBackground: React.FC = () => {
     const [index, setIndex] = useState(0);
 

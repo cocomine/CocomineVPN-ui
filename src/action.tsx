@@ -39,7 +39,6 @@ const Action: React.FC = () => {
                     target_state: power ? "START" : "STOP"
                 })
             })
-            if (!res.ok) throw res
         } catch (e: any) {
             if (e.status === 460) return toast.error(`節點只允許 ${VMData._readonly} 操作`)
             if (e.status === 461) return toast.error(`節點已經處於${VMData._isPowerOn ? '開機' : '關機'}狀態`)

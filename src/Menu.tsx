@@ -139,7 +139,7 @@ const Menu: React.FC<{
                         </Col>
                         <Col xs="auto">
                             <Button variant="danger" href="/cdn-cgi/access/logout">
-                                <i className="bi bi-box-arrow-right"></i>Logout
+                                <i className="bi bi-box-arrow-right me-2"></i>Logout
                             </Button>
                         </Col>
                     </Row>
@@ -338,11 +338,9 @@ const fetchVPNData = async (abortController: AbortController = new AbortControll
             "Cf-Access-Jwt-Assertion": TOKEN,
             'X-Requested-With': 'XMLHttpRequest'
         }
-    }).catch((err) => {
-        throw new NetworkError(err.message);
     })
     if (!res.ok) throw res;
-    return await res.json()
+    return await res.json();
 }
 
 /**
@@ -359,8 +357,6 @@ const fetchProfileData = async (abortController: AbortController = new AbortCont
             "Cf-Access-Jwt-Assertion": TOKEN,
             'X-Requested-With': 'XMLHttpRequest'
         }
-    }).catch((err) => {
-        throw new NetworkError(err.message);
     })
     if (!res.ok) throw res;
     return await res.json()

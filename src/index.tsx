@@ -40,7 +40,7 @@ const router = createBrowserRouter([
     },
     {
         path: '/login',
-        element: <></>,
+        element: <LoadingScreen display={true}/>,
         loader: async () => {
             const redirect = sessionStorage.getItem('redirect');
             window.location.replace(redirect ? redirect : "/")
