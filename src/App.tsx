@@ -16,7 +16,7 @@ if (NODE_ENV === 'development') {
     API_URL = "http://localhost:8088"
 } else {
     console.log("Production mode")
-    API_URL = "https://api.cocomine.cc" //for production
+    API_URL = "https://vpn.cocomine.cc/api" //for production
 }
 
 /**
@@ -225,7 +225,7 @@ const ErrorScreen: React.FC = () => {
 
     const loginCallback = useCallback(() => {
         sessionStorage.setItem('redirect', window.location.pathname)
-        window.location.replace(API_URL + "/login?url=" + window.location.origin + "/login")
+        window.location.replace("/login")
     }, []);
 
     return (

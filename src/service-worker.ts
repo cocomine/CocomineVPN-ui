@@ -41,7 +41,7 @@ registerRoute(
             return false;
         }
 
-        if (url.pathname.startsWith('/login')) {
+        if (url.pathname.startsWith('/login') || url.pathname.startsWith('/api')) {
             return false;
         }
 
