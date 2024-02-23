@@ -35,16 +35,16 @@ const router = createBrowserRouter([
                 path: 'download',
                 element: <Download/>,
                 errorElement: <ErrorElement/>,
+            },
+            {
+                path: 'login',
+                element: <LoadingScreen display={true}/>,
+                loader: async () => {
+                    const redirect = sessionStorage.getItem('redirect');
+                    window.location.replace(redirect ? redirect : "/")
+                },
             }
         ]
-    },
-    {
-        path: '/login',
-        element: <LoadingScreen display={true}/>,
-        loader: async () => {
-            const redirect = sessionStorage.getItem('redirect');
-            window.location.replace(redirect ? redirect : "/")
-        },
     }
 ])
 
@@ -65,7 +65,7 @@ figlet.text('Cocomine VPN Manager', {
         return;
     }
     console.log(data);
-    console.log("App version: 1.8.5")
+    console.log("App version: 1.8.6")
 });
 
 root.render(

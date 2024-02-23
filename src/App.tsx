@@ -228,7 +228,7 @@ const ErrorScreen: React.FC = () => {
 
     const loginCallback = useCallback(() => {
         sessionStorage.setItem('redirect', window.location.pathname)
-        window.location.replace("/login")
+        window.location.replace(API_URL + "/login?url=" + window.location.origin + "/login")
     }, []);
 
     return (
