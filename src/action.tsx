@@ -206,6 +206,7 @@ const PowerControl: React.FC<{ isPower: boolean, action: (power: boolean) => voi
 const ChooseProfile: React.FC = () => {
     const [show, setShow] = useState(true);
     const {VMData} = useOutletContext<{ VMData: VMData }>()
+    const navigate = useNavigate();
 
     // set title
     useEffect(() => {
@@ -229,7 +230,7 @@ const ChooseProfile: React.FC = () => {
 
     return (
         <>
-            <Modal show={show} centered onHide={() => window.history.back()} size="lg">
+            <Modal show={show} centered onHide={() => navigate('..', {replace: true})} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>下載設定檔 <small style={{color: "darkgray", fontSize: "x-small"}}>
                         ({VMData._name})

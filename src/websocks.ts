@@ -5,7 +5,7 @@ const connectWebsocket = () => {
     if (NODE_ENV === 'development') {
         websocket = new WebSocket("ws://localhost:8088/vpn/ws");
     } else {
-        websocket = new WebSocket("wss://api.cocomine.cc/vpn/ws");
+        websocket = new WebSocket("wss://vpn.cocomine.cc/api/vpn/ws");
     }
 
     websocket.onopen = () => {
