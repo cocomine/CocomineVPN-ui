@@ -9,6 +9,7 @@ import {Action, ChooseProfile, ErrorElement, loader as actionLoader} from "./act
 import figlet from "figlet";
 import {Download} from "./download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import {connectWebsocket} from "./websocks";
 
 // create router
 const router = createBrowserRouter([
@@ -65,7 +66,7 @@ figlet.text('Cocomine VPN Manager', {
         return;
     }
     console.log(data);
-    console.log("App version: 1.8.6-r")
+    console.log("App version: 1.8.6-r1")
 });
 
 root.render(
@@ -73,6 +74,8 @@ root.render(
         <RouterProvider router={router} fallbackElement={<LoadingScreen display={true}/>} />
     </React.StrictMode>
 );
+
+connectWebsocket();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

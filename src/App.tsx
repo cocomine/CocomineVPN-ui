@@ -168,7 +168,7 @@ const ErrorScreen: React.FC = () => {
                     return (<>
                         <h1>401</h1>
                         <Row className="justify-content-center">
-                            <Lottie animationData={require("./assets/403.json")}
+                            <Lottie animationData={require("./assets/400.json")}
                                     style={{width: "400px", height: "300px"}}/>
                         </Row>
                         <p>你被登出了! 你需要再一次登入!!</p>
