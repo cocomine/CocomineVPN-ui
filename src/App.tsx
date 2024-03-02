@@ -1,6 +1,6 @@
 import React, {CSSProperties, useCallback, useEffect, useMemo, useState} from 'react';
 import './App.scss';
-import {Button, Col, Container, Row} from "react-bootstrap";
+import {Button, Col, Container, Row, Spinner} from "react-bootstrap";
 import {fetchVPNData, Menu, NetworkError, userProfile, VMData} from "./Menu";
 import loading from "./assets/loading.svg";
 import {toast, ToastContainer} from "react-toastify";
@@ -222,8 +222,10 @@ const ErrorScreen: React.FC = () => {
             <p>發生了一些不能遇見的錯誤! 不如再試一試?</p>
         </>)
     }, [error]);
+    const [loading, setLoading] = useState(false);
 
     const loginCallback = useCallback(() => {
+        setLoading(true)
         sessionStorage.setItem('redirect', window.location.pathname)
         window.location.replace("/login")
     }, []);
@@ -236,20 +238,23 @@ const ErrorScreen: React.FC = () => {
                 </Col>
                 {((status === 401) || (status === 403)) &&
                     <Col xs={12} className="text-center">
-                        <Button variant="primary" className="rounded-5" onClick={loginCallback}>點我
-                            重新登入</Button>
+                        <Button variant="primary" className="rounded-5" onClick={loginCallback} disabled={loading}>
+                            {loading ? <Spinner animation="grow"/> : "點我 重新登入"}
+                        </Button>
                     </Col>
                 }
                 {status === 0 &&
                     <Col xs={12} className="text-center">
-                        <Button variant="primary" className="rounded-5" onClick={() => window.location.reload()}>點我
-                            重新載入</Button>
+                        <Button variant="primary" className="rounded-5" onClick={() => window.location.reload()}>
+                            點我 重新載入
+                        </Button>
                     </Col>
                 }
                 {status === 404 &&
                     <Col xs={12} className="text-center">
-                        <Button variant="primary" className="rounded-5" onClick={() => window.location.href = "/"}>點我
-                            回到首頁</Button>
+                        <Button variant="primary" className="rounded-5" onClick={() => window.location.href = "/"}>
+                            點我 回到首頁
+                        </Button>
                     </Col>
                 }
             </Row>

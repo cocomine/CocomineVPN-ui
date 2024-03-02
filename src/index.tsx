@@ -65,7 +65,7 @@ figlet.text('Cocomine VPN Manager', {
         return;
     }
     console.log(data);
-    console.log("App version: 1.9.0-beta.1-rollback")
+    console.log("App version: 1.9.1-beta.1-rollback")
 });
 
 root.render(
@@ -74,7 +74,7 @@ root.render(
     </React.StrictMode>
 );
 
-// connectWebsocket();
+//connectWebsocket();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
