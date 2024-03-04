@@ -148,7 +148,7 @@ const SS: React.FC<{ profile: profile }> = ({profile}) => {
     return (
         <>
             {/*eslint-disable-next-line*/}
-            <a href="#" onClick={onClick}>
+            <a onClick={onClick} className="position-relative chooseProfile_btn" href="#">
                 <img src={require("./assets/SS.webp")} alt="ShadowSocks" className="rounded-4 profileImg"
                      draggable={false}/>
                 <p className="text-center pt-2">{data.name}</p>

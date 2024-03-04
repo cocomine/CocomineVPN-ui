@@ -239,7 +239,8 @@ const ErrorScreen: React.FC = () => {
                 {((status === 401) || (status === 403)) &&
                     <Col xs={12} className="text-center">
                         <Button variant="primary" className="rounded-5" onClick={loginCallback} disabled={loading}>
-                            {loading ? <Spinner animation="grow"/> : "點我 重新登入"}
+                            {loading ? <><Spinner animation="grow" size="sm" className="me-2"/>
+                                <span className="visually-hidden">Loading...</span></> : "點我 重新登入"}
                         </Button>
                     </Col>
                 }
@@ -379,7 +380,7 @@ const toastHttpError = (status: number) => {
             toast.error("你不可以看這個東西!")
             break;
         case 401:
-            toast.error("我不知道你是誰 你能告訴我嗎!")
+            toast.error("你被登出了! 你需要再一次登入!!")
             break;
         case 500:
             toast.error("我出現問題了! 稍後再試一試")

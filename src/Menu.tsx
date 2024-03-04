@@ -62,7 +62,8 @@ type VMData = {
     _profiles: profile[]
     _provider: provider
     _isPowerOn: boolean
-    _readonly: readOnlyMode
+    _readonly: readOnlyMode,
+    expect_offline_time?: string | null
 }
 /**
  * Type definition for the user profile.
