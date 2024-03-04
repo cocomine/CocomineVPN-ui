@@ -1,7 +1,37 @@
+import {API_URL, TOKEN} from "./App";
+
 const NODE_ENV = process.env.NODE_ENV || 'development';
 let websocket: WebSocket;
 
-const connectWebsocket = () => {
+interface IWS_ticket {
+    data?: {
+        ticket: string
+    }
+}
+
+const connectWebsocket = async () => {
+    let data: IWS_ticket;
+    try {
+        const res = await fetch(API_URL + "/vpn/ws/ticket", {
+            method: "GET",
+            credentials: "include",
+            redirect: "error",
+            headers: {
+                "Cf-Access-Jwt-Assertion": TOKEN,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        if (!res.ok) {
+            setTimeout(connectWebsocket, 5000) //reconnect at 5s
+            return;
+        }
+        data = await res.json();
+    } catch (err: any) {
+        setTimeout(connectWebsocket, 5000) //reconnect at 5s
+        return;
+    }
+
+    //connect to websocket server
     if (NODE_ENV === 'development') {
         websocket = new WebSocket("ws://localhost:8088/vpn/ws");
     } else {
@@ -10,12 +40,11 @@ const connectWebsocket = () => {
 
     websocket.onopen = () => {
         console.log("WebSocket Connected")
-        websocket.send("Ping!")
+        websocket.send(data.data?.ticket || "")
     }
     websocket.onclose = () => {
         console.warn("WebSocket Disconnected. Reconnect in 5s.")
-        //reconnect at 5s
-        setTimeout(connectWebsocket, 5000)
+        setTimeout(connectWebsocket, 5000) //reconnect at 5s
     }
     websocket.onerror = (event) => {
         console.error(event)
