@@ -65,7 +65,7 @@ figlet.text('Cocomine VPN Manager', {
         return;
     }
     console.log(data);
-    console.log("App version: 1.9.2-beta.2-rollback")
+    console.log("App version: 1.9.3-beta.2-rollback")
 });
 
 root.render(

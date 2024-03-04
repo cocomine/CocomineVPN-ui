@@ -212,10 +212,12 @@ const Menu: React.FC<{
                 </Col>
                 <Col xs={12}>
                     <Row className="justify-content-between">
-                        <Col xs="auto" className="pt-2">
+                        <Col xs="auto">
                             <span>Build by © {moment().format("yyyy")} <a
                                 href="https://github.com/cocomine" target="_blank"
                                 rel="noopener noreferrer">cocomine</a>.</span>
+                            <br/>
+                            <span className="text-muted">1.9.3-beta.2-rollback</span>
                         </Col>
                         <Col xs="auto">
                             <Button variant="link" href="https://github.com/cocomine/cocomine_vpnapi_ui" target="_blank"
