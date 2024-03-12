@@ -10,6 +10,8 @@ import figlet from "figlet";
 import {Download} from "./download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
+const APP_VERSION = "1.9.4-beta.2-rollback";
+
 // create router
 const router = createBrowserRouter([
     {
@@ -65,7 +67,7 @@ figlet.text('Cocomine VPN Manager', {
         return;
     }
     console.log(data);
-    console.log("App version: 1.9.3-beta.2-rollback")
+    console.log(APP_VERSION)
 });
 
 root.render(
@@ -85,3 +87,5 @@ serviceWorkerRegistration.register();
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+export {APP_VERSION}

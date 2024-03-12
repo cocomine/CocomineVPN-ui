@@ -240,7 +240,7 @@ const ErrorScreen: React.FC = () => {
                     <Col xs={12} className="text-center">
                         <Button variant="primary" className="rounded-5" onClick={loginCallback} disabled={loading}>
                             {loading ? <><Spinner animation="grow" size="sm" className="me-2"/>
-                                <span className="visually-hidden">Loading...</span></> : "點我 重新登入"}
+                                <span>Loading...</span></> : "點我 重新登入"}
                         </Button>
                     </Col>
                 }

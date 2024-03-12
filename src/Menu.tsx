@@ -8,6 +8,7 @@ import {API_URL, toastHttpError, TOKEN} from "./App";
 import {fetchVMData} from "./action";
 import us_flag from "./assets/us.svg";
 import download_svg from "./assets/download.svg";
+import {APP_VERSION} from "./index";
 
 /**
  * Type definition for the country.
@@ -217,7 +218,7 @@ const Menu: React.FC<{
                                 href="https://github.com/cocomine" target="_blank"
                                 rel="noopener noreferrer">cocomine</a>.</span>
                             <br/>
-                            <span className="text-muted">1.9.3-beta.2-rollback</span>
+                            <span className="text-muted">{APP_VERSION}</span>
                         </Col>
                         <Col xs="auto">
                             <Button variant="link" href="https://github.com/cocomine/cocomine_vpnapi_ui" target="_blank"
