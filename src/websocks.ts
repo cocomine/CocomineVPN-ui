@@ -1,9 +1,8 @@
 import {API_URL, TOKEN} from "./App";
-import {VMData} from "./Menu";
 
 type websocketData = {
     url: string,
-    data: VMData,
+    data: any,
 }
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -38,26 +37,31 @@ const connectWebsocket = async () => {
     }
 
     //connect to websocket server
+    let tmp_ws: WebSocket;
     if (NODE_ENV === 'development') {
-        websocket = new WebSocket("ws://localhost:8088/vpn/ws");
+        tmp_ws = new WebSocket("ws://localhost:8088/vpn/ws");
     } else {
-        websocket = new WebSocket("wss://api.cocomine.cc/vpn/ws");
+        tmp_ws = new WebSocket("wss://api.cocomine.cc/vpn/ws");
     }
 
-    websocket.onopen = () => {
+    tmp_ws.addEventListener('open', () => {
         console.log("WebSocket Connected")
-        websocket.send(data.data?.ticket || "")
-    }
-    websocket.onclose = () => {
+        tmp_ws.send(data.data?.ticket || "")
+    });
+    tmp_ws.addEventListener('error', (event) => {
+        console.error(event)
+    });
+    tmp_ws.addEventListener('close', (event) => {
         console.warn("WebSocket Disconnected. Reconnect in 5s.")
         setTimeout(connectWebsocket, 5000) //reconnect at 5s
-    }
-    websocket.onerror = (event) => {
-        console.error(event)
-    }
-    websocket.onmessage = (event) => {
-        console.debug("Received message from server: " + event.data)
-    }
+    });
+    tmp_ws.addEventListener('message', (event) => {
+        const data: websocketData = JSON.parse(event.data);
+        console.debug(data)
+        if (data.data.auth) {
+            websocket = tmp_ws;
+        }
+    });
 }
 
 

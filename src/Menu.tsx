@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from "react";
-import {Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
+import {Alert, Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
@@ -8,7 +8,7 @@ import {API_URL, ContextType, IstatusUpdateCallback, toastHttpError, TOKEN} from
 import us_flag from "./assets/us.svg";
 import download_svg from "./assets/download.svg";
 import {APP_VERSION} from "./index";
-import {connectWebsocket, websocket, websocketData} from "./websocks";
+import {websocket, websocketData} from "./websocks";
 import {toast} from "react-toastify";
 
 /**
@@ -101,6 +101,7 @@ const Menu: React.FC<{
     const [nextUpdateInterval, setNextUpdateInterval] = useState("00:00");
     const [lastUpdate, setLastUpdate] = useState("00:00");
     const [nextUpdate, setNextUpdate] = useState(moment());
+    const [wsDisconnected, setWsDisconnected] = useState(false);
 
     // fetch data when data is changed
     useEffect(() => {
@@ -145,8 +146,9 @@ const Menu: React.FC<{
 
     // websocket event listener for updating VM data
     useEffect(() => {
-        websocket.onmessage = (event) => {
-            console.debug("In React" + event.data)
+        if (!websocket) return;
+
+        websocket.addEventListener('message', (event) => {
             const data: websocketData = JSON.parse(event.data)
 
             if (data.url === "/vpn/vm") {
@@ -156,12 +158,14 @@ const Menu: React.FC<{
                     return perv;
                 })
             }
-        }
-        websocket.onclose = () => {
-            console.warn("WebSocket Disconnected. Reconnect in 5s.")
-            setTimeout(connectWebsocket, 5000) //reconnect at 5s
-        }
+        });
+        websocket.addEventListener('close', () => {
+            setWsDisconnected(true);
+        });
 
+        return () => {
+            setWsDisconnected(false);
+        }
     }, [websocket]);
 
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
@@ -202,6 +206,9 @@ const Menu: React.FC<{
                             <Button variant="danger" href="/cdn-cgi/access/logout">
                                 <i className="bi bi-box-arrow-right me-2"></i>Logout
                             </Button>
+                        </Col>
+                        <Col xs={12}>
+                            <Alert variant={"warning"} show={wsDisconnected}>與伺服器的連線中斷! 現在重新連線...</Alert>
                         </Col>
                     </Row>
                 </Col>
