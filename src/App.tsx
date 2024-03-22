@@ -1,10 +1,10 @@
 import React, {CSSProperties, useCallback, useEffect, useMemo, useState} from 'react';
 import './App.scss';
 import {Button, Col, Container, Row, Spinner} from "react-bootstrap";
-import {fetchVPNData, Menu, NetworkError, userProfile, VMData} from "./Menu";
+import {fetchProfileData, fetchVPNData, Menu, NetworkError, userProfile, VMData} from "./Menu";
 import loading from "./assets/loading.svg";
 import {toast, ToastContainer} from "react-toastify";
-import {isRouteErrorResponse, Outlet, useLoaderData, useLocation, useNavigation, useRouteError} from "react-router-dom";
+import {isRouteErrorResponse, useLoaderData, useLocation, useNavigation, useRouteError} from "react-router-dom";
 import Lottie from "lottie-react";
 import Cookies from "js-cookie";
 
@@ -29,7 +29,7 @@ if (NODE_ENV === 'development') {
  * @returns {void}
  */
 interface IstatusUpdateCallback {
-    (promise: Promise<VMData>, target_power: boolean, vm_id: string): void
+    (target_power: boolean, vm_id: string): void
 }
 
 /**
@@ -42,60 +42,11 @@ type ContextType = {
     statusUpdateCallback: IstatusUpdateCallback
 }
 
+
 function App() {
     const navigation = useNavigation();
     const location = useLocation();
-    const {vpnData, userProfile} = useLoaderData() as { vpnData: any, userProfile: userProfile };
-    const [data, setData] = useState(vpnData);
-
-    // force update status
-    const forceUpDateStatus = useCallback(async () => {
-        let data
-        try {
-            data = await fetchVPNData()
-        } catch (err: any) {
-            console.error(err)
-            if (err.name !== "AbortError") toastHttpError(err.status)
-            return
-        }
-        setData(data)
-    }, []);
-
-    // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
-    const statusUpdateCallback = useCallback<IstatusUpdateCallback>(async (promise, target, vm_id) => {
-        // update individual vm status
-        setData((perv: any) => {
-            let tmp = {...perv}
-            tmp.data = tmp.data.map((vm: VMData) => {
-                if (vm._id === vm_id) {
-                    vm._status = target ? "STAGING" : "STOPPING"
-                }
-                return vm
-            })
-            return tmp
-        });
-
-        // show toast message
-        await toast.promise(promise, {
-                pending: `正在${target ? '開機' : '關機'}中...`,
-                success: '節點已成功' + (target ? '開機' : '關機') + '!',
-                error: '節點' + (target ? '開機' : '關機') + '失敗!',
-            }
-        ).then((data) => {
-            // update individual vm status
-            setData((perv: any) => {
-                let tmp = {...perv}
-                tmp.data = tmp.data.map((vm: VMData) => {
-                    if (vm._id === vm_id) return data
-                    return vm
-                })
-                return tmp
-            });
-        }).catch((err) => {
-            console.error(err)
-            forceUpDateStatus() // force update all vm status
-        });
-    }, [forceUpDateStatus]);
+    const {VMData, userProfile} = useLoaderData() as { VMData: any, userProfile: userProfile };
 
     // set title
     useEffect(() => {
@@ -105,7 +56,7 @@ function App() {
     return (
         <>
             <Container className="content h-100" data-bs-theme="dark">
-                <Menu data={data} userProfile={userProfile}/>
+                <Menu data={VMData} userProfile={userProfile}/>
             </Container>
             <Bubbles/>
             <AnimeBackground/>
@@ -120,9 +71,22 @@ function App() {
                             draggable
                             pauseOnHover
                             theme="colored"/>
-            <Outlet context={{statusUpdateCallback} satisfies ContextType}/>
         </>
     );
+}
+
+/**
+ * Loader for menu
+ * @constructor
+ */
+const loader = async () => {
+    const VMData = await fetchVPNData()
+    const userProfile = await fetchProfileData();
+    console.debug(VMData, userProfile) //debug
+    return {
+        VMData,
+        userProfile: {email: userProfile.data.email, username: userProfile.data.name, ip: userProfile.data.ip}
+    }
 }
 
 /**
@@ -397,6 +361,6 @@ const toastHttpError = (status: number) => {
 }
 
 export default App;
-export {API_URL, ErrorScreen, LoadingScreen, toastHttpError, TOKEN};
+export {API_URL, ErrorScreen, LoadingScreen, toastHttpError, TOKEN, loader};
 export type {IstatusUpdateCallback, ContextType};
 

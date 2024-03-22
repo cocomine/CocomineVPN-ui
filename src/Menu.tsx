@@ -1,14 +1,15 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {Button, Col, OverlayTrigger, Ratio, Row, Spinner, Tooltip, TooltipProps} from "react-bootstrap";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
+import {Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
-import {Link} from "react-router-dom";
-import {API_URL, toastHttpError, TOKEN} from "./App";
-import {fetchVMData} from "./action";
+import {Link, Outlet} from "react-router-dom";
+import {API_URL, ContextType, IstatusUpdateCallback, toastHttpError, TOKEN} from "./App";
 import us_flag from "./assets/us.svg";
 import download_svg from "./assets/download.svg";
 import {APP_VERSION} from "./index";
+import {websocket, websocketData} from "./websocks";
+import {toast} from "react-toastify";
 
 /**
  * Type definition for the country.
@@ -54,17 +55,17 @@ type readOnlyMode = "startOnly" | "stopOnly" | "readOnly" | "disable"
  * @property {readOnlyMode} _readonly - The read only mode of the VM.
  */
 type VMData = {
-    _name: string;
+    readonly _name: string;
     _status: string;
-    _id: string;
-    _zone: string;
-    _url: string
-    _country: country
-    _profiles: profile[]
-    _provider: provider
+    readonly _id: string;
+    readonly _zone: string;
+    readonly _url: string
+    readonly _country: country
+    readonly _profiles: profile[]
+    readonly _provider: provider
     _isPowerOn: boolean
-    _readonly: readOnlyMode,
-    expect_offline_time?: string | null
+    readonly _readonly: readOnlyMode,
+    _expired?: string | null
 }
 /**
  * Type definition for the user profile.
@@ -134,28 +135,6 @@ const Menu: React.FC<{
                 return;
             }
 
-            // evey 5 seconds, check update data
-            if (count5time >= 5) {
-                // check what VM is under processing
-                for (const vm of vm_data) {
-                    if (processingStatusText.includes(vm._status)) {
-                        // update data if individual VM is under processing
-                        try {
-                            const vmData = await fetchVMData(vm._id, abortController, true);
-                            setVMData((prev) => {
-                                const index = prev.findIndex((value) => value._id === vmData.data._id);
-                                prev[index] = vmData.data;
-                                return [...prev];
-                            });
-                        } catch (err: any) {
-                            console.error(err)
-                            if (err.name !== "AbortError") toastHttpError(err.status)
-                        }
-                    }
-                }
-            }
-            count5time = (count5time + 1) % 6;
-
             setNextUpdateInterval(moment(diff).format("mm:ss"));
         }, 1000);
 
@@ -165,17 +144,52 @@ const Menu: React.FC<{
         };
     }, [nextUpdate, vm_data]);
 
-    // 下載程式 tooltip
-    const renderTooltip = (props: TooltipProps) => (
-        <Tooltip id="download" {...props}>
-            下載程式
-        </Tooltip>
-    );
+    // websocket event listener for updating VM data
+    useEffect(() => {
+        websocket.onmessage = (event) => {
+            console.debug("In React" + event.data)
+            const data: websocketData = JSON.parse(event.data)
+
+            if (data.url === "/vpn/vm") {
+                setVMData((perv) => {
+                    let index = perv.findIndex((vm: VMData) => vm._id === data.data._id);
+                    perv[index] = data.data;
+                    return perv;
+                })
+            }
+        }
+    }, [websocket]);
+
+    // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
+    const statusUpdateCallback = useCallback<IstatusUpdateCallback>(async (target, vm_id) => {
+        // show toast message
+        await toast.promise(new Promise((resolve, reject) => {
+                let count = 0;
+                const id = setInterval(() => {
+                    count++;
+                    if (vm_data.find((vm) => vm._id === vm_id)?._isPowerOn === target) {
+                        clearInterval(id);
+                        resolve("Success")
+                    }
+                    if (count > 60) {
+                        clearInterval(id);
+                        reject("Timeout")
+                    }
+                }, 1000);
+            }), {
+                pending: `正在${target ? '開機' : '關機'}中...`,
+                success: '節點已成功' + (target ? '開機' : '關機') + '!',
+                error: '節點' + (target ? '開機' : '關機') + '失敗!',
+            }
+        ).catch((err) => {
+            console.error(err)
+        });
+    }, [vm_data]);
 
     return (
         <>
             <Row className="justify-content-start align-content-center g-5 py-3 mx-1 gx-xl-4">
-                <Col xs={12} className="pt-5 pt-md-0">
+                <Col xs={12} className="pt-5 pt-xl-0">
                     <Row className="justify-content-between align-items-center">
                         <Col xs="auto">
                             <h1>Welcome {userProfile.username} !</h1>
@@ -190,15 +204,13 @@ const Menu: React.FC<{
                 {vm_data.map((vm) => <Flag key={vm._id} vm_data={vm}/>)}
                 <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
                     <Link to={`/download`}>
-                        <OverlayTrigger placement="bottom" delay={{show: 250, hide: 400}} overlay={renderTooltip}>
-                            <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
-                                <div>
-                                    <img src={download_svg} alt="Download" className="flag"
-                                         style={{backgroundColor: "#fff", padding: "0.8rem"}}
-                                         draggable={false}/>
-                                </div>
-                            </Ratio>
-                        </OverlayTrigger>
+                        <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
+                            <div>
+                                <img src={download_svg} alt="Download" className="flag"
+                                     style={{backgroundColor: "#fff", padding: "0.8rem"}}
+                                     draggable={false}/>
+                            </div>
+                        </Ratio>
                     </Link>
                 </Col>
                 <Col xs={12}>
@@ -229,6 +241,7 @@ const Menu: React.FC<{
                     </Row>
                 </Col>
             </Row>
+            <Outlet context={{statusUpdateCallback} satisfies ContextType}/>
         </>
     );
 }
@@ -240,30 +253,6 @@ const Menu: React.FC<{
  */
 const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
     const [data, setData] = useState<VMData>(vm_data);
-
-    // tooltip for menu item
-    const renderTooltip = (props: TooltipProps) => {
-        switch (data._country) {
-            case "TW":
-                return <Tooltip id="TW-tooltip" {...props}>
-                    台灣節點
-                </Tooltip>;
-            case "JP":
-                return <Tooltip id="JP-tooltip" {...props}>
-                    日本節點
-                </Tooltip>;
-            case "US":
-                return <Tooltip id="US-tooltip" {...props}>
-                    美國節點
-                </Tooltip>;
-            case "HK":
-                return <Tooltip id="HK-tooltip" {...props}>
-                    香港節點
-                </Tooltip>;
-            default:
-                return null;
-        }
-    };
 
     // provider image element for menu item (memoized) (only update when data._provider is changed)
     const provider = useMemo(() => {
@@ -324,17 +313,15 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
         return (
             <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
                 <Link to={`/${data._id}`}>
-                    <OverlayTrigger placement="bottom" delay={{show: 250, hide: 400}} overlay={renderTooltip}>
-                        <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
-                            <div>
-                                {flag}
-                                {provider}
-                                {statusMark}
-                                {!data._isPowerOn ? <div className="offlineDimDark"></div> : null}
-                                {spinner}
-                            </div>
-                        </Ratio>
-                    </OverlayTrigger>
+                    <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
+                        <div>
+                            {flag}
+                            {provider}
+                            {statusMark}
+                            {!data._isPowerOn ? <div className="offlineDimDark"></div> : null}
+                            {spinner}
+                        </div>
+                    </Ratio>
                 </Link>
             </Col>
         )
@@ -352,20 +339,6 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
                 </Ratio>
             </Col>
         )
-    }
-}
-
-/**
- * Loader for menu
- * @constructor
- */
-const loader = async () => {
-    const vpnData = await fetchVPNData()
-    const userProfile = await fetchProfileData();
-    console.debug(vpnData, userProfile) //debug
-    return {
-        vpnData,
-        userProfile: {email: userProfile.data.email, username: userProfile.data.name, ip: userProfile.data.ip}
     }
 }
 
@@ -431,5 +404,5 @@ class NetworkError implements Error {
     }
 }
 
-export {Menu, loader, fetchVPNData, fetchProfileData, NetworkError};
-export type {VMData, userProfile, profile, country, provider};
+export {Menu, fetchVPNData, fetchProfileData, NetworkError};
+export type {VMData, userProfile, profile, country, provider, readOnlyMode};

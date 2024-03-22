@@ -1,4 +1,10 @@
 import {API_URL, TOKEN} from "./App";
+import {VMData} from "./Menu";
+
+type websocketData = {
+    url: string,
+    data: VMData,
+}
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 let websocket: WebSocket;
@@ -55,4 +61,5 @@ const connectWebsocket = async () => {
 }
 
 
-export {connectWebsocket, websocket}
+export {connectWebsocket, websocket};
+export type {websocketData};

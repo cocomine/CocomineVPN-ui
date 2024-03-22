@@ -10,7 +10,7 @@ import {
     useNavigate,
     useOutletContext
 } from "react-router-dom";
-import {VMData} from "./Menu";
+import {readOnlyMode, VMData} from "./Menu";
 import {API_URL, ContextType, toastHttpError, TOKEN} from "./App";
 import {toast} from "react-toastify";
 import power from "./assets/power.svg";
@@ -25,11 +25,12 @@ const Action: React.FC = () => {
     const [show, setShow] = useState(true);
     const {statusUpdateCallback} = useOutletContext<ContextType>()
     const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string>("Loading...")
+    const [enableExtend, setEnableExtend] = useState<boolean>(false)
 
     // power action
     const powerAction = useCallback(async (power: boolean) => {
         try {
-            await fetch(API_URL + "/vpn/" + VMData._id, {
+            const res = await fetch(API_URL + "/vpn/" + VMData._id, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -41,42 +42,45 @@ const Action: React.FC = () => {
                     target_state: power ? "START" : "STOP"
                 })
             })
+            if (!res.ok) {
+                if (res.status === 460) return toast.error(`節點只允許 ${VMData._readonly} 操作`)
+                if (res.status === 461) return toast.error(`節點已經處於${VMData._isPowerOn ? '開機' : '關機'}狀態`)
+                return toastHttpError(res.status)
+            }
         } catch (e: any) {
-            if (e.status === 460) return toast.error(`節點只允許 ${VMData._readonly} 操作`)
-            if (e.status === 461) return toast.error(`節點已經處於${VMData._isPowerOn ? '開機' : '關機'}狀態`)
+            console.log(e)
             toastHttpError(e.status)
             return
         } finally {
             navigate('..', {replace: true}) // redirect to home page
         }
 
-        // update status until status changed or try count > 10 times
-        const promise = new Promise<VMData>((resolve, reject) => {
-            let tryCount = 0
-            const id = setInterval(async () => {
-                let data
-                try {
-                    const res = await fetchVMData(VMData._id, undefined, true)
-                    data = res.data as VMData
-                } catch (e) {
-                    clearInterval(id)
-                    return reject()
-                }
-
-                if (data._isPowerOn === power) {
-                    clearInterval(id)
-                    return resolve(data)
-                }
-                if (tryCount > 20) {
-                    clearInterval(id)
-                    return reject(data)
-                }
-                tryCount++
-                console.debug("tryCount: " + tryCount) //debug
-            }, 5000)
-        });
-        statusUpdateCallback(promise, power, VMData._id)
+        statusUpdateCallback(power, VMData._id)
     }, [VMData, statusUpdateCallback, navigate]);
+
+    // extend time action
+    const extendTime = useCallback(async () => {
+        try {
+            const res = await fetch(API_URL + "/vpn/" + VMData._id, {
+                method: "PATCH",
+                credentials: "include",
+                headers: {
+                    "Cf-Access-Jwt-Assertion": TOKEN,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+            })
+            if (!res.ok) {
+                if (res.status === 462) return toast.error(`只允許離線前一小時操作`)
+                return toastHttpError(res.status)
+            }
+        } catch (e: any) {
+            console.log(e)
+            toastHttpError(e.status)
+            return
+        } finally {
+            navigate('..', {replace: true}) // redirect to home page
+        }
+    }, [VMData, navigate])
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -95,18 +99,19 @@ const Action: React.FC = () => {
 
     // update expect_offline_time_Interval every second
     useEffect(() => {
-        if (VMData.expect_offline_time !== null) {
+        if (VMData._expired !== null) {
             const id = setInterval(() => {
-                const expect_offline_time = moment(VMData.expect_offline_time)
-                const diff = expect_offline_time.diff(moment())
+                const expect_offline_time = moment(VMData._expired)
+                const diff = expect_offline_time.diff(Date.now())
                 const tmp = moment.utc(diff).format('HH:mm:ss')
 
+                if (diff < 60 * 60 * 1000) setEnableExtend(true)
                 setExpect_offline_time_Interval(diff > 0 ? tmp : "00:00:00");
             }, 1000)
 
             return () => clearInterval(id)
         }
-    }, [VMData.expect_offline_time]);
+    }, [VMData._expired]);
 
     // set title
     useEffect(() => {
@@ -127,7 +132,8 @@ const Action: React.FC = () => {
                     <Modal.Body>
                         <Row className="gx-5 gy-4">
                             <Col>
-                                <PowerControl isPower={VMData._isPowerOn} action={powerAction}/>
+                                <PowerControl isPower={VMData._isPowerOn} action={powerAction}
+                                              readonly={VMData._readonly}/>
                             </Col>
                             <Col className="border-start">
                                 <Link to={`${location.pathname}/profile`} className="chooseProfile_btn">
@@ -135,7 +141,7 @@ const Action: React.FC = () => {
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
                             </Col>
-                            {VMData.expect_offline_time !== null &&
+                            {VMData._expired !== null &&
                                 <>
                                     <Col xs={12} className="text-center">
                                         <div className="border-top w-100"></div>
@@ -143,6 +149,9 @@ const Action: React.FC = () => {
                                     <Col xs={12} className="text-center">
                                         <h3>{expect_offline_time_Interval}</h3>
                                         <p>距離預計離線</p>
+                                        <Button variant={enableExtend ? "primary" : "outline-primary"}
+                                                className="w-100 rounded-5" onClick={extendTime}
+                                                disabled={!enableExtend}>{enableExtend ? "延長開放時間" : "離線前一小時可以延長開放時間"}</Button>
                                     </Col>
                                 </>
                             }{/*VMData.expect_offline_time !== null &&
@@ -164,7 +173,13 @@ const Action: React.FC = () => {
     );
 }
 
-const PowerControl: React.FC<{ isPower: boolean, action: (power: boolean) => void }> = ({isPower, action}) => {
+interface IPowerControl {
+    isPower: boolean,
+    action: (power: boolean) => void,
+    readonly: readOnlyMode;
+}
+
+const PowerControl: React.FC<IPowerControl> = ({isPower, action, readonly}) => {
     const timeout = useRef<NodeJS.Timeout | null>(null)
     const [loading, setLoading] = useState(false) // loading state
 
@@ -189,7 +204,8 @@ const PowerControl: React.FC<{ isPower: boolean, action: (power: boolean) => voi
             <>
                 <Ratio aspectRatio="1x1" className="">
                     <Button variant="danger" className="powerBtn" onMouseDown={onMouseDown} onMouseUp={onMouseUp}
-                            onTouchStart={onMouseDown} onTouchEnd={onMouseUp} disabled={loading}>
+                            onTouchStart={onMouseDown} onTouchEnd={onMouseUp}
+                            disabled={loading || readonly === "readOnly" || readonly === "startOnly"}>
                         <img src={power} alt="power icon"/>
                         <svg viewBox="0 0 100 100" className="loading">
                             <defs>
@@ -214,7 +230,8 @@ const PowerControl: React.FC<{ isPower: boolean, action: (power: boolean) => voi
         <>
             <Ratio aspectRatio="1x1">
                 <Button variant="success" className="powerBtn" onMouseDown={onMouseDown} onMouseUp={onMouseUp}
-                        onTouchStart={onMouseDown} onTouchEnd={onMouseUp} disabled={loading}
+                        onTouchStart={onMouseDown} onTouchEnd={onMouseUp}
+                        disabled={loading || readonly === "readOnly" || readonly === "stopOnly"}
                         onContextMenu={e => {
                             e.preventDefault();
                             e.stopPropagation();

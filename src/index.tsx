@@ -1,16 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.scss';
-import App, {ErrorScreen, LoadingScreen} from './App';
+import App, {ErrorScreen, loader, LoadingScreen} from './App';
 import reportWebVitals from './reportWebVitals';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import {loader} from "./Menu";
 import {Action, ChooseProfile, ErrorElement, loader as actionLoader} from "./action";
 import figlet from "figlet";
 import {Download} from "./download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import {connectWebsocket} from "./websocks";
 
-const APP_VERSION = "1.9.4-beta.2-rollback";
+const APP_VERSION = "1.9.4-Alpha.1";
 
 // create router
 const router = createBrowserRouter([
@@ -76,7 +76,7 @@ root.render(
     </React.StrictMode>
 );
 
-//connectWebsocket();
+connectWebsocket();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
