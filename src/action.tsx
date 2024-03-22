@@ -73,6 +73,7 @@ const Action: React.FC = () => {
                 if (res.status === 462) return toast.error(`只允許離線前一小時操作`)
                 return toastHttpError(res.status)
             }
+            toast.success("延長開放時間成功")
         } catch (e: any) {
             console.log(e)
             toastHttpError(e.status)

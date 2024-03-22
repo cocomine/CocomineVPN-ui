@@ -8,7 +8,7 @@ import {API_URL, ContextType, IstatusUpdateCallback, toastHttpError, TOKEN} from
 import us_flag from "./assets/us.svg";
 import download_svg from "./assets/download.svg";
 import {APP_VERSION} from "./index";
-import {websocket, websocketData} from "./websocks";
+import {connectWebsocket, websocket, websocketData} from "./websocks";
 import {toast} from "react-toastify";
 
 /**
@@ -112,7 +112,6 @@ const Menu: React.FC<{
     // update timeInterval every second
     useEffect(() => {
         const abortController = new AbortController();
-        let count5time = 0;
 
         const id = setInterval(async () => {
             const diff = nextUpdate.diff(moment())
@@ -158,6 +157,11 @@ const Menu: React.FC<{
                 })
             }
         }
+        websocket.onclose = () => {
+            console.warn("WebSocket Disconnected. Reconnect in 5s.")
+            setTimeout(connectWebsocket, 5000) //reconnect at 5s
+        }
+
     }, [websocket]);
 
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
