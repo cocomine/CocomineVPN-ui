@@ -79,6 +79,18 @@ type userProfile = {
     username: string;
     ip: string;
 }
+type weatherAlertType = {
+    [key: string]: { name: string, code: string, actionCode: string }
+}
+type weatherData = {
+    temperature: number,
+    icon: number,
+    alert: weatherAlertType,
+    generalSituation: string,
+    humidity: number,
+    forecastDesc: string,
+    outlook: string
+}
 
 // VM processing status
 const processingStatusText = [
@@ -148,6 +160,8 @@ const Menu: React.FC<{
     useEffect(() => {
         if (!websocket) return;
 
+        // event listener for websocket
+        // update VM data when received message from websocket
         websocket.addEventListener('message', (event) => {
             const data: websocketData = JSON.parse(event.data)
 
@@ -159,6 +173,8 @@ const Menu: React.FC<{
                 })
             }
         });
+
+        // event listener for websocket close
         websocket.addEventListener('close', () => {
             setWsDisconnected(true);
         });
@@ -200,12 +216,18 @@ const Menu: React.FC<{
                 <Col xs={12} className="pt-5 pt-xl-0">
                     <Row className="justify-content-between align-items-center">
                         <Col xs="auto">
-                            <h1>Welcome {userProfile.username} !</h1>
+                            <h1 className="text-truncate">Welcome {userProfile.username} !</h1>
                         </Col>
                         <Col xs="auto">
                             <Button variant="danger" href="/cdn-cgi/access/logout">
                                 <i className="bi bi-box-arrow-right me-2"></i>Logout
                             </Button>
+                        </Col>
+                        <Col xs={12}>
+                            <p>
+                                <span>{moment().format("LL")} {}</span>
+                                <Weather/>
+                            </p>
                         </Col>
                         <Col xs={12}>
                             <Alert variant={"warning"} show={wsDisconnected}>與伺服器的連線中斷! 現在重新連線...</Alert>
@@ -255,6 +277,48 @@ const Menu: React.FC<{
             <Outlet context={{statusUpdateCallback} satisfies ContextType}/>
         </>
     );
+}
+
+const Weather: React.FC = () => {
+    const [data, setData] = useState<weatherData | null>(null);
+
+    //get weather data
+    useEffect(() => {
+        const abortController = new AbortController();
+
+        fetchWeatherData(abortController).then((data) => {
+            console.log(data)
+            setData(data)
+        }).catch((err) => {
+            if (err.name !== "AbortError") toastHttpError(err.status)
+            console.error(err)
+        })
+
+        return () => {
+            abortController.abort();
+        }
+    }, []);
+
+    if (data === null) return <></>
+    return (
+        <>
+            <img src={`https://www.hko.gov.hk/images/HKOWxIconOutline/pic${data.icon}.png`} alt="weather"
+                 style={{width: '42px'}} className="ps-2"/>
+            <span className="">{data.temperature}°C</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
+                 className="bi bi-droplet-fill ps-2" viewBox="0 0 16 16">
+                <path
+                    d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6M6.646 4.646l.708.708c-.29.29-1.128 1.311-1.907 2.87l-.894-.448c.82-1.641 1.717-2.753 2.093-3.13"/>
+            </svg>
+            <span className="">{data.humidity}%</span>
+            <div className="marquee"><p>
+                <span style={{paddingLeft: "1rem"}}>{data.generalSituation}</span>
+                <span style={{paddingLeft: "3rem"}}>今日天氣預測: {data.forecastDesc}</span>
+                <span style={{paddingLeft: "3rem"}}>展望: {data.outlook}</span>
+            </p></div>
+        </>
+    )
+
 }
 
 /**
@@ -389,6 +453,40 @@ const fetchProfileData = async (abortController: AbortController = new AbortCont
     })
     if (!res.ok) throw res;
     return await res.json()
+}
+
+const fetchWeatherData = async (abortController: AbortController = new AbortController()): Promise<weatherData> => {
+    let res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc`, {
+        method: "GET",
+        signal: abortController.signal
+    })
+    if (!res.ok) throw res;
+    let data = await res.json();
+    const temperature: number = data.temperature.data[1].value;
+    const icon: number = data.icon[0];
+    const humidity: number = data.humidity.data[0].value;
+
+
+    res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc`, {
+        method: "GET",
+        signal: abortController.signal
+    })
+    if (!res.ok) throw res;
+    data = Object.values(await res.json());
+    const alert: weatherAlertType = data.filter((item: any) => item.actionCode !== "CANCEL")
+
+    res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc`, {
+        method: "GET",
+        signal: abortController.signal
+    })
+    if (!res.ok) throw res;
+    data = await res.json();
+    const generalSituation: string = data.generalSituation
+    const forecastDesc: string = data.forecastDesc
+    const outlook: string = data.outlook
+
+    return {temperature, icon, alert, generalSituation, humidity, forecastDesc, outlook}
+
 }
 
 /**

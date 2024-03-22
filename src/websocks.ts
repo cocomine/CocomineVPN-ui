@@ -46,12 +46,12 @@ const connectWebsocket = async () => {
 
     tmp_ws.addEventListener('open', () => {
         console.log("WebSocket Connected")
-        tmp_ws.send(data.data?.ticket || "")
+        tmp_ws.send(data.data?.ticket || "") //send ticket
     });
     tmp_ws.addEventListener('error', (event) => {
         console.error(event)
     });
-    tmp_ws.addEventListener('close', (event) => {
+    tmp_ws.addEventListener('close', () => {
         console.warn("WebSocket Disconnected. Reconnect in 5s.")
         setTimeout(connectWebsocket, 5000) //reconnect at 5s
     });
