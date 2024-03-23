@@ -10,7 +10,7 @@ import {Download} from "./download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import {connectWebsocket} from "./websocks";
 
-const APP_VERSION = "1.9.4-Alpha.4";
+const APP_VERSION = "1.9.4-Alpha.5";
 
 // create router
 const router = createBrowserRouter([
@@ -76,6 +76,14 @@ root.render(
     </React.StrictMode>
 );
 
+// prompt install
+let deferredPrompt: any;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    console.log(e)
+    deferredPrompt = e
+});
+
 connectWebsocket();
 
 // If you want your app to work offline and load faster, you can change
@@ -88,4 +96,4 @@ serviceWorkerRegistration.register();
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
 
-export {APP_VERSION}
+export {APP_VERSION, deferredPrompt}

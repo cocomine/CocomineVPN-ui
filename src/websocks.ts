@@ -39,7 +39,7 @@ const connectWebsocket = async () => {
     //connect to websocket server
     let tmp_ws: WebSocket;
     if (NODE_ENV === 'development') {
-        tmp_ws = new WebSocket("ws://localhost:8088/vpn/ws");
+        tmp_ws = new WebSocket("ws://192.168.0.102:8088/vpn/ws");
     } else {
         tmp_ws = new WebSocket("wss://api.cocomine.cc/vpn/ws");
     }

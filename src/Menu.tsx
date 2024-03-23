@@ -7,7 +7,7 @@ import {Link, Outlet} from "react-router-dom";
 import {API_URL, ContextType, IstatusUpdateCallback, toastHttpError, TOKEN} from "./App";
 import us_flag from "./assets/us.svg";
 import download_svg from "./assets/download.svg";
-import {APP_VERSION} from "./index";
+import {APP_VERSION, deferredPrompt} from "./index";
 import {websocket, websocketData} from "./websocks";
 import {toast} from "react-toastify";
 
@@ -213,7 +213,7 @@ const Menu: React.FC<{
     return (
         <>
             <Row className="justify-content-start align-content-center g-5 py-3 mx-1 gx-xl-4">
-                <Col xs={12} className="pt-5 pt-xl-0">
+                <Col xs={12} className="pt-5">
                     <Row className="justify-content-between align-items-center">
                         <Col xs="auto">
                             <h1 className="text-truncate">Welcome {userProfile.username} !</h1>
@@ -224,13 +224,12 @@ const Menu: React.FC<{
                             </Button>
                         </Col>
                         <Col xs={12}>
-                            <p>
-                                <span>{moment().format("LL")} {}</span>
-                                <Weather/>
-                            </p>
+                            <Weather/>
                         </Col>
                         <Col xs={12}>
-                            <Alert variant={"warning"} show={wsDisconnected}>與伺服器的連線中斷! 現在重新連線...</Alert>
+                            <Alert variant={"warning"} show={wsDisconnected}
+                                   style={{position: "fixed", top: 0, left: 0, right: 0}}>與伺服器的連線中斷!
+                                正在重新連線...</Alert>
                         </Col>
                     </Row>
                 </Col>
@@ -257,6 +256,9 @@ const Menu: React.FC<{
                     </Row>
                 </Col>
                 <Col xs={12}>
+                    <PWAInstall/>
+                </Col>
+                <Col xs={12}>
                     <Row className="justify-content-between">
                         <Col xs="auto">
                             <span>Build by © {moment().format("yyyy")} <a
@@ -279,6 +281,40 @@ const Menu: React.FC<{
     );
 }
 
+/**
+ * PWA install element for menu
+ * @constructor
+ */
+const PWAInstall: React.FC = () => {
+    const installPWA = useCallback(async () => {
+        deferredPrompt.prompt();
+    }, []);
+
+    if (!deferredPrompt || isPwa()) return null
+    return (
+        <div>
+            <div className="pwa-install rounded p-2 px-3 border" onClick={installPWA}>
+                <Row className="align-items-center align-content-center">
+                    <Col xs="auto">
+                        <img src={require('./assets/devcie.webp')} alt="將網頁安裝為APP" style={{height: "6rem"}}
+                             className="pe-2"/>
+                    </Col>
+                    <Col>
+                        <h5 className="fw-bold text-info align-bottom">
+                            將網頁安裝為APP<span className="badge rounded-pill text-bg-primary ms-2">立即安裝!</span>
+                        </h5>
+                        <p className="m-0">將網頁安裝為APP到您的裝置上。獲得原生應用程式的體驗，更快捷的訪問，無須再打開瀏覽器。</p>
+                    </Col>
+                </Row>
+            </div>
+        </div>
+    )
+}
+
+/**
+ * Weather element for menu
+ * @constructor
+ */
 const Weather: React.FC = () => {
     const [data, setData] = useState<weatherData | null>(null);
 
@@ -287,7 +323,7 @@ const Weather: React.FC = () => {
         const abortController = new AbortController();
 
         fetchWeatherData(abortController).then((data) => {
-            console.log(data)
+            console.debug(data)
             setData(data)
         }).catch((err) => {
             if (err.name !== "AbortError") toastHttpError(err.status)
@@ -299,24 +335,33 @@ const Weather: React.FC = () => {
         }
     }, []);
 
-    if (data === null) return <></>
+    if (data === null) return null
     return (
-        <>
-            <img src={`https://www.hko.gov.hk/images/HKOWxIconOutline/pic${data.icon}.png`} alt="weather"
-                 style={{width: '42px'}} className="ps-2"/>
-            <span className="">{data.temperature}°C</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
-                 className="bi bi-droplet-fill ps-2" viewBox="0 0 16 16">
-                <path
-                    d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6M6.646 4.646l.708.708c-.29.29-1.128 1.311-1.907 2.87l-.894-.448c.82-1.641 1.717-2.753 2.093-3.13"/>
-            </svg>
-            <span className="">{data.humidity}%</span>
-            <div className="marquee"><p>
-                <span style={{paddingLeft: "1rem"}}>{data.generalSituation}</span>
-                <span style={{paddingLeft: "3rem"}}>今日天氣預測: {data.forecastDesc}</span>
-                <span style={{paddingLeft: "3rem"}}>展望: {data.outlook}</span>
-            </p></div>
-        </>
+        <Row className="g-1 align-content-center align-items-center">
+            <Col xs={"auto"}>
+                <span>{moment().format("LL")}</span>
+            </Col>
+            <Col xs={"auto"}>
+                <img src={`https://www.hko.gov.hk/images/HKOWxIconOutline/pic${data.icon}.png`} alt="weather"
+                     style={{width: '42px'}} className="ps-2"/>
+                <span>{data.temperature}°C</span>
+            </Col>
+            <Col xs={"auto"}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                     className="bi bi-droplet-fill ps-2" viewBox="0 0 16 16">
+                    <path
+                        d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6M6.646 4.646l.708.708c-.29.29-1.128 1.311-1.907 2.87l-.894-.448c.82-1.641 1.717-2.753 2.093-3.13"/>
+                </svg>
+                <span>{data.humidity}%</span>
+            </Col>
+            <Col style={{minWidth: "20rem"}}>
+                <div className="marquee"><p>
+                    <span style={{paddingLeft: "1rem"}}>{data.generalSituation}</span>
+                    <span style={{paddingLeft: "3rem"}}>今日天氣預測: {data.forecastDesc}</span>
+                    <span style={{paddingLeft: "3rem"}}>展望: {data.outlook}</span>
+                </p></div>
+            </Col>
+        </Row>
     )
 
 }
@@ -455,6 +500,10 @@ const fetchProfileData = async (abortController: AbortController = new AbortCont
     return await res.json()
 }
 
+/**
+ * Fetch weather data
+ * @param abortController AbortController
+ */
 const fetchWeatherData = async (abortController: AbortController = new AbortController()): Promise<weatherData> => {
     let res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc`, {
         method: "GET",
@@ -487,6 +536,12 @@ const fetchWeatherData = async (abortController: AbortController = new AbortCont
 
     return {temperature, icon, alert, generalSituation, humidity, forecastDesc, outlook}
 
+}
+
+function isPwa() {
+    return ["fullscreen", "standalone", "minimal-ui"].some(
+        (displayMode) => window.matchMedia('(display-mode: ' + displayMode + ')').matches
+    );
 }
 
 /**

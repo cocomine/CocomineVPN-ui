@@ -171,19 +171,19 @@ body {
     mask: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
 
     p {
-        animation: marquee1 30s linear infinite;
+        animation: marquee1 60s linear infinite;
         position: absolute;
         display: inline-block;
-        text-align: center;
         width: auto;
         height: 100%;
+        left: 100%;
 
         @keyframes marquee1 {
             0% {
-                transform: translate(100vw, 0);
+                transform: translate(0, 0);
             }
             100% {
-                transform: translate(-100%, 0);
+                transform: translate(-150%, 0);
             }
         }
     }
@@ -209,6 +209,13 @@ body {
 .profileImg {
     width: 100%;
     height: auto;
+}
+
+/*pwa-install*/
+.pwa-install {
+    width: 100%;
+    background-color: var(--bs-body-bg);
+    cursor: pointer;
 }
 
 /* download-anime */

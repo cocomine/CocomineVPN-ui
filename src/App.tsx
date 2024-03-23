@@ -13,7 +13,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 let API_URL: string; // API URL
 if (NODE_ENV === 'development') {
     console.log("Development mode")
-    API_URL = "http://localhost:8088"
+    API_URL = "http://192.168.0.102:8088"
 } else {
     console.log("Production mode")
     API_URL = "https://vpn.cocomine.cc/api" //for production
