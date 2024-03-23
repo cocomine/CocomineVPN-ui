@@ -182,6 +182,7 @@ const Menu: React.FC<{
         return () => {
             setWsDisconnected(false);
         }
+        // eslint-disable-next-line
     }, [websocket]);
 
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status

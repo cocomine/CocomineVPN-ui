@@ -1,7 +1,7 @@
 import React, {CSSProperties, useCallback, useEffect, useMemo, useState} from 'react';
 import './App.scss';
 import {Button, Col, Container, Row, Spinner} from "react-bootstrap";
-import {fetchProfileData, fetchVPNData, Menu, NetworkError, userProfile, VMData} from "./Menu";
+import {fetchProfileData, fetchVPNData, Menu, NetworkError, userProfile} from "./Menu";
 import loading from "./assets/loading.svg";
 import {toast, ToastContainer} from "react-toastify";
 import {isRouteErrorResponse, useLoaderData, useLocation, useNavigation, useRouteError} from "react-router-dom";
