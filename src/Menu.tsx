@@ -227,9 +227,8 @@ const Menu: React.FC<{
                             <Weather weatherData={weatherData}/>
                         </Col>
                         <Col xs={12}>
-                            <Alert variant={"warning"} show={wsDisconnected}
-                                   style={{position: "fixed", top: 0, left: 0, right: 0}}>與伺服器的連線中斷!
-                                正在重新連線...</Alert>
+                            <Alert variant={"warning"} show={wsDisconnected} className="wsDisconnected">
+                                與伺服器的連線中斷! 正在重新連線...</Alert>
                         </Col>
                     </Row>
                 </Col>
@@ -299,7 +298,7 @@ const PWAInstall: React.FC = () => {
                         <img src={require('./assets/devcie.webp')} alt="將網頁安裝為APP" style={{height: "6rem"}}
                              className="pe-2"/>
                     </Col>
-                    <Col>
+                    <Col style={{minWidth: "20rem"}}>
                         <h5 className="fw-bold text-info align-bottom">
                             將網頁安裝為APP<span className="badge rounded-pill text-bg-primary ms-2">立即安裝!</span>
                         </h5>
