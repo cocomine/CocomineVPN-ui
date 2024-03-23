@@ -189,6 +189,7 @@ const ErrorScreen: React.FC = () => {
                         </Row>
                         <p>網絡出現問題! 檢查一下</p>
                     </>);
+                case 523:
                 case 502:
                     return (<>
                         <h1>502</h1>
@@ -196,7 +197,7 @@ const ErrorScreen: React.FC = () => {
                             <Lottie animationData={require("./assets/500.json")}
                                     style={{width: "300px", height: "300px"}}/>
                         </Row>
-                        <p>太多人了! 稍後再試一試</p>
+                        <p>網頁正在維護中! 稍後再試一試</p>
                     </>);
             }
         }
@@ -233,27 +234,27 @@ const ErrorScreen: React.FC = () => {
                 <Col xs={12} className="text-center">
                     {error_Elm}
                 </Col>
-                {((status === 401) || (status === 403)) &&
+                {((status === 401) || (status === 403)) ?
                     <Col xs={12} className="text-center">
                         <Button variant="primary" className="rounded-5" onClick={loginCallback} disabled={loading}>
                             {loading ? <><Spinner animation="grow" size="sm" className="me-2"/>
                                 <span>Loading...</span></> : "點我 重新登入"}
                         </Button>
                     </Col>
-                }
-                {status === 0 &&
-                    <Col xs={12} className="text-center">
-                        <Button variant="primary" className="rounded-5" onClick={() => window.location.reload()}>
-                            點我 重新載入
-                        </Button>
-                    </Col>
-                }
-                {status === 404 &&
-                    <Col xs={12} className="text-center">
-                        <Button variant="primary" className="rounded-5" onClick={() => window.location.href = "/"}>
-                            點我 回到首頁
-                        </Button>
-                    </Col>
+                    : (status === 404 ?
+                            <Col xs={12} className="text-center">
+                                <Button variant="primary" className="rounded-5"
+                                        onClick={() => window.location.href = "/"}>
+                                    點我 回到首頁
+                                </Button>
+                            </Col>
+                            : <Col xs={12} className="text-center">
+                                <Button variant="primary" className="rounded-5"
+                                        onClick={() => window.location.reload()}>
+                                    點我 重新載入
+                                </Button>
+                            </Col>
+                    )
                 }
             </Row>
         </div>
