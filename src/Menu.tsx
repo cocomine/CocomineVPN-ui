@@ -82,7 +82,7 @@ type userProfile = {
 type weatherAlertType = {
     [key: string]: { name: string, code: string, actionCode: string }
 }
-type weatherData = {
+type weatherDataType = {
     temperature: number,
     icon: number,
     alert: weatherAlertType,
@@ -107,8 +107,9 @@ const processingStatusText = [
 
 const Menu: React.FC<{
     data: { data: VMData[], next_update: string, last_update: string },
-    userProfile: userProfile
-}> = ({data, userProfile}) => {
+    userProfile: userProfile,
+    weatherData: weatherDataType
+}> = ({data, userProfile, weatherData}) => {
     const [vm_data, setVMData] = useState<VMData[]>([]);
     const [nextUpdateInterval, setNextUpdateInterval] = useState("00:00");
     const [lastUpdate, setLastUpdate] = useState("00:00");
@@ -223,7 +224,7 @@ const Menu: React.FC<{
                             </Button>
                         </Col>
                         <Col xs={12}>
-                            <Weather/>
+                            <Weather weatherData={weatherData}/>
                         </Col>
                         <Col xs={12}>
                             <Alert variant={"warning"} show={wsDisconnected}
@@ -314,25 +315,13 @@ const PWAInstall: React.FC = () => {
  * Weather element for menu
  * @constructor
  */
-const Weather: React.FC = () => {
-    const [data, setData] = useState<weatherData | null>(null);
+const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
+    const [data, setData] = useState<weatherDataType>(weatherData);
 
-    //get weather data
+    //update weather data
     useEffect(() => {
-        const abortController = new AbortController();
-
-        fetchWeatherData(abortController).then((data) => {
-            console.debug(data)
-            setData(data)
-        }).catch((err) => {
-            if (err.name !== "AbortError") toastHttpError(err.status)
-            console.error(err)
-        })
-
-        return () => {
-            abortController.abort();
-        }
-    }, []);
+        setData(weatherData)
+    }, [weatherData]);
 
     if (data === null) return null
     return (
@@ -503,7 +492,7 @@ const fetchProfileData = async (abortController: AbortController = new AbortCont
  * Fetch weather data
  * @param abortController AbortController
  */
-const fetchWeatherData = async (abortController: AbortController = new AbortController()): Promise<weatherData> => {
+const fetchWeatherData = async (abortController: AbortController = new AbortController()): Promise<weatherDataType> => {
     let res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc`, {
         method: "GET",
         signal: abortController.signal
@@ -567,5 +556,5 @@ class NetworkError implements Error {
     }
 }
 
-export {Menu, fetchVPNData, fetchProfileData, NetworkError};
-export type {VMData, userProfile, profile, country, provider, readOnlyMode};
+export {Menu, fetchVPNData, fetchProfileData, NetworkError, fetchWeatherData};
+export type {VMData, userProfile, profile, country, provider, readOnlyMode, weatherDataType, weatherAlertType};
