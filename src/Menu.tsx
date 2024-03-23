@@ -3,7 +3,7 @@ import {Alert, Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
-import {Link, Outlet} from "react-router-dom";
+import {Link, Outlet, useRevalidator} from "react-router-dom";
 import {API_URL, ContextType, IstatusUpdateCallback, toastHttpError, TOKEN} from "./App";
 import us_flag from "./assets/us.svg";
 import download_svg from "./assets/download.svg";
@@ -115,6 +115,7 @@ const Menu: React.FC<{
     const [lastUpdate, setLastUpdate] = useState("00:00");
     const [nextUpdate, setNextUpdate] = useState(moment());
     const [wsDisconnected, setWsDisconnected] = useState(true);
+    let revalidator = useRevalidator();
 
     // fetch data when data is changed
     useEffect(() => {
@@ -161,6 +162,7 @@ const Menu: React.FC<{
     useEffect(() => {
         if (!websocket) return;
         setWsDisconnected(false);
+        revalidator.revalidate();
 
         // event listener for websocket
         // update VM data when received message from websocket
