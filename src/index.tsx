@@ -10,7 +10,7 @@ import {Download} from "./download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import {connectWebsocket} from "./websocks";
 
-const APP_VERSION = "1.10.2-beta";
+const APP_VERSION = "1.10.3-beta";
 
 // create router
 const router = createBrowserRouter([

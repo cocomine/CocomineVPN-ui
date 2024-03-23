@@ -65,7 +65,7 @@ type VMData = {
     readonly _provider: provider
     _isPowerOn: boolean
     readonly _readonly: readOnlyMode,
-    _expired?: string | null
+    _expired: string | null
 }
 /**
  * Type definition for the user profile.

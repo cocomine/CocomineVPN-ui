@@ -18,14 +18,18 @@ import tools from "./assets/tools.svg";
 import Profile from "./Profile";
 import moment from "moment/moment";
 
+interface IPowerControl {
+    isPower: boolean,
+    action: (power: boolean) => void,
+    readonly: readOnlyMode;
+}
+
 const Action: React.FC = () => {
     const {VMData} = useLoaderData() as { VMData: VMData };
     const location = useLocation();
     const navigate = useNavigate();
     const [show, setShow] = useState(true);
     const {statusUpdateCallback} = useOutletContext<ContextType>()
-    const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string>("Loading...")
-    const [enableExtend, setEnableExtend] = useState<boolean>(false)
 
     // power action
     const powerAction = useCallback(async (power: boolean) => {
@@ -98,22 +102,6 @@ const Action: React.FC = () => {
         return () => clearTimeout(id);
     }, [show, blocker]);
 
-    // update expect_offline_time_Interval every second
-    useEffect(() => {
-        if (VMData._expired !== null) {
-            const id = setInterval(() => {
-                const expect_offline_time = moment(VMData._expired)
-                const diff = expect_offline_time.diff(Date.now())
-                const tmp = moment.utc(diff).format('HH:mm:ss')
-
-                if (diff < 60 * 60 * 1000) setEnableExtend(true)
-                setExpect_offline_time_Interval(diff > 0 ? tmp : "00:00:00");
-            }, 1000)
-
-            return () => clearInterval(id)
-        }
-    }, [VMData._expired]);
-
     // set title
     useEffect(() => {
         if (location.pathname === '/' + VMData._id) {
@@ -142,20 +130,8 @@ const Action: React.FC = () => {
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
                             </Col>
-                            {VMData._expired !== null &&
-                                <>
-                                    <Col xs={12} className="text-center">
-                                        <div className="border-top w-100"></div>
-                                    </Col>
-                                    <Col xs={12} className="text-center">
-                                        <h3>{expect_offline_time_Interval}</h3>
-                                        <p>距離預計離線</p>
-                                        <Button variant={enableExtend ? "primary" : "outline-primary"}
-                                                className="w-100 rounded-5" onClick={extendTime}
-                                                disabled={!enableExtend}>{enableExtend ? "延長開放時間" : "離線前一小時可以延長開放時間"}</Button>
-                                    </Col>
-                                </>
-                            }{/*VMData.expect_offline_time !== null &&
+                            <ExtendTime expired={VMData._expired} onClick={extendTime}/>
+                            {/*VMData.expect_offline_time !== null &&
                                 <>
                                     <Col xs={12} className="text-center m-0">
                                         <div className="border-top w-100"></div>
@@ -163,8 +139,7 @@ const Action: React.FC = () => {
                                     <Col xs={12} className="text-center">
                                         <Button variant="primary" className="w-100 rounded-5">一鍵連線</Button>
                                     </Col>
-                                </>*/
-                        }
+                                </>*/}
                         </Row>
                     </Modal.Body>
                 </Modal>
@@ -174,10 +149,41 @@ const Action: React.FC = () => {
     );
 }
 
-interface IPowerControl {
-    isPower: boolean,
-    action: (power: boolean) => void,
-    readonly: readOnlyMode;
+const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({expired, onClick}) => {
+    const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string>("Loading...")
+    const [enableExtend, setEnableExtend] = useState<boolean>(false)
+
+    // update expect_offline_time_Interval every second
+    useEffect(() => {
+        if (expired !== null) {
+            const id = setInterval(() => {
+                const expect_offline_time = moment(expired)
+                const diff = expect_offline_time.diff(Date.now())
+                const tmp = moment.utc(diff).format('HH:mm:ss')
+
+                if (diff < 60 * 60 * 1000) setEnableExtend(true)
+                setExpect_offline_time_Interval(diff > 0 ? tmp : "00:00:00");
+            }, 1000)
+
+            return () => clearInterval(id)
+        }
+    }, [expired]);
+
+    if (expired === null) return null;
+    return (
+        <>
+            <Col xs={12} className="text-center">
+                <div className="border-top w-100"></div>
+            </Col>
+            <Col xs={12} className="text-center">
+                <h3>{expect_offline_time_Interval}</h3>
+                <p>距離預計離線</p>
+                <Button variant={enableExtend ? "primary" : "outline-primary"}
+                        className="w-100 rounded-5" onClick={onClick}
+                        disabled={!enableExtend}>{enableExtend ? "延長開放時間" : "離線前一小時可以延長開放時間"}</Button>
+            </Col>
+        </>
+    )
 }
 
 const PowerControl: React.FC<IPowerControl> = ({isPower, action, readonly}) => {
