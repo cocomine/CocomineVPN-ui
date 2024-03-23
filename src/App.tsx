@@ -4,7 +4,14 @@ import {Button, Col, Container, Row, Spinner} from "react-bootstrap";
 import {fetchProfileData, fetchVPNData, Menu, NetworkError, userProfile} from "./Menu";
 import loading from "./assets/loading.svg";
 import {toast, ToastContainer} from "react-toastify";
-import {isRouteErrorResponse, useLoaderData, useLocation, useNavigation, useRouteError} from "react-router-dom";
+import {
+    isRouteErrorResponse,
+    useLoaderData,
+    useLocation,
+    useNavigate,
+    useNavigation,
+    useRouteError
+} from "react-router-dom";
 import Lottie from "lottie-react";
 import Cookies from "js-cookie";
 
@@ -45,6 +52,7 @@ type ContextType = {
 
 function App() {
     const navigation = useNavigation();
+    const navigate = useNavigate();
     const location = useLocation();
     const {VMData, userProfile} = useLoaderData() as { VMData: any, userProfile: userProfile };
 
@@ -52,6 +60,17 @@ function App() {
     useEffect(() => {
         if (location.pathname === "/") document.title = "Home - VPN Manager"
     }, [location]);
+
+    // tab visibilitychange
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === "visible") {
+                navigate(0);
+            }
+        }
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    }, []);
 
     return (
         <>

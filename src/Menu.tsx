@@ -113,7 +113,7 @@ const Menu: React.FC<{
     const [nextUpdateInterval, setNextUpdateInterval] = useState("00:00");
     const [lastUpdate, setLastUpdate] = useState("00:00");
     const [nextUpdate, setNextUpdate] = useState(moment());
-    const [wsDisconnected, setWsDisconnected] = useState(false);
+    const [wsDisconnected, setWsDisconnected] = useState(true);
 
     // fetch data when data is changed
     useEffect(() => {
@@ -159,6 +159,7 @@ const Menu: React.FC<{
     // websocket event listener for updating VM data
     useEffect(() => {
         if (!websocket) return;
+        setWsDisconnected(false);
 
         // event listener for websocket
         // update VM data when received message from websocket
@@ -179,9 +180,6 @@ const Menu: React.FC<{
             setWsDisconnected(true);
         });
 
-        return () => {
-            setWsDisconnected(false);
-        }
         // eslint-disable-next-line
     }, [websocket]);
 

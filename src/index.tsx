@@ -10,7 +10,7 @@ import {Download} from "./download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import {connectWebsocket} from "./websocks";
 
-const APP_VERSION = "1.10.0-beta";
+const APP_VERSION = "1.10.1-beta";
 
 // create router
 const router = createBrowserRouter([
@@ -80,7 +80,6 @@ root.render(
 let deferredPrompt: any;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
-    console.log(e)
     deferredPrompt = e
 });
 
