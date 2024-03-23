@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Button, Col, Modal, Ratio, Row} from "react-bootstrap";
+import {Button, Col, Modal, Ratio, Row, Spinner} from "react-bootstrap";
 import {
     Link,
     Navigate,
@@ -152,6 +152,11 @@ const Action: React.FC = () => {
 const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({expired, onClick}) => {
     const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string>("Loading...")
     const [enableExtend, setEnableExtend] = useState<boolean>(false)
+    const [loading, setLoading] = useState(false)
+    const click = useCallback(() => {
+        setLoading(true);
+        onClick()
+    }, [onClick]);
 
     // update expect_offline_time_Interval every second
     useEffect(() => {
@@ -179,8 +184,11 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({
                 <h3>{expect_offline_time_Interval}</h3>
                 <p>距離預計離線</p>
                 <Button variant={enableExtend ? "primary" : "outline-primary"}
-                        className="w-100 rounded-5" onClick={onClick}
-                        disabled={!enableExtend}>{enableExtend ? "延長開放時間" : "離線前一小時可以延長開放時間"}</Button>
+                        className="w-100 rounded-5" onClick={click}
+                        disabled={!enableExtend || loading}>
+                    {loading && <Spinner animation="grow" size="sm" className="me-2"/>}
+                    {enableExtend ? "延長開放時間" : "離線前一小時可以延長開放時間"}
+                </Button>
             </Col>
         </>
     )
