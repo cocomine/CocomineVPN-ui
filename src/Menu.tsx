@@ -84,16 +84,21 @@ type userProfile = {
     ip: string;
 }
 type weatherAlertType = {
-    [key: string]: { name: string, code: string, actionCode: string }
+    name: string, code: string, actionCode: string, type: string
 }
 type weatherDataType = {
     temperature: number,
     icon: number,
-    alert: weatherAlertType,
-    generalSituation: string,
+    alert: weatherAlertType[],
     humidity: number,
-    forecastDesc: string,
-    outlook: string
+    uv_index: number
+    weatherReport: {
+        forecastDesc: string,
+        outlook: string,
+        generalSituation: string,
+        tcInfo: string | "",
+        fireDangerWarning: string | "",
+    }
 }
 
 // VM processing status
@@ -323,35 +328,59 @@ const PWAInstall: React.FC = () => {
 const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
     const [data, setData] = useState<weatherDataType>(weatherData);
 
+    const alert = useMemo(() => {
+        console.log(data.alert)
+        return data.alert.map((item) => {
+            return require("./assets/weather alert/" + item.code + ".webp")
+        })
+    }, [data.alert]);
+
     //update weather data
     useEffect(() => {
         setData(weatherData)
     }, [weatherData]);
 
-    if (data === null) return null
     return (
-        <Row className="g-1 align-content-center align-items-center">
+        <Row className="g-1 align-content-center align-items-center gx-2">
             <Col xs={"auto"}>
                 <span>{moment().format("LL")}</span>
             </Col>
             <Col xs={"auto"}>
                 <img src={`https://www.hko.gov.hk/images/HKOWxIconOutline/pic${data.icon}.png`} alt="weather"
-                     style={{width: '42px'}} className="ps-2"/>
+                     style={{width: '42px'}}/>
                 <span>{data.temperature}°C</span>
             </Col>
             <Col xs={"auto"}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
-                     className="bi bi-droplet-fill ps-2" viewBox="0 0 16 16">
+                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor"
+                     className="bi bi-droplet-fill" viewBox="0 0 16 16">
                     <path
                         d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6M6.646 4.646l.708.708c-.29.29-1.128 1.311-1.907 2.87l-.894-.448c.82-1.641 1.717-2.753 2.093-3.13"/>
                 </svg>
                 <span>{data.humidity}%</span>
             </Col>
+            <Col xs={"auto"}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"
+                     strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M3 12h1m16 0h1m-15.4 -6.4l.7 .7m12.1 -.7l-.7 .7m-9.7 5.7a4 4 0 1 1 8 0"/>
+                    <path d="M12 4v-1"/>
+                    <path d="M13 16l2 5h1l2 -5"/>
+                    <path d="M6 16v3a2 2 0 1 0 4 0v-3"/>
+                </svg>
+                <span>{data.uv_index}</span>
+            </Col>
+            <Col xs={"auto"}>
+                {alert.map((item) => <img src={item} alt={"weather alert"} style={{width: "40px"}}/>)}
+            </Col>
             <Col style={{minWidth: "20rem"}}>
                 <div className="marquee"><p>
-                    <span style={{paddingLeft: "1rem"}}>{data.generalSituation}</span>
-                    <span style={{paddingLeft: "3rem"}}>今日天氣預測: {data.forecastDesc}</span>
-                    <span style={{paddingLeft: "3rem"}}>展望: {data.outlook}</span>
+                    {data.weatherReport.tcInfo !== "" ?
+                        <span style={{paddingLeft: "3rem"}}>熱帶氣旋資訊: {data.weatherReport.tcInfo}</span> : null}
+                    {data.weatherReport.fireDangerWarning !== "" ?
+                        <span style={{paddingLeft: "3rem"}}>火災危險警告信息: {data.weatherReport.tcInfo}</span> : null}
+                    <span style={{paddingLeft: "1rem"}}>{data.weatherReport.generalSituation}</span>
+                    <span style={{paddingLeft: "3rem"}}>今日天氣預測: {data.weatherReport.forecastDesc}</span>
+                    <span style={{paddingLeft: "3rem"}}>展望: {data.weatherReport.outlook}</span>
                 </p></div>
             </Col>
         </Row>
@@ -508,7 +537,7 @@ const fetchWeatherData = async (abortController: AbortController = new AbortCont
     const temperature: number = data.temperature.data[1].value;
     const icon: number = data.icon[0];
     const humidity: number = data.humidity.data[0].value;
-
+    const uv_index: number = data.uvindex !== "" ? data.uvindex.data[0].value : 0;
 
     res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc`, {
         method: "GET",
@@ -516,19 +545,16 @@ const fetchWeatherData = async (abortController: AbortController = new AbortCont
     })
     if (!res.ok) throw res;
     data = Object.values(await res.json());
-    const alert: weatherAlertType = data.filter((item: any) => item.actionCode !== "CANCEL")
+    const alert: weatherAlertType[] = data.filter((item: any) => item.actionCode !== "CANCEL")
 
     res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc`, {
         method: "GET",
         signal: abortController.signal
     })
     if (!res.ok) throw res;
-    data = await res.json();
-    const generalSituation: string = data.generalSituation
-    const forecastDesc: string = data.forecastDesc
-    const outlook: string = data.outlook
+    const weatherReport = await res.json();
 
-    return {temperature, icon, alert, generalSituation, humidity, forecastDesc, outlook}
+    return {temperature, icon, alert, humidity, weatherReport, uv_index}
 
 }
 
