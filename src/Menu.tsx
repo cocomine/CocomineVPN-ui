@@ -6,6 +6,10 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import {Link, Outlet, useRevalidator} from "react-router-dom";
 import {API_URL, ContextType, IstatusUpdateCallback, toastHttpError, TOKEN} from "./App";
 import us_flag from "./assets/us.svg";
+import uk_flag from "./assets/uk.svg";
+import hk_flag from "./assets/hk.svg";
+import jp_flag from "./assets/jp.svg";
+import tw_flag from "./assets/tw.svg";
 import download_svg from "./assets/download.svg";
 import {APP_VERSION, deferredPrompt} from "./index";
 import {websocket, websocketData} from "./websocks";
@@ -400,14 +404,15 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
     const flag = useMemo(() => {
         switch (data._country) {
             case "TW":
-                return <img src={require("./assets/tw.webp")} alt="TW Flag" className="flag fit-left"
-                            draggable={false}/>;
+                return <img src={tw_flag} alt="TW Flag" className="flag fit-left" draggable={false}/>;
             case "JP":
-                return <img src={require("./assets/jp.webp")} alt="JP Flag" className="flag" draggable={false}/>;
+                return <img src={jp_flag} alt="JP Flag" className="flag" draggable={false}/>;
             case "US":
                 return <img src={us_flag} alt="JP Flag" className="flag fit-left" draggable={false}/>;
             case "HK":
-                return <img src={require('./assets/hk.webp')} alt="HK Flag" className="flag" draggable={false}/>;
+                return <img src={hk_flag} alt="HK Flag" className="flag" draggable={false}/>;
+            case "UK":
+                return <img src={uk_flag} alt="UK Flag" className="flag" draggable={false}/>;
             default:
                 return null;
         }
