@@ -131,8 +131,8 @@ const Action: React.FC = () => {
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
                             </Col>
-                            <ExtendTime expired={VMData._expired} onClick={extendTime}/>
                             {VMData._isPowerOn && <ExtensionConnect profileData={VMData._profiles}/>}
+                            <ExtendTime expired={VMData._expired} onClick={extendTime}/>
                         </Row>
                     </Modal.Body>
                 </Modal>
@@ -145,15 +145,17 @@ const Action: React.FC = () => {
 
 const ExtensionConnect: React.FC<{ profileData: profile[] }> = ({profileData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
+    const [loading, setLoading] = useState(false)
 
     const onClick = useCallback(() => {
+        setLoading(true)
         const profile = profileData.find(p => p.type === "socks5")
         window.postMessage({type: 'Connect', ask: true, profile});
     }, [profileData]);
 
     // check if extension is installed
     useEffect(() => {
-        function callback(e: MessageEvent<{ type: string, installed: boolean, ask: boolean }>) {
+        function callback(e: MessageEvent<{ type: string, installed: boolean, ask: boolean, connected: boolean }>) {
             if (e.source !== window) {
                 return;
             }
@@ -161,6 +163,11 @@ const ExtensionConnect: React.FC<{ profileData: profile[] }> = ({profileData}) =
 
             if ((e.data.type === 'ExtensionInstalled') && !e.data.ask && e.data.installed) {
                 setInstalled(profileData.some(p => p.type === "socks5"))
+            }
+
+            if ((e.data.type === 'Connect') && !e.data.ask && e.data.connected) {
+                setLoading(false)
+                toast.success("已連線")
             }
         }
 
@@ -173,11 +180,25 @@ const ExtensionConnect: React.FC<{ profileData: profile[] }> = ({profileData}) =
     if (!installed) return null
     return (
         <>
-            <Col xs={12} className="text-center m-0">
+            <Col xs={12} className="text-center">
                 <div className="border-top w-100"></div>
             </Col>
             <Col xs={12} className="text-center">
-                <Button variant="primary" className="w-100 rounded-5" onClick={onClick}>一鍵連線</Button>
+                <h5>Cocomine VPN 擴充功能</h5>
+                <p className="text-muted small">你已經安裝了擴充功能, 可以使用一鍵連線功能</p>
+                <Button variant="primary" className="w-100 rounded-5 rainbow-btn border-0" onClick={onClick}
+                        disabled={loading}>
+                    <div className="rounded-5">
+                        <Row className="justify-content-center align-items-center h-100">
+                            <Col xs="auto">
+                                {loading ? <Spinner animation="grow" size="sm" className="me-2"/> :
+                                    <i className="bi bi-link-45deg me-2"></i>}
+                                一鍵連線
+                            </Col>
+                        </Row>
+
+                    </div>
+                </Button>
             </Col>
         </>
     )
@@ -216,7 +237,7 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({
             </Col>
             <Col xs={12} className="text-center">
                 <h3>{expect_offline_time_Interval}</h3>
-                <p>距離預計離線</p>
+                <p className="small text-muted">距離預計離線</p>
                 <Button variant={enableExtend ? "primary" : "outline-primary"}
                         className="w-100 rounded-5" onClick={click}
                         disabled={!enableExtend || loading}>

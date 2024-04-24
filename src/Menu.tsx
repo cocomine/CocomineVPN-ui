@@ -329,7 +329,7 @@ const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
     const [data, setData] = useState<weatherDataType>(weatherData);
 
     const alert = useMemo(() => {
-        console.log(data.alert)
+        console.debug(data.alert)
         return data.alert.map((item) => {
             return require("./assets/weather alert/" + item.code + ".webp")
         })
@@ -370,7 +370,8 @@ const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
                 <span>{data.uv_index}</span>
             </Col>
             <Col xs={"auto"}>
-                {alert.map((item) => <img src={item} alt={"weather alert"} style={{width: "40px"}}/>)}
+                {alert.map((item, index) => <img src={item} key={index} alt={"weather alert"}
+                                                 style={{width: "40px"}}/>)}
             </Col>
             <Col style={{minWidth: "20rem"}}>
                 <div className="marquee"><p>
