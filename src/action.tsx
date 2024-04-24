@@ -131,7 +131,8 @@ const Action: React.FC = () => {
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
                             </Col>
-                            {VMData._isPowerOn && <ExtensionConnect profileData={VMData._profiles}/>}
+                            {VMData._isPowerOn &&
+                                <ExtensionConnect profileData={VMData._profiles} expired={VMData._expired}/>}
                             <ExtendTime expired={VMData._expired} onClick={extendTime}/>
                         </Row>
                     </Modal.Body>
@@ -143,15 +144,16 @@ const Action: React.FC = () => {
 }
 
 
-const ExtensionConnect: React.FC<{ profileData: profile[] }> = ({profileData}) => {
+const ExtensionConnect: React.FC<{ profileData: profile[], expired: string | null }> = ({profileData, expired}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
 
+    // connect to extension
     const onClick = useCallback(() => {
         setLoading(true)
         const profile = profileData.find(p => p.type === "socks5")
-        window.postMessage({type: 'Connect', ask: true, profile});
-    }, [profileData]);
+        window.postMessage({type: 'Connect', ask: true, profile, expired});
+    }, [profileData, expired]);
 
     // check if extension is installed
     useEffect(() => {
