@@ -10,7 +10,7 @@ import {
     useNavigate,
     useOutletContext
 } from "react-router-dom";
-import {readOnlyMode, VMData} from "./Menu";
+import {profile, readOnlyMode, VMData} from "./Menu";
 import {API_URL, ContextType, toastHttpError, TOKEN} from "./App";
 import {toast} from "react-toastify";
 import power from "./assets/power.svg";
@@ -132,15 +132,7 @@ const Action: React.FC = () => {
                                 </Link>
                             </Col>
                             <ExtendTime expired={VMData._expired} onClick={extendTime}/>
-                            {/*VMData.expect_offline_time !== null &&
-                                <>
-                                    <Col xs={12} className="text-center m-0">
-                                        <div className="border-top w-100"></div>
-                                    </Col>
-                                    <Col xs={12} className="text-center">
-                                        <Button variant="primary" className="w-100 rounded-5">一鍵連線</Button>
-                                    </Col>
-                                </>*/}
+                            {VMData._isPowerOn && <ExtensionConnect profileData={VMData._profiles}/>}
                         </Row>
                     </Modal.Body>
                 </Modal>
@@ -148,6 +140,47 @@ const Action: React.FC = () => {
             <Outlet context={{VMData}}/>
         </>
     );
+}
+
+
+const ExtensionConnect: React.FC<{ profileData: profile[] }> = ({profileData}) => {
+    const [installed, setInstalled] = useState<boolean>(false)
+
+    const onClick = useCallback(() => {
+        const profile = profileData.find(p => p.type === "socks5")
+        window.postMessage({type: 'Connect', ask: true, profile});
+    }, [profileData]);
+
+    // check if extension is installed
+    useEffect(() => {
+        function callback(e: MessageEvent<{ type: string, installed: boolean, ask: boolean }>) {
+            if (e.source !== window) {
+                return;
+            }
+            console.debug(e.data)
+
+            if ((e.data.type === 'ExtensionInstalled') && !e.data.ask && e.data.installed) {
+                setInstalled(profileData.some(p => p.type === "socks5"))
+            }
+        }
+
+        window.addEventListener('message', callback);
+        window.postMessage({type: 'ExtensionInstalled', ask: true});
+
+        return () => window.removeEventListener('message', callback);
+    }, []);
+
+    if (!installed) return null
+    return (
+        <>
+            <Col xs={12} className="text-center m-0">
+                <div className="border-top w-100"></div>
+            </Col>
+            <Col xs={12} className="text-center">
+                <Button variant="primary" className="w-100 rounded-5" onClick={onClick}>一鍵連線</Button>
+            </Col>
+        </>
+    )
 }
 
 const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({expired, onClick}) => {

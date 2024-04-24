@@ -19,7 +19,7 @@ import {toast} from "react-toastify";
  * Type definition for the country.
  * @typedef {("TW" | "JP" | "US" | "HK" | string)} country
  */
-type country = "TW" | "JP" | "US" | "HK" | string
+type country = "TW" | "JP" | "US" | "HK" | "UK" | string
 /**
  * Type definition for the provider.
  * @typedef {("google" | "azure")} provider
@@ -34,7 +34,7 @@ type provider = "google" | "azure"
  * @property {string} [url] - The url of the profile.
  */
 type profile = {
-    "type": "OpenVPN" | "SoftEther" | "SS",
+    "type": "OpenVPN" | "SoftEther" | "SS" | "socks5",
     "name": string,
     "filename": string
     "url"?: string
