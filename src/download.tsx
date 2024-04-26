@@ -105,6 +105,16 @@ const Download = () => {
                                     <p className="text-center pt-2">ShadowSocks (ios)</p>
                                 </a>
                             </Col>
+                            <Col xl={2} lg={3} md={4} sm={5} xs={6}>
+                                <a href={'https://chromewebstore.google.com/detail/cgmahkkfajhojihmidpkcmcdjmjniihk'}
+                                   target={'_blank'}
+                                   rel="noreferrer noopener" className="chooseProfile_btn position-relative">
+                                    <img src={require("./assets/extension.webp")} alt="Extension"
+                                         className="rounded-4 profileImg"
+                                         draggable={false}/>
+                                    <p className="text-center pt-2">瀏覽器擴充</p>
+                                </a>
+                            </Col>
                         </Row>
                     </Modal.Body>
                 </Modal>

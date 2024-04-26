@@ -3,7 +3,6 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/cocomine/cocomine_vpnapi_ui)
-![Cloudflare Pages Deployment](https://img.shields.io/github/deployments/cocomine/cocomine_vpnapi_ui/cloudflare-pages?label=deploy&logo=cloudflare&style=flat-square)
 
 ## Available Scripts
 
