@@ -12,7 +12,7 @@ import jp_flag from "./assets/jp.svg";
 import tw_flag from "./assets/tw.svg";
 import download_svg from "./assets/download.svg";
 import {APP_VERSION, deferredPrompt} from "./index";
-import {websocket, websocketData} from "./websocks";
+import {useWebsocket, websocketData} from "./websocks";
 import {toast} from "react-toastify";
 
 /**
@@ -119,6 +119,7 @@ const Menu: React.FC<{
     userProfile: userProfile,
     weatherData: weatherDataType
 }> = ({data, userProfile, weatherData}) => {
+    const websocket = useWebsocket();
     const [vm_data, setVMData] = useState<VMData[]>([]);
     const [nextUpdateInterval, setNextUpdateInterval] = useState("00:00");
     const [lastUpdate, setLastUpdate] = useState("00:00");
@@ -169,7 +170,7 @@ const Menu: React.FC<{
 
     // websocket event listener for updating VM data
     useEffect(() => {
-        if (!websocket) return;
+        //if (!websocket) return;
         setWsDisconnected(false);
         revalidator.revalidate();
 
