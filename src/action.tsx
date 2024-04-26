@@ -24,6 +24,8 @@ interface IPowerControl {
     readonly: readOnlyMode;
 }
 
+type postMessageDataType = { type: string, data: { installed?: boolean, connected?: boolean }, ask: boolean }
+
 const Action: React.FC = () => {
     const {vmData} = useLoaderData() as { vmData: VMData };
     const location = useLocation();
@@ -157,17 +159,17 @@ const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
     // check if extension is installed
     useEffect(() => {
         // callback function
-        function callback(e: MessageEvent<{ type: string, installed: boolean, ask: boolean, connected: boolean }>) {
+        function callback(e: MessageEvent<postMessageDataType>) {
             if (e.source !== window) {
                 return;
             }
             console.debug(e.data)
 
-            if ((e.data.type === 'ExtensionInstalled') && !e.data.ask && e.data.installed) {
+            if ((e.data.type === 'ExtensionInstalled') && !e.data.ask && e.data.data.installed) {
                 setInstalled(vmData._profiles.some(p => p.type === "socks5"))
             }
 
-            if ((e.data.type === 'Connect') && !e.data.ask && e.data.connected) {
+            if ((e.data.type === 'Connect') && !e.data.ask && e.data.data.connected) {
                 setLoading(false)
                 toast.success("已連線")
             }
