@@ -277,6 +277,7 @@ const Menu: React.FC<{
                                 rel="noopener noreferrer">cocomine</a>.</span>
                             <br/>
                             <span className="text-muted">{APP_VERSION}</span>
+                            <Link to={"/privacypolicy"} className="ms-2">Privacy Policy</Link>
                         </Col>
                         <Col xs="auto">
                             <Button variant="link" href="https://github.com/cocomine/cocomine_vpnapi_ui" target="_blank"

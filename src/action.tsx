@@ -145,7 +145,6 @@ const Action: React.FC = () => {
     );
 }
 
-
 const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)

@@ -9,6 +9,7 @@ import figlet from "figlet";
 import {Download} from "./download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import {connectWebsocket} from "./websocks";
+import PrivacyPolicy from "./PrivacyPolicy";
 
 const APP_VERSION = "1.11.0-beta";
 
@@ -45,7 +46,12 @@ const router = createBrowserRouter([
                     const redirect = sessionStorage.getItem('redirect');
                     window.location.replace(redirect ? redirect : "/")
                 },
-            }
+            },
+            {
+                path: 'privacypolicy',
+                element: <PrivacyPolicy/>,
+            },
+
         ]
     }
 ])
