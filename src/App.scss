@@ -145,10 +145,10 @@ body {
     position: relative;
     height: 2.5rem;
     background-size: 400% 400%;
-    animation: rainbow 5s infinite linear;
 
     &:hover {
-        transform: scale(1.1);
+        animation: rainbow 5s infinite linear;
+        box-shadow: white 0 0 10px 0;
 
         & > div {
             background-color: $blue-700;

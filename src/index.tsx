@@ -69,6 +69,7 @@ figlet.text('Cocomine VPN Manager', {
     console.log(data);
     console.log(APP_VERSION)
 });
+connectWebsocket();
 
 root.render(
     <React.StrictMode>
@@ -82,8 +83,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e
 });
-
-connectWebsocket();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

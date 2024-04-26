@@ -10,7 +10,7 @@ import {
     useNavigate,
     useOutletContext
 } from "react-router-dom";
-import {profile, readOnlyMode, VMData} from "./Menu";
+import {readOnlyMode, VMData} from "./Menu";
 import {API_URL, ContextType, toastHttpError, TOKEN} from "./App";
 import {toast} from "react-toastify";
 import power from "./assets/power.svg";
@@ -25,7 +25,7 @@ interface IPowerControl {
 }
 
 const Action: React.FC = () => {
-    const {VMData} = useLoaderData() as { VMData: VMData };
+    const {vmData} = useLoaderData() as { vmData: VMData };
     const location = useLocation();
     const navigate = useNavigate();
     const [show, setShow] = useState(true);
@@ -34,7 +34,7 @@ const Action: React.FC = () => {
     // power action
     const powerAction = useCallback(async (power: boolean) => {
         try {
-            const res = await fetch(API_URL + "/vpn/" + VMData._id, {
+            const res = await fetch(API_URL + "/vpn/" + vmData._id, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -47,8 +47,8 @@ const Action: React.FC = () => {
                 })
             })
             if (!res.ok) {
-                if (res.status === 460) return toast.error(`節點只允許 ${VMData._readonly} 操作`)
-                if (res.status === 461) return toast.error(`節點已經處於${VMData._isPowerOn ? '開機' : '關機'}狀態`)
+                if (res.status === 460) return toast.error(`節點只允許 ${vmData._readonly} 操作`)
+                if (res.status === 461) return toast.error(`節點已經處於${vmData._isPowerOn ? '開機' : '關機'}狀態`)
                 return toastHttpError(res.status)
             }
         } catch (e: any) {
@@ -59,13 +59,13 @@ const Action: React.FC = () => {
             navigate('..', {replace: true}) // redirect to home page
         }
 
-        statusUpdateCallback(power, VMData._id)
-    }, [VMData, statusUpdateCallback, navigate]);
+        statusUpdateCallback(power, vmData._id)
+    }, [vmData, statusUpdateCallback, navigate]);
 
     // extend time action
     const extendTime = useCallback(async () => {
         try {
-            const res = await fetch(API_URL + "/vpn/" + VMData._id, {
+            const res = await fetch(API_URL + "/vpn/" + vmData._id, {
                 method: "PATCH",
                 credentials: "include",
                 headers: {
@@ -86,7 +86,7 @@ const Action: React.FC = () => {
         } finally {
             navigate('..', {replace: true}) // redirect to home page
         }
-    }, [VMData, navigate])
+    }, [vmData, navigate])
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -105,25 +105,25 @@ const Action: React.FC = () => {
 
     // set title
     useEffect(() => {
-        if (location.pathname === '/' + VMData._id) {
-            document.title = VMData._name + " - VPN Manager"
+        if (location.pathname === '/' + vmData._id) {
+            document.title = vmData._name + " - VPN Manager"
             setShow(true)
         }
-    }, [location, VMData]);
+    }, [location, vmData]);
 
     return (
         <>
-            {location.pathname === '/' + VMData._id &&
+            {location.pathname === '/' + vmData._id &&
                 <Modal show={show} centered onHide={() => navigate('..', {replace: true})}>
                     <Modal.Header closeButton>
                         <Modal.Title>你想? <small
-                            style={{color: "darkgray", fontSize: "x-small"}}>({VMData._name})</small></Modal.Title>
+                            style={{color: "darkgray", fontSize: "x-small"}}>({vmData._name})</small></Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Row className="gx-5 gy-4">
                             <Col>
-                                <PowerControl isPower={VMData._isPowerOn} action={powerAction}
-                                              readonly={VMData._readonly}/>
+                                <PowerControl isPower={vmData._isPowerOn} action={powerAction}
+                                              readonly={vmData._readonly}/>
                             </Col>
                             <Col className="border-start">
                                 <Link to={`${location.pathname}/profile`} className="chooseProfile_btn">
@@ -131,32 +131,32 @@ const Action: React.FC = () => {
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
                             </Col>
-                            {VMData._isPowerOn &&
-                                <ExtensionConnect profileData={VMData._profiles} expired={VMData._expired}/>}
-                            <ExtendTime expired={VMData._expired} onClick={extendTime}/>
+                            {vmData._isPowerOn &&
+                                <ExtensionConnect vmData={vmData}/>}
+                            <ExtendTime expired={vmData._expired} onClick={extendTime}/>
                         </Row>
                     </Modal.Body>
                 </Modal>
             }
-            <Outlet context={{VMData}}/>
+            <Outlet context={{vmData}}/>
         </>
     );
 }
 
 
-const ExtensionConnect: React.FC<{ profileData: profile[], expired: string | null }> = ({profileData, expired}) => {
+const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
 
     // connect to extension
     const onClick = useCallback(() => {
         setLoading(true)
-        const profile = profileData.find(p => p.type === "socks5")
-        window.postMessage({type: 'Connect', ask: true, profile, expired});
-    }, [profileData, expired]);
+        window.postMessage({type: 'Connect', ask: true, data: vmData});
+    }, [vmData]);
 
     // check if extension is installed
     useEffect(() => {
+        // callback function
         function callback(e: MessageEvent<{ type: string, installed: boolean, ask: boolean, connected: boolean }>) {
             if (e.source !== window) {
                 return;
@@ -164,7 +164,7 @@ const ExtensionConnect: React.FC<{ profileData: profile[], expired: string | nul
             console.debug(e.data)
 
             if ((e.data.type === 'ExtensionInstalled') && !e.data.ask && e.data.installed) {
-                setInstalled(profileData.some(p => p.type === "socks5"))
+                setInstalled(vmData._profiles.some(p => p.type === "socks5"))
             }
 
             if ((e.data.type === 'Connect') && !e.data.ask && e.data.connected) {
@@ -173,11 +173,12 @@ const ExtensionConnect: React.FC<{ profileData: profile[], expired: string | nul
             }
         }
 
+        // add event listener
         window.addEventListener('message', callback);
         window.postMessage({type: 'ExtensionInstalled', ask: true});
 
         return () => window.removeEventListener('message', callback);
-    }, []);
+    }, [vmData]);
 
     if (!installed) return null
     return (
@@ -185,20 +186,27 @@ const ExtensionConnect: React.FC<{ profileData: profile[], expired: string | nul
             <Col xs={12} className="text-center">
                 <div className="border-top w-100"></div>
             </Col>
-            <Col xs={12} className="text-center">
-                <h5>Cocomine VPN 擴充功能</h5>
-                <p className="text-muted small">你已經安裝了擴充功能, 可以使用一鍵連線功能</p>
+            <Col xs={12}>
+                <Row className="justify-content-center align-items-center g-2 pb-2">
+                    <Col xs={"auto"} className="text-center text-sm-end">
+                        <h5>Cocomine VPN 擴充功能</h5>
+                        <span className="text-muted small">你已經安裝了擴充功能, 可以使用一鍵連線功能</span>
+                    </Col>
+                    <Col xs={"auto"}>
+                        <img src={require('./assets/extension.webp')} alt="extension" className="img-fluid"
+                             style={{width: "4rem"}}/>
+                    </Col>
+                </Row>
                 <Button variant="primary" className="w-100 rounded-5 rainbow-btn border-0" onClick={onClick}
                         disabled={loading}>
                     <div className="rounded-5">
-                        <Row className="justify-content-center align-items-center h-100">
+                        <Row className="justify-content-center align-content-center h-100">
                             <Col xs="auto">
                                 {loading ? <Spinner animation="grow" size="sm" className="me-2"/> :
                                     <i className="bi bi-link-45deg me-2"></i>}
                                 一鍵連線
                             </Col>
                         </Row>
-
                     </div>
                 </Button>
             </Col>
@@ -331,13 +339,13 @@ const PowerControl: React.FC<IPowerControl> = ({isPower, action, readonly}) => {
 
 const ChooseProfile: React.FC = () => {
     const [show, setShow] = useState(true);
-    const {VMData} = useOutletContext<{ VMData: VMData }>()
+    const {vmData} = useOutletContext<{ vmData: VMData }>()
     const navigate = useNavigate();
 
     // set title
     useEffect(() => {
-        document.title = VMData._name + " Profile - VPN Manager"
-    }, [VMData]);
+        document.title = vmData._name + " Profile - VPN Manager"
+    }, [vmData]);
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -359,13 +367,13 @@ const ChooseProfile: React.FC = () => {
             <Modal show={show} centered onHide={() => navigate('..', {replace: true})} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>下載設定檔 <small style={{color: "darkgray", fontSize: "x-small"}}>
-                        ({VMData._name})
+                        ({vmData._name})
                     </small></Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Row className={"g-5 justify-content-center"}>
-                        {VMData._profiles.map((profile) => <Profile key={profile.filename} profile={profile}
-                                                                    vm_id={VMData._id}/>)}
+                        {vmData._profiles.map((profile) => <Profile key={profile.filename} profile={profile}
+                                                                    vm_id={vmData._id}/>)}
                     </Row>
                 </Modal.Body>
             </Modal>
@@ -378,7 +386,7 @@ const loader = async ({params}) => {
     try {
         const VMData = await fetchVMData(params.id);
         console.debug(VMData)
-        return {VMData: VMData.data}
+        return {vmData: VMData.data}
     } catch (e: any) {
         toastHttpError(e.status)
         throw e
