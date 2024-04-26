@@ -70,6 +70,7 @@ function useWebsocket() {
 
     useEffect(() => {
         setWebSocket(websocket)
+        // eslint-disable-next-line
     }, [websocket]);
 
     return ws;
