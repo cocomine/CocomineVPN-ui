@@ -138,6 +138,43 @@ body {
     cursor: pointer;
 }
 
+/* Rainbow button */
+.rainbow-btn {
+    transition: all .2s ease-in-out;
+    background-image: linear-gradient(90deg, #00C0FF, #FFCF00, #FC4F4F, #00C0FF);
+    position: relative;
+    height: 2.5rem;
+    background-size: 400% 400%;
+
+    &:hover {
+        animation: rainbow 5s infinite linear;
+        box-shadow: white 0 0 10px 0;
+
+        & > div {
+            background-color: $blue-700;
+        }
+    }
+
+    @keyframes rainbow {
+        0% {
+            background-position: 0 50%;
+        }
+        100% {
+            background-position: 400% 50%;
+        }
+    }
+
+    & > div {
+        background-color: $primary;
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        right: 4px;
+        bottom: 4px;
+        /*color: $primary;*/
+    }
+}
+
 /* powerBtn */
 @mixin powerBtn($color) {
     border-radius: 50%;
@@ -242,20 +279,20 @@ body {
         animation: b .2s ease-in-out forwards;
 
         @keyframes b {
-            from{
+            from {
                 transform: translate(0, 0) scale(1);
             }
-            to{
+            to {
                 transform: translate(0, var(--top)) scale(0.2);
             }
         }
     }
 
     @keyframes a {
-        from{
+        from {
             transform: translate(0, 0);
         }
-        to{
+        to {
             transform: translate(var(--right), 0);
         }
     }

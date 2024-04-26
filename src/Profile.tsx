@@ -16,6 +16,8 @@ const Profile: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}
                 return (<SoftEther profile={profile} vm_id={vm_id}/>)
             case "SS":
                 return (<SS profile={profile}/>)
+            default:
+                return null
         }
     }, [data, profile, vm_id]);
 
@@ -24,6 +26,7 @@ const Profile: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}
         setData(profile)
     }, [profile]);
 
+    if (elm === null) return null
     return (
         <Col xl={2} lg={3} md={4} sm={5} xs={6}>
             {elm}

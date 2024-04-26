@@ -12,14 +12,14 @@ import jp_flag from "./assets/jp.svg";
 import tw_flag from "./assets/tw.svg";
 import download_svg from "./assets/download.svg";
 import {APP_VERSION, deferredPrompt} from "./index";
-import {websocket, websocketData} from "./websocks";
+import {useWebsocket, websocketData} from "./websocks";
 import {toast} from "react-toastify";
 
 /**
  * Type definition for the country.
  * @typedef {("TW" | "JP" | "US" | "HK" | string)} country
  */
-type country = "TW" | "JP" | "US" | "HK" | string
+type country = "TW" | "JP" | "US" | "HK" | "UK" | string
 /**
  * Type definition for the provider.
  * @typedef {("google" | "azure")} provider
@@ -34,7 +34,7 @@ type provider = "google" | "azure"
  * @property {string} [url] - The url of the profile.
  */
 type profile = {
-    "type": "OpenVPN" | "SoftEther" | "SS",
+    "type": "OpenVPN" | "SoftEther" | "SS" | "socks5",
     "name": string,
     "filename": string
     "url"?: string
@@ -119,6 +119,7 @@ const Menu: React.FC<{
     userProfile: userProfile,
     weatherData: weatherDataType
 }> = ({data, userProfile, weatherData}) => {
+    const websocket = useWebsocket();
     const [vm_data, setVMData] = useState<VMData[]>([]);
     const [nextUpdateInterval, setNextUpdateInterval] = useState("00:00");
     const [lastUpdate, setLastUpdate] = useState("00:00");
@@ -169,7 +170,7 @@ const Menu: React.FC<{
 
     // websocket event listener for updating VM data
     useEffect(() => {
-        if (!websocket) return;
+        //if (!websocket) return;
         setWsDisconnected(false);
         revalidator.revalidate();
 
@@ -329,7 +330,7 @@ const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
     const [data, setData] = useState<weatherDataType>(weatherData);
 
     const alert = useMemo(() => {
-        console.log(data.alert)
+        console.debug(data.alert)
         return data.alert.map((item) => {
             return require("./assets/weather alert/" + item.code + ".webp")
         })
@@ -370,7 +371,8 @@ const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
                 <span>{data.uv_index}</span>
             </Col>
             <Col xs={"auto"}>
-                {alert.map((item) => <img src={item} alt={"weather alert"} style={{width: "40px"}}/>)}
+                {alert.map((item, index) => <img src={item} key={index} alt={"weather alert"}
+                                                 style={{width: "40px"}}/>)}
             </Col>
             <Col style={{minWidth: "20rem"}}>
                 <div className="marquee"><p>

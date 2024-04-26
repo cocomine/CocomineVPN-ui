@@ -1,18 +1,19 @@
 import {API_URL, TOKEN} from "./App";
+import {useEffect, useState} from "react";
 
 type websocketData = {
     url: string,
     data: any,
 }
 
-const NODE_ENV = process.env.NODE_ENV || 'development';
-let websocket: WebSocket;
-
 interface IWS_ticket {
     data?: {
         ticket: string
     }
 }
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+let websocket: WebSocket;
 
 const connectWebsocket = async () => {
     let data: IWS_ticket;
@@ -64,6 +65,15 @@ const connectWebsocket = async () => {
     });
 }
 
+function useWebsocket() {
+    const [ws, setWebSocket] = useState<WebSocket>(websocket);
 
-export {connectWebsocket, websocket};
+    useEffect(() => {
+        setWebSocket(websocket)
+    }, [websocket]);
+
+    return ws;
+}
+
+export {connectWebsocket, useWebsocket};
 export type {websocketData};

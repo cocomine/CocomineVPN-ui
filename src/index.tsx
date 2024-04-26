@@ -10,7 +10,7 @@ import {Download} from "./download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import {connectWebsocket} from "./websocks";
 
-const APP_VERSION = "1.10.7-beta";
+const APP_VERSION = "1.11.0-beta";
 
 // create router
 const router = createBrowserRouter([
@@ -69,6 +69,7 @@ figlet.text('Cocomine VPN Manager', {
     console.log(data);
     console.log(APP_VERSION)
 });
+connectWebsocket();
 
 root.render(
     <React.StrictMode>
@@ -82,8 +83,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e
 });
-
-connectWebsocket();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
