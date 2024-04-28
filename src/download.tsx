@@ -106,7 +106,7 @@ const Download = () => {
                                 </a>
                             </Col>
                             <Col xl={2} lg={3} md={4} sm={5} xs={6}>
-                                <a href={'https://chromewebstore.google.com/detail/cgmahkkfajhojihmidpkcmcdjmjniihk'}
+                                <a href={'https://chromewebstore.google.com/detail/cocomine-vpn-extension/cgmahkkfajhojihmidpkcmcdjmjniihk'}
                                    target={'_blank'}
                                    rel="noreferrer noopener" className="chooseProfile_btn position-relative">
                                     <img src={require("./assets/extension.webp")} alt="Extension"
