@@ -2,6 +2,8 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+![GitHub package.json version](https://img.shields.io/github/package-json/v/cocomine/cocomine_vpnapi_ui)
+
 ## Available Scripts
 
 In the project directory, you can run:
