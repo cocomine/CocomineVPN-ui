@@ -196,6 +196,10 @@ const Menu: React.FC<{
         // eslint-disable-next-line
     }, [websocket]);
 
+    // audio element for playing sound when status changed
+    const SuccessAudio = useMemo(() => new Audio(require("./assets/Bing.mp3")), []);
+    const FailAudio = useMemo(() => new Audio(require("./assets/Error.mp3")), []);
+
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
     const statusUpdateCallback = useCallback<IstatusUpdateCallback>(async (target, vm_id) => {
         // show toast message
@@ -205,10 +209,12 @@ const Menu: React.FC<{
                     count++;
                     if (vm_data.find((vm) => vm._id === vm_id)?._isPowerOn === target) {
                         clearInterval(id);
+                        SuccessAudio.play();
                         resolve("Success")
                     }
                     if (count > 60) {
                         clearInterval(id);
+                        FailAudio.play();
                         reject("Timeout")
                     }
                 }, 1000);
@@ -220,7 +226,7 @@ const Menu: React.FC<{
         ).catch((err) => {
             console.error(err)
         });
-    }, [vm_data]);
+    }, [vm_data, SuccessAudio, FailAudio]);
 
     return (
         <>
