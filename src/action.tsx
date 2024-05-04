@@ -185,7 +185,7 @@ const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
         window.postMessage({type: 'ExtensionInstalled', ask: true});
 
         return () => window.removeEventListener('message', callback);
-    }, [vmData]);
+    }, [vmData, audio]);
 
     if (!installed) return null
     return (
