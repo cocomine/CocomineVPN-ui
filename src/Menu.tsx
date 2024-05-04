@@ -10,6 +10,7 @@ import uk_flag from "./assets/uk.svg";
 import hk_flag from "./assets/hk.svg";
 import jp_flag from "./assets/jp.svg";
 import tw_flag from "./assets/tw.svg";
+import moisture from "./assets/moisture.svg";
 import download_svg from "./assets/download.svg";
 import {APP_VERSION, deferredPrompt} from "./index";
 import {useWebsocket, websocketData} from "./websocks";
@@ -196,6 +197,19 @@ const Menu: React.FC<{
         // eslint-disable-next-line
     }, [websocket]);
 
+    // post message to content script when vm_data is changed
+    useEffect(() => {
+        window.postMessage({
+            type: 'PostVMData',
+            ask: false,
+            data: vm_data
+        })
+    }, [vm_data]);
+
+    // audio element for playing sound when status changed
+    const SuccessAudio = useMemo(() => new Audio(require("./assets/Bing.mp3")), []);
+    const FailAudio = useMemo(() => new Audio(require("./assets/Error.mp3")), []);
+
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
     const statusUpdateCallback = useCallback<IstatusUpdateCallback>(async (target, vm_id) => {
         // show toast message
@@ -205,10 +219,12 @@ const Menu: React.FC<{
                     count++;
                     if (vm_data.find((vm) => vm._id === vm_id)?._isPowerOn === target) {
                         clearInterval(id);
+                        SuccessAudio.play();
                         resolve("Success")
                     }
                     if (count > 60) {
                         clearInterval(id);
+                        FailAudio.play();
                         reject("Timeout")
                     }
                 }, 1000);
@@ -220,7 +236,7 @@ const Menu: React.FC<{
         ).catch((err) => {
             console.error(err)
         });
-    }, [vm_data]);
+    }, [vm_data, SuccessAudio, FailAudio]);
 
     return (
         <>
@@ -350,15 +366,11 @@ const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
             </Col>
             <Col xs={"auto"}>
                 <img src={`https://www.hko.gov.hk/images/HKOWxIconOutline/pic${data.icon}.png`} alt="weather"
-                     style={{width: '42px'}}/>
+                     style={{width: '40px'}}/>
                 <span>{data.temperature}°C</span>
             </Col>
             <Col xs={"auto"}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor"
-                     className="bi bi-droplet-fill" viewBox="0 0 16 16">
-                    <path
-                        d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6M6.646 4.646l.708.708c-.29.29-1.128 1.311-1.907 2.87l-.894-.448c.82-1.641 1.717-2.753 2.093-3.13"/>
-                </svg>
+                <img src={moisture} alt="weather" style={{width: '20px'}} className="me-1 pb-1"/>
                 <span>{data.humidity}%</span>
             </Col>
             <Col xs={"auto"}>

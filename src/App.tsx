@@ -257,6 +257,9 @@ const ErrorScreen: React.FC = () => {
                     )
                 }
             </Row>
+            <audio autoPlay>
+                <source src={require('./assets/Error.mp3')} type="audio/mpeg"/>
+            </audio>
         </div>
     );
 }
@@ -367,6 +370,9 @@ const LoadingScreen: React.FC<{ display: boolean }> = ({display}) => {
  * @param status http status code
  */
 const toastHttpError = (status: number) => {
+    const audio = new Audio(require('./assets/Error.mp3'));
+    audio.play();
+
     switch (status) {
         case 400:
             toast.error("你給的資料我不明白 你肯定沒有錯?",)

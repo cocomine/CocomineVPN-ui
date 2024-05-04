@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Button, Col, Modal, Ratio, Row, Spinner} from "react-bootstrap";
 import {
     Link,
@@ -24,7 +24,11 @@ interface IPowerControl {
     readonly: readOnlyMode;
 }
 
-type postMessageDataType = { type: string, data: { installed?: boolean, connected?: boolean }, ask: boolean }
+type postMessageDataType = {
+    type: string,
+    data: { installed?: boolean, connected?: boolean, id?: string },
+    ask: boolean
+}
 
 const Action: React.FC = () => {
     const {vmData} = useLoaderData() as { vmData: VMData };
@@ -148,6 +152,7 @@ const Action: React.FC = () => {
 const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
+    const audio = useMemo(() => new Audio(require('./assets/Jig 0.mp3')), []);
 
     // connect to extension
     const onClick = useCallback(() => {
@@ -171,6 +176,7 @@ const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
             if ((e.data.type === 'Connect') && !e.data.ask && e.data.data.connected) {
                 setLoading(false)
                 toast.success("已連線")
+                audio.play()
             }
         }
 
@@ -179,7 +185,7 @@ const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
         window.postMessage({type: 'ExtensionInstalled', ask: true});
 
         return () => window.removeEventListener('message', callback);
-    }, [vmData]);
+    }, [vmData, audio]);
 
     if (!installed) return null
     return (
@@ -420,3 +426,4 @@ const ErrorElement: React.FC = () => {
 }
 
 export {Action, loader, fetchVMData, ErrorElement, ChooseProfile};
+export type {IPowerControl, postMessageDataType};

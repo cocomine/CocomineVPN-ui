@@ -145,9 +145,9 @@ body {
     position: relative;
     height: 2.5rem;
     background-size: 400% 400%;
+    animation: rainbow 5s infinite linear;
 
     &:hover {
-        animation: rainbow 5s infinite linear;
         box-shadow: white 0 0 10px 0;
 
         & > div {
@@ -171,7 +171,6 @@ body {
         left: 4px;
         right: 4px;
         bottom: 4px;
-        /*color: $primary;*/
     }
 }
 

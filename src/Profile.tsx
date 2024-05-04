@@ -3,7 +3,6 @@ import {Button, Col, Form, InputGroup, Modal, Row} from "react-bootstrap";
 import {API_URL} from "./App";
 import {profile} from "./Menu";
 import {QRCodeSVG} from "qrcode.react";
-import {toast} from "react-toastify";
 
 const Profile: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}) => {
     const [data, setData] = useState<profile>(profile);
@@ -129,6 +128,7 @@ const SoftEther: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_i
 const SS: React.FC<{ profile: profile }> = ({profile}) => {
     const [data, setData] = useState<profile>(profile);
     const [show, setShow] = useState(false);
+    const [isCopy, setIsCopy] = useState(false);
 
     // update data when profile changed
     useEffect(() => {
@@ -145,7 +145,11 @@ const SS: React.FC<{ profile: profile }> = ({profile}) => {
 
     const onCopy = useCallback(async () => {
         await navigator.clipboard.writeText(profile.url || '')
-        toast.success('已複製')
+        setIsCopy(true)
+
+        setTimeout(() => {
+            setIsCopy(false)
+        }, 2000)
     }, [profile.url])
 
     return (
@@ -169,10 +173,11 @@ const SS: React.FC<{ profile: profile }> = ({profile}) => {
                     </Row>
 
                     <span>或複製以下連結</span>
-                    <InputGroup>
-                        <Form.Control readOnly={true} value={profile.url || ''}/>
-                        <Button onClick={onCopy} variant="outline-secondary"><i
-                            className="bi bi-clipboard"></i></Button>
+                    <InputGroup hasValidation>
+                        <Form.Control readOnly={true} value={profile.url || ''} isValid={isCopy}/>
+                        <Button onClick={onCopy} variant={isCopy ? "outline-success" : "outline-secondary"}>
+                            <i className="bi bi-clipboard"></i></Button>
+                        <Form.Control.Feedback type="valid">已複製</Form.Control.Feedback>
                     </InputGroup>
                 </Modal.Body>
             </Modal>
