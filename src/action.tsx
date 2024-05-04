@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Button, Col, Modal, Ratio, Row, Spinner} from "react-bootstrap";
 import {
     Link,
@@ -152,6 +152,7 @@ const Action: React.FC = () => {
 const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
+    const audio = useMemo(() => new Audio(require('./assets/Jig 0.mp3')), []);
 
     // connect to extension
     const onClick = useCallback(() => {
@@ -175,6 +176,7 @@ const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
             if ((e.data.type === 'Connect') && !e.data.ask && e.data.data.connected) {
                 setLoading(false)
                 toast.success("已連線")
+                audio.play()
             }
         }
 
