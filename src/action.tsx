@@ -24,7 +24,11 @@ interface IPowerControl {
     readonly: readOnlyMode;
 }
 
-type postMessageDataType = { type: string, data: { installed?: boolean, connected?: boolean }, ask: boolean }
+type postMessageDataType = {
+    type: string,
+    data: { installed?: boolean, connected?: boolean, id?: string },
+    ask: boolean
+}
 
 const Action: React.FC = () => {
     const {vmData} = useLoaderData() as { vmData: VMData };
@@ -420,3 +424,4 @@ const ErrorElement: React.FC = () => {
 }
 
 export {Action, loader, fetchVMData, ErrorElement, ChooseProfile};
+export type {IPowerControl, postMessageDataType};

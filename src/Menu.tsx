@@ -196,6 +196,15 @@ const Menu: React.FC<{
         // eslint-disable-next-line
     }, [websocket]);
 
+    // post message to content script when vm_data is changed
+    useEffect(() => {
+        window.postMessage({
+            type: 'PostVMData',
+            ask: false,
+            data: vm_data
+        })
+    }, [vm_data]);
+
     // audio element for playing sound when status changed
     const SuccessAudio = useMemo(() => new Audio(require("./assets/Bing.mp3")), []);
     const FailAudio = useMemo(() => new Audio(require("./assets/Error.mp3")), []);
