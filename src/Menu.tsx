@@ -171,7 +171,7 @@ const Menu: React.FC<{
 
     // websocket event listener for updating VM data
     useEffect(() => {
-        //if (!websocket) return;
+        if (!websocket) return;
         setWsDisconnected(false);
         revalidator.revalidate();
 
