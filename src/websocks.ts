@@ -16,6 +16,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 let websocket: WebSocket;
 
 const connectWebsocket = async () => {
+    //get ticket
     let data: IWS_ticket;
     try {
         const res = await fetch(API_URL + "/vpn/ws/ticket", {
@@ -38,16 +39,14 @@ const connectWebsocket = async () => {
     }
 
     //connect to websocket server
-    let tmp_ws: WebSocket;
-    if (NODE_ENV === 'development') {
-        tmp_ws = new WebSocket("ws://192.168.0.102:8088/vpn/ws");
-    } else {
-        tmp_ws = new WebSocket("wss://api.cocomine.cc/vpn/ws");
-    }
+    const ws_url = new URL(API_URL);
+    ws_url.pathname = '/api/vpn/v2/ws';
+    ws_url.protocol = NODE_ENV === 'development' ? 'ws:' : 'wss:';
+    ws_url.searchParams.append('ticket', data.data?.ticket ?? '');
+    const tmp_ws = new WebSocket(ws_url);
 
     tmp_ws.addEventListener('open', () => {
         console.log("WebSocket Connected")
-        tmp_ws.send(data.data?.ticket || "") //send ticket
     });
     tmp_ws.addEventListener('error', (event) => {
         console.error(event)
@@ -61,6 +60,7 @@ const connectWebsocket = async () => {
         console.debug(data)
         if (data.data.auth) {
             websocket = tmp_ws;
+            console.log("WebSocket Authentication successful")
         }
     });
 }

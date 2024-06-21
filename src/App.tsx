@@ -25,13 +25,13 @@ import Cookies from "js-cookie";
 
 const TOKEN = Cookies.get('CF_Authorization') ?? ""; // get token from cookie
 const NODE_ENV = process.env.NODE_ENV || 'development';
-let API_URL: string; // API URL
+const API_URL = new URL('https://vpn.cocomine.cc/api'); // API URL
 if (NODE_ENV === 'development') {
     console.log("Development mode")
-    API_URL = "http://192.168.0.102:8088"
+    API_URL.host = "localhost:8787"
+    API_URL.protocol = "http:"
 } else {
     console.log("Production mode")
-    API_URL = "https://vpn.cocomine.cc/api" //for production
 }
 
 /**
