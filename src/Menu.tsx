@@ -248,7 +248,7 @@ const Menu: React.FC<{
                         resolve("Success")
                         window.removeEventListener("message", callback); // remove event listener
                     }
-                    }
+                }
             }
 
             //receive message from window
@@ -269,7 +269,7 @@ const Menu: React.FC<{
         ).catch((err) => {
             console.error(err)
         });
-    }, [vm_data, SuccessAudio, FailAudio]);
+    }, [SuccessAudio, FailAudio]);
 
     return (
         <>
