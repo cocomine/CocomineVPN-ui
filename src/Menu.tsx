@@ -102,6 +102,27 @@ type weatherDataType = {
     }
 }
 
+/**
+ * Interface for the structure of window post messages.
+ * @interface
+ * @property {string} type - The type of the message, used to identify the purpose or action of the message.
+ * @property {boolean} ask - A boolean flag indicating whether the message is a request for information (true) or a notification (false).
+ */
+interface I_windowPostMessage {
+    type: string,
+    ask: boolean,
+}
+
+/**
+ * Interface extending `I_windowPostMessage` for messages that include VM data.
+ * @interface
+ * @extends I_windowPostMessage
+ * @property {VMData[]} data - An array of VMData objects, providing detailed information about virtual machines.
+ */
+interface I_VMData_windowPostMessage extends I_windowPostMessage {
+    data: VMData[]
+}
+
 // VM processing status
 const processingStatusText = [
     "PROVISIONING",
@@ -181,10 +202,11 @@ const Menu: React.FC<{
             const data: websocketData = JSON.parse(event.data)
 
             if (data.url === "/vpn/vm") {
-                setVMData((perv) => {
-                    let index = perv.findIndex((vm: VMData) => vm._id === data.data._id);
-                    perv[index] = data.data;
-                    return perv;
+                setVMData((prev) => {
+                    const newVMData = [...prev]; // clone previous data
+                    let index = newVMData.findIndex((vm: VMData) => vm._id === data.data._id);
+                    newVMData[index] = data.data;
+                    return newVMData;
                 })
             }
         });
@@ -214,20 +236,31 @@ const Menu: React.FC<{
     const statusUpdateCallback = useCallback<IstatusUpdateCallback>(async (target, vm_id) => {
         // show toast message
         await toast.promise(new Promise((resolve, reject) => {
-                let count = 0;
-                const id = setInterval(() => {
-                    count++;
-                    if (vm_data.find((vm) => vm._id === vm_id)?._isPowerOn === target) {
-                        clearInterval(id);
+
+            // create event listener for message from window
+            const callback = (event: MessageEvent<I_VMData_windowPostMessage>) => {
+                if (event.data.type === "PostVMData" && !event.data.ask) {
+                    const newVMData = event.data.data;
+                    let index = newVMData.findIndex((vm: VMData) => vm._id === vm_id);
+
+                    if (newVMData[index]._isPowerOn === target) {
                         SuccessAudio.play();
                         resolve("Success")
+                        window.removeEventListener("message", callback); // remove event listener
                     }
-                    if (count > 60) {
-                        clearInterval(id);
-                        FailAudio.play();
-                        reject("Timeout")
                     }
-                }, 1000);
+            }
+
+            //receive message from window
+            window.addEventListener("message", callback);
+
+            // timeout for 60 seconds
+            setTimeout(() => {
+                FailAudio.play();
+                reject("Timeout")
+                window.removeEventListener("message", callback); // remove event listener
+            }, 60 * 1000);
+
             }), {
                 pending: `正在${target ? '開機' : '關機'}中...`,
                 success: '節點已成功' + (target ? '開機' : '關機') + '!',
