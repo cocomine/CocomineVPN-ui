@@ -10,6 +10,7 @@ import uk_flag from "./assets/uk.svg";
 import hk_flag from "./assets/hk.svg";
 import jp_flag from "./assets/jp.svg";
 import tw_flag from "./assets/tw.svg";
+import in_flag from "./assets/in.svg";
 import moisture from "./assets/moisture.svg";
 import download_svg from "./assets/download.svg";
 import {APP_VERSION, deferredPrompt} from "./index";
@@ -491,6 +492,8 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
                 return <img src={hk_flag} alt="HK Flag" className="flag" draggable={false}/>;
             case "UK":
                 return <img src={uk_flag} alt="UK Flag" className="flag" draggable={false}/>;
+            case "IN":
+                return <img src={in_flag} alt="IN Flag" className="flag" draggable={false}/>;
             default:
                 return null;
         }
