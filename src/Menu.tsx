@@ -561,7 +561,7 @@ const fetchVPNData = async (abortController: AbortController = new AbortControll
  * @param abortController AbortController
  */
 const fetchProfileData = async (abortController: AbortController = new AbortController()) => {
-    const res = await fetch(`${API_URL}/profile`, {
+    const res = await fetch(`${API_URL}/cdn-cgi/access/get-identity`, {
         method: "GET",
         credentials: "include",
         signal: abortController.signal,
