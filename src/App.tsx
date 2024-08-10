@@ -117,7 +117,7 @@ const loader = async () => {
     console.debug(VMData, userProfile, WeatherData) //debug
     return {
         VMData,
-        userProfile: {email: userProfile.data.email, username: userProfile.data.name, ip: userProfile.data.ip},
+        userProfile: {email: userProfile.email, username: userProfile.name, ip: userProfile.ip},
         WeatherData
     }
 }
