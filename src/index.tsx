@@ -10,7 +10,7 @@ import {Download} from "./download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import {connectWebsocket} from "./websocks";
 
-const APP_VERSION = "1.11.8";
+const APP_VERSION = "1.11.9";
 
 // create router
 const router = createBrowserRouter([
@@ -55,7 +55,7 @@ const root = ReactDOM.createRoot(
 );
 
 figlet.defaults({fontPath: "/ascii-fonts"});
-figlet.text('Cocomine VPN Manager', {
+figlet.text('Cocomine VPN', {
     font: 'ANSI Shadow',
     horizontalLayout: 'full',
     verticalLayout: 'full',

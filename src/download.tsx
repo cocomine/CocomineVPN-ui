@@ -24,7 +24,7 @@ const Download = () => {
     // set title
     useEffect(() => {
         if (location.pathname === '/download') {
-            document.title = "下載程式 - VPN Manager"
+            document.title = "下載程式 - Cocomine VPN"
             setShow(true)
         }
     }, [location]);

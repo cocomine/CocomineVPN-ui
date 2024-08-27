@@ -112,7 +112,7 @@ const Action: React.FC = () => {
     // set title
     useEffect(() => {
         if (location.pathname === '/' + vmData._id) {
-            document.title = vmData._name + " - VPN Manager"
+            document.title = vmData._name + " - Cocomine VPN"
             setShow(true)
         }
     }, [location, vmData]);
@@ -351,7 +351,7 @@ const ChooseProfile: React.FC = () => {
 
     // set title
     useEffect(() => {
-        document.title = vmData._name + " Profile - VPN Manager"
+        document.title = vmData._name + " Profile - Cocomine VPN"
     }, [vmData]);
 
     // block navigation when modal is open

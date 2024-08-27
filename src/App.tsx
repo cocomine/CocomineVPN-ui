@@ -70,7 +70,7 @@ function App() {
 
     // set title
     useEffect(() => {
-        if (location.pathname === "/") document.title = "Home - VPN Manager"
+        if (location.pathname === "/") document.title = "Home - Cocomine VPN"
     }, [location]);
 
     // tab visibilitychange
