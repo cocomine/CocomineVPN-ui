@@ -82,7 +82,7 @@ type VMData = {
  */
 type userProfile = {
     email: string;
-    username: string;
+    name: string;
     ip: string;
 }
 type weatherAlertType = {
@@ -136,6 +136,7 @@ const processingStatusText = [
     "creating",
     "deallocating"
 ]
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const Menu: React.FC<{
     data: { data: VMData[], next_update: string, last_update: string },
@@ -278,7 +279,7 @@ const Menu: React.FC<{
                 <Col xs={12} className="pt-5">
                     <Row className="justify-content-between align-items-center">
                         <Col xs="auto">
-                            <h1 className="text-truncate">Welcome {userProfile.username} !</h1>
+                            <h1 className="text-truncate">Welcome {userProfile.name} !</h1>
                         </Col>
                         <Col xs="auto">
                             <Button variant="danger" href="/cdn-cgi/access/logout">
@@ -559,8 +560,11 @@ const fetchVPNData = async (abortController: AbortController = new AbortControll
 /**
  * Fetch profile data
  * @param abortController AbortController
+ * @returns {Promise<userProfile>}
  */
-const fetchProfileData = async (abortController: AbortController = new AbortController()) => {
+const fetchProfileData = async (abortController: AbortController = new AbortController()): Promise<userProfile> => {
+    if (NODE_ENV === 'development') return {name: "development user", email: "", ip: ""};
+
     const res = await fetch(`${API_URL}/cdn-cgi/access/get-identity`, {
         method: "GET",
         credentials: "include",

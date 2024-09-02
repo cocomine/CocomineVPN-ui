@@ -39,8 +39,7 @@ const connectWebsocket = async () => {
     }
 
     //connect to websocket server
-    const ws_url = new URL(API_URL);
-    ws_url.pathname = '/api/vpn/v2/ws';
+    const ws_url = new URL(API_URL + '/vpn/v2/ws');
     ws_url.protocol = NODE_ENV === 'development' ? 'ws:' : 'wss:';
     ws_url.searchParams.append('ticket', data.data?.ticket ?? '');
     const tmp_ws = new WebSocket(ws_url);

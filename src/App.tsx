@@ -25,11 +25,10 @@ import Cookies from "js-cookie";
 
 const TOKEN = Cookies.get('CF_Authorization') ?? ""; // get token from cookie
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const API_URL = new URL('https://vpn.cocomine.cc/api'); // API URL
+let API_URL = 'https://vpn.cocomine.cc/api'; // API URL
 if (NODE_ENV === 'development') {
     console.log("Development mode")
-    API_URL.host = "localhost:8787"
-    API_URL.protocol = "http:"
+    API_URL = 'http://192.168.0.102:8088'; //debug
 } else {
     console.log("Production mode")
 }
@@ -117,7 +116,7 @@ const loader = async () => {
     console.debug(VMData, userProfile, WeatherData) //debug
     return {
         VMData,
-        userProfile: {email: userProfile.email, username: userProfile.name, ip: userProfile.ip},
+        userProfile: {email: userProfile.email, name: userProfile.name, ip: userProfile.ip},
         WeatherData
     }
 }
@@ -362,10 +361,10 @@ const toastHttpError = (status: number) => {
 
     switch (status) {
         case 400:
-            toast.error("你給的資料我不明白 你肯定沒有錯?",)
+            toast.error("你給的資料我不明白 你肯定沒有錯?")
             break;
         case 404:
-            toast.error("這裡不存在任何東西! 你確定去對地方了?", {containerId: 1})
+            toast.error("這裡不存在任何東西! 你確定去對地方了?")
             break;
         case 403:
             toast.error("你不可以看這個東西!")
