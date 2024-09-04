@@ -1,23 +1,19 @@
-import {API_URL, TOKEN} from "./App";
 import {useEffect, useState} from "react";
+import {API_URL, NODE_ENV, TOKEN} from "../constants/GlobalVariable";
+import {WebSocketDataType} from "../constants/Type";
+import {I_WebSocketTicket} from "../constants/Interface";
 
-type websocketData = {
-    url: string,
-    data: any,
-}
-
-interface IWS_ticket {
-    data?: {
-        ticket: string
-    }
-}
-
-const NODE_ENV = process.env.NODE_ENV || 'development';
 let websocket: WebSocket;
 
+/**
+ * Connects to the WebSocket server.
+ *
+ * This function first fetches a ticket from the server and then uses it to establish a WebSocket connection.
+ * It handles reconnection attempts in case of failure and sets up event listeners for WebSocket events.
+ */
 const connectWebsocket = async () => {
     //get ticket
-    let data: IWS_ticket;
+    let data: I_WebSocketTicket;
     try {
         const res = await fetch(API_URL + "/vpn/ws/ticket", {
             method: "GET",
@@ -55,7 +51,7 @@ const connectWebsocket = async () => {
         setTimeout(connectWebsocket, 5000) //reconnect at 5s
     });
     tmp_ws.addEventListener('message', (event) => {
-        const data: websocketData = JSON.parse(event.data);
+        const data: WebSocketDataType = JSON.parse(event.data);
         console.debug(data)
         if (data.data.auth) {
             websocket = tmp_ws;
@@ -64,7 +60,12 @@ const connectWebsocket = async () => {
     });
 }
 
-function useWebsocket() {
+/**
+ * Custom hook to manage WebSocket connection state.
+ *
+ * This hook initializes the WebSocket state and updates it whenever the global `websocket` variable changes.
+ **/
+function useWebSocket() {
     const [ws, setWebSocket] = useState<WebSocket>(websocket);
 
     useEffect(() => {
@@ -75,5 +76,5 @@ function useWebsocket() {
     return ws;
 }
 
-export {connectWebsocket, useWebsocket};
-export type {websocketData};
+export {connectWebsocket};
+export default useWebSocket;

@@ -1,16 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.scss';
-import App, {ErrorScreen, loader, LoadingScreen} from './App';
+import App, {loader} from './app/App';
 import reportWebVitals from './reportWebVitals';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import {Action, ChooseProfile, ErrorElement, loader as actionLoader} from "./action";
+import VMAction, {loader as actionLoader, VMActionErrorElement} from "./app/[id]";
 import figlet from "figlet";
-import {Download} from "./download";
+import Download from "./app/download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
-import {connectWebsocket} from "./websocks";
-
-const APP_VERSION = "1.11.11";
+import {connectWebsocket} from "./hook/useWebSocks";
+import {APP_VERSION} from "./constants/GlobalVariable";
+import {ErrorScreen} from "./components/ErrorScreen";
+import {LoadingScreen} from "./components/LoadingScreen";
+import Profile from "./app/[id]/profile";
 
 // create router
 const router = createBrowserRouter([
@@ -23,20 +25,20 @@ const router = createBrowserRouter([
             {
                 path: ':id',
                 loader: actionLoader,
-                element: <Action />,
-                errorElement: <ErrorElement />,
+                element: <VMAction/>,
+                errorElement: <VMActionErrorElement/>,
                 children: [
                     {
                         path: 'profile',
-                        element: <ChooseProfile />,
-                        errorElement: <ErrorElement />,
+                        element: <Profile/>,
+                        errorElement: <VMActionErrorElement/>,
                     }
                 ]
             },
             {
                 path: 'download',
                 element: <Download/>,
-                errorElement: <ErrorElement/>,
+                errorElement: <VMActionErrorElement/>,
             },
             {
                 path: 'login',
@@ -50,6 +52,7 @@ const router = createBrowserRouter([
     }
 ])
 
+// create root
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
@@ -69,20 +72,15 @@ figlet.text('Cocomine VPN', {
     console.log(data);
     console.log(APP_VERSION)
 });
-connectWebsocket();
 
+connectWebsocket(); // connect websocket
+
+// render app
 root.render(
     <React.StrictMode>
         <RouterProvider router={router} fallbackElement={<LoadingScreen display={true}/>} />
     </React.StrictMode>
 );
-
-// prompt install
-let deferredPrompt: any;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e
-});
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
@@ -93,5 +91,3 @@ serviceWorkerRegistration.register();
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
-
-export {APP_VERSION, deferredPrompt}

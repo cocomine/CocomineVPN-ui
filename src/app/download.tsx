@@ -2,6 +2,17 @@ import React, {useEffect, useState} from "react";
 import {Col, Modal, Row} from "react-bootstrap";
 import {useBlocker, useLocation} from "react-router-dom";
 
+/**
+ * Download component
+ *
+ * This component renders a modal for downloading various VPN clients.
+ * It blocks navigation when the modal is open and redirects to the home page after the modal close animation.
+ * It also sets the document title based on the current location.
+ *
+ * Path: /download
+ *
+ * @returns {JSX.Element} The rendered component
+ */
 const Download = () => {
     const location = useLocation();
     const [show, setShow] = useState(true);
@@ -42,7 +53,7 @@ const Download = () => {
                                 <a href={'https://www.softether-download.com/cn.aspx?product=softether'}
                                    target={'_blank'}
                                    rel="noreferrer noopener" className="chooseProfile_btn position-relative">
-                                    <img src={require("./assets/softether.webp")} alt="SoftEther"
+                                    <img src={require("../assets/softether.webp")} alt="SoftEther"
                                          className="rounded-4 profileImg"
                                          draggable={false}/>
                                     <p className="text-center pt-2">SoftEther</p>
@@ -51,7 +62,7 @@ const Download = () => {
                             <Col xl={2} lg={3} md={4} sm={5} xs={6}>
                                 <a href={'https://openvpn.net/client/'} target={'_blank'}
                                    rel="noreferrer noopener" className="chooseProfile_btn position-relative">
-                                    <img src={require("./assets/openvpn.webp")} alt="OpenVPN"
+                                    <img src={require("../assets/openvpn.webp")} alt="OpenVPN"
                                          className="rounded-4 profileImg"
                                          draggable={false}/>
                                     <p className="text-center pt-2">OpenVPN</p>
@@ -61,7 +72,7 @@ const Download = () => {
                                 <a href={'https://github.com/shadowsocks/shadowsocks-windows/releases'}
                                    target={'_blank'}
                                    rel="noreferrer noopener" className="chooseProfile_btn position-relative">
-                                    <img src={require("./assets/SS windows.webp")} alt="ShadowSocks (Windows)"
+                                    <img src={require("../assets/SS windows.webp")} alt="ShadowSocks (Windows)"
                                          className="rounded-4 profileImg"
                                          draggable={false}/>
                                     <p className="text-center pt-2">ShadowSocks (Windows)</p>
@@ -71,7 +82,7 @@ const Download = () => {
                                 <a href={'https://play.google.com/store/apps/details?id=com.github.shadowsocks'}
                                    target={'_blank'}
                                    rel="noreferrer noopener" className="chooseProfile_btn position-relative">
-                                    <img src={require("./assets/SS Android.webp")} alt="ShadowSocks (Android)"
+                                    <img src={require("../assets/SS Android.webp")} alt="ShadowSocks (Android)"
                                          className="rounded-4 profileImg"
                                          draggable={false}/>
                                     <p className="text-center pt-2">ShadowSocks (Android)</p>
@@ -81,7 +92,7 @@ const Download = () => {
                                 <a href={'https://play.google.com/store/apps/details?id=com.github.shadowsocks.tv'}
                                    target={'_blank'}
                                    rel="noreferrer noopener" className="chooseProfile_btn position-relative">
-                                    <img src={require("./assets/SS Androidtv.webp")} alt="ShadowSocks (Android TV)"
+                                    <img src={require("../assets/SS Androidtv.webp")} alt="ShadowSocks (Android TV)"
                                          className="rounded-4 profileImg"
                                          draggable={false}/>
                                     <p className="text-center pt-2">ShadowSocks (Android TV)</p>
@@ -90,7 +101,7 @@ const Download = () => {
                             <Col xl={2} lg={3} md={4} sm={5} xs={6}>
                                 <a href={'https://github.com/shadowsocks/ShadowsocksX-NG/releases/'} target={'_blank'}
                                    rel="noreferrer noopener" className="chooseProfile_btn position-relative">
-                                    <img src={require("./assets/SS mac.webp")} alt="ShadowSocks (MacOS)"
+                                    <img src={require("../assets/SS mac.webp")} alt="ShadowSocks (MacOS)"
                                          className="rounded-4 profileImg"
                                          draggable={false}/>
                                     <p className="text-center pt-2">ShadowSocks (MacOS)</p>
@@ -99,7 +110,7 @@ const Download = () => {
                             <Col xl={2} lg={3} md={4} sm={5} xs={6}>
                                 <a href={'https://apps.apple.com/us/app/shadowrocket/id932747118'} target={'_blank'}
                                    rel="noreferrer noopener" className="chooseProfile_btn position-relative">
-                                    <img src={require("./assets/SS ios.webp")} alt="ShadowSocks (ios)"
+                                    <img src={require("../assets/SS ios.webp")} alt="ShadowSocks (ios)"
                                          className="rounded-4 profileImg"
                                          draggable={false}/>
                                     <p className="text-center pt-2">ShadowSocks (ios)</p>
@@ -109,7 +120,7 @@ const Download = () => {
                                 <a href={'https://chromewebstore.google.com/detail/cocomine-vpn-extension/cgmahkkfajhojihmidpkcmcdjmjniihk'}
                                    target={'_blank'}
                                    rel="noreferrer noopener" className="chooseProfile_btn position-relative">
-                                    <img src={require("./assets/icon with extension.webp")} alt="Extension"
+                                    <img src={require("../assets/icon with extension.webp")} alt="Extension"
                                          className="rounded-4 profileImg"
                                          draggable={false}/>
                                     <p className="text-center pt-2">瀏覽器擴充</p>
@@ -123,4 +134,4 @@ const Download = () => {
     );
 }
 
-export {Download};
+export default Download;

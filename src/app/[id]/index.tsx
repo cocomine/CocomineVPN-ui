@@ -10,28 +10,31 @@ import {
     useNavigate,
     useOutletContext
 } from "react-router-dom";
-import {readOnlyMode, VMData} from "./Menu";
-import {API_URL, ContextType, toastHttpError, TOKEN} from "./App";
 import {toast} from "react-toastify";
-import power from "./assets/power.svg";
-import tools from "./assets/tools.svg";
-import Profile from "./Profile";
+import power from "../../assets/power.svg";
+import tools from "../../assets/tools.svg";
 import moment from "moment/moment";
+import {API_URL, TOKEN} from "../../constants/GlobalVariable";
+import {ContextType, VMDataType} from "../../constants/Type";
+import {toastHttpError} from "../../components/ToastHttpError";
+import {
+    I_Connect_PostMessageData,
+    I_ExtensionInstalled_PostMessageData,
+    I_PostMessageData,
+    I_PowerControl
+} from "../../constants/Interface";
+import {fetchVMData} from "../../hook/Loader";
 
-interface IPowerControl {
-    isPower: boolean,
-    action: (power: boolean) => void,
-    readonly: readOnlyMode;
-}
-
-type postMessageDataType = {
-    type: string,
-    data: { installed?: boolean, connected?: boolean, id?: string },
-    ask: boolean
-}
-
-const Action: React.FC = () => {
-    const {vmData} = useLoaderData() as { vmData: VMData };
+/**
+ * VMAction component
+ *
+ * This component handles the actions related to a virtual machine (VM), such as power control and extending time.
+ * It uses various hooks to manage state, navigation, and side effects.
+ *
+ * Path: `/:id`
+ */
+const VMAction: React.FC = () => {
+    const {vmData} = useLoaderData() as { vmData: VMDataType };
     const location = useLocation();
     const navigate = useNavigate();
     const [show, setShow] = useState(true);
@@ -132,7 +135,7 @@ const Action: React.FC = () => {
                                               readonly={vmData._readonly}/>
                             </Col>
                             <Col className="border-start">
-                                <Link to={`${location.pathname}/profile`} className="chooseProfile_btn">
+                                <Link to={location.pathname + '/profile'} className="chooseProfile_btn">
                                     <img src={tools} alt="Config file" className="w-100" draggable={false}/>
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
@@ -149,31 +152,52 @@ const Action: React.FC = () => {
     );
 }
 
-const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
+/**
+ * ExtensionConnect component for connecting to a browser extension.
+ *
+ * @param {Object} props - The component props.
+ * @param {VMDataType} props.vmData - The VM data.
+ *
+ */
+const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
-    const audio = useMemo(() => new Audio(require('./assets/Jig 0.mp3')), []);
+    const audio = useMemo(() => new Audio(require('../../assets/Jig 0.mp3')), []);
 
     // connect to extension
     const onClick = useCallback(() => {
         setLoading(true)
         window.postMessage({type: 'Connect', ask: true, data: vmData});
+
+        // timeout for loading state
+        const id = setTimeout(() => {
+            setLoading(false)
+            toast.error("連線失敗")
+        }, 10000);
+
+        return () => clearTimeout(id)
     }, [vmData]);
 
     // check if extension is installed
     useEffect(() => {
         // callback function
-        function callback(e: MessageEvent<postMessageDataType>) {
+        function callback(e: MessageEvent<I_PostMessageData>) {
             if (e.source !== window) {
                 return;
             }
-            console.debug(e.data)
 
-            if ((e.data.type === 'ExtensionInstalled') && !e.data.ask && e.data.data.installed) {
+
+            if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
+                const data: I_ExtensionInstalled_PostMessageData = e.data
+                if (!data.data.installed) return;
+
                 setInstalled(vmData._profiles.some(p => p.type === "socks5"))
             }
 
-            if ((e.data.type === 'Connect') && !e.data.ask && e.data.data.connected) {
+            if ((e.data.type === 'Connect') && !e.data.ask) {
+                const data: I_Connect_PostMessageData = e.data
+                if (!data.data.connected) return;
+
                 setLoading(false)
                 toast.success("已連線")
                 audio.play()
@@ -200,7 +224,8 @@ const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
                         <span className="text-muted small">你已經安裝了擴充功能, 可以使用一鍵連線功能</span>
                     </Col>
                     <Col xs={"auto"}>
-                        <img src={require('./assets/icon with extension.webp')} alt="extension" className="img-fluid"
+                        <img src={require('../../assets/icon with extension.webp')} alt="extension"
+                             className="img-fluid"
                              style={{width: "4rem"}}/>
                     </Col>
                 </Row>
@@ -221,6 +246,15 @@ const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
     )
 }
 
+/**
+ * ExtendTime component
+ *
+ * This component displays the remaining time until the expected offline time and allows the user to extend the time.
+ *
+ * @param {Object} props - The component props
+ * @param {string | null} props.expired - The expiration time as a string or null
+ * @param {Function} props.onClick - The function to call when the extend time button is clicked
+ */
 const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({expired, onClick}) => {
     const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string>("Loading...")
     const [enableExtend, setEnableExtend] = useState<boolean>(false)
@@ -266,7 +300,18 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({
     )
 }
 
-const PowerControl: React.FC<IPowerControl> = ({isPower, action, readonly}) => {
+/**
+ * PowerControl component
+ *
+ * This component renders a button that allows the user to control the power state of a node.
+ * The button supports a long press event to trigger the power action.
+ *
+ * @param {Object} props - The component props
+ * @param {boolean} props.isPower - The current power state of the node
+ * @param {Function} props.action - The function to call to change the power state
+ * @param {string} props.readonly - The readonly state of the node
+ */
+const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly}) => {
     const timeout = useRef<NodeJS.Timeout | null>(null)
     const [loading, setLoading] = useState(false) // loading state
 
@@ -344,52 +389,10 @@ const PowerControl: React.FC<IPowerControl> = ({isPower, action, readonly}) => {
     );
 }
 
-const ChooseProfile: React.FC = () => {
-    const [show, setShow] = useState(true);
-    const {vmData} = useOutletContext<{ vmData: VMData }>()
-    const navigate = useNavigate();
-
-    // set title
-    useEffect(() => {
-        document.title = vmData._name + " Profile - Cocomine VPN"
-    }, [vmData]);
-
-    // block navigation when modal is open
-    let blocker = useBlocker(() => {
-        setShow(false)
-        return true
-    });
-
-    // redirect to home page after modal close animation
-    useEffect(() => {
-        if (show) return
-        const id = setTimeout(() => {
-            if (blocker.state === "blocked") blocker.proceed()
-        }, 150);
-        return () => clearTimeout(id);
-    }, [show, blocker]);
-
-    return (
-        <>
-            <Modal show={show} centered onHide={() => navigate('..', {replace: true})} size="lg">
-                <Modal.Header closeButton>
-                    <Modal.Title>下載設定檔 <small style={{color: "darkgray", fontSize: "x-small"}}>
-                        ({vmData._name})
-                    </small></Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Row className={"g-5 justify-content-center"}>
-                        {vmData._profiles.map((profile) => <Profile key={profile.filename} profile={profile}
-                                                                    vm_id={vmData._id}/>)}
-                    </Row>
-                </Modal.Body>
-            </Modal>
-        </>
-    );
-};
-
-// @ts-ignore
-const loader = async ({params}) => {
+/**
+ * Loader function for Index
+ */
+const loader = async ({params}: any) => {
     try {
         const VMData = await fetchVMData(params.id);
         console.debug(VMData)
@@ -401,29 +404,15 @@ const loader = async ({params}) => {
 }
 
 /**
- * Fetch VM data from API
- * @param vm_id VM id
- * @param abortController AbortController
- * @param patch update data or not
+ * VMActionErrorElement component
+ *
+ * This component handles the error state for the VMAction route.
+ * It redirects the user to the parent route when an error occurs.
+ *
  */
-const fetchVMData = async (vm_id: string, abortController: AbortController = new AbortController(), patch = false) => {
-    const res = await fetch(API_URL + "/vpn/" + vm_id, {
-        method: patch ? "PATCH" : "GET",
-        credentials: "include",
-        signal: abortController.signal,
-        redirect: "error",
-        headers: {
-            "Cf-Access-Jwt-Assertion": TOKEN,
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    });
-    if (!res.ok) throw res;
-    return await res.json();
-}
-
-const ErrorElement: React.FC = () => {
+const VMActionErrorElement: React.FC = () => {
     return (<Navigate to=".." replace={true} relative="path"/>);
 }
 
-export {Action, loader, fetchVMData, ErrorElement, ChooseProfile};
-export type {IPowerControl, postMessageDataType};
+export default VMAction;
+export {loader, VMActionErrorElement};

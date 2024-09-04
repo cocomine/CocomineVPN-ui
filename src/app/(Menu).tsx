@@ -4,156 +4,32 @@ import "./App.scss";
 import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
 import {Link, Outlet, useRevalidator} from "react-router-dom";
-import {API_URL, ContextType, IstatusUpdateCallback, toastHttpError, TOKEN} from "./App";
-import us_flag from "./assets/us.svg";
-import uk_flag from "./assets/uk.svg";
-import hk_flag from "./assets/hk.svg";
-import jp_flag from "./assets/jp.svg";
-import tw_flag from "./assets/tw.svg";
-import in_flag from "./assets/in.svg";
-import moisture from "./assets/moisture.svg";
-import download_svg from "./assets/download.svg";
-import {APP_VERSION, deferredPrompt} from "./index";
-import {useWebsocket, websocketData} from "./websocks";
+import us_flag from "../assets/us.svg";
+import uk_flag from "../assets/uk.svg";
+import hk_flag from "../assets/hk.svg";
+import jp_flag from "../assets/jp.svg";
+import tw_flag from "../assets/tw.svg";
+import in_flag from "../assets/in.svg";
+import moisture from "../assets/moisture.svg";
+import download_svg from "../assets/download.svg";
+import useWebSocket from "../hook/useWebSocks";
 import {toast} from "react-toastify";
-
-/**
- * Type definition for the country.
- * @typedef {("TW" | "JP" | "US" | "HK" | string)} country
- */
-type country = "TW" | "JP" | "US" | "HK" | "UK" | string
-/**
- * Type definition for the provider.
- * @typedef {("google" | "azure")} provider
- */
-type provider = "google" | "azure"
-/**
- * Type definition for the profile.
- * @typedef {Object} profile
- * @property {("OpenVPN" | "SoftEther" | "SS")} type - The type of the profile.
- * @property {string} name - The name of the profile.
- * @property {string} filename - The filename of the profile.
- * @property {string} [url] - The url of the profile.
- */
-type profile = {
-    "type": "OpenVPN" | "SoftEther" | "SS" | "socks5",
-    "name": string,
-    "filename": string
-    "url"?: string
-}
-/**
- * Type definition for the read only mode.
- * @typedef {("startOnly" | "stopOnly" | "readOnly" | "disable")} readOnlyMode
- */
-type readOnlyMode = "startOnly" | "stopOnly" | "readOnly" | "disable"
-/**
- * Type definition for the VM data.
- * @typedef {Object} VMData
- * @property {string} _name - The name of the VM.
- * @property {string} _status - The status of the VM.
- * @property {string} _id - The id of the VM.
- * @property {string} _zone - The zone of the VM.
- * @property {string} _url - The url of the VM.
- * @property {country} _country - The country of the VM.
- * @property {profile[]} _profiles - The profiles of the VM.
- * @property {provider} _provider - The provider of the VM.
- * @property {boolean} _isPowerOn - The power status of the VM.
- * @property {readOnlyMode} _readonly - The read only mode of the VM.
- */
-type VMData = {
-    readonly _name: string;
-    _status: string;
-    readonly _id: string;
-    readonly _zone: string;
-    readonly _url: string
-    readonly _country: country
-    readonly _profiles: profile[]
-    readonly _provider: provider
-    _isPowerOn: boolean
-    readonly _readonly: readOnlyMode,
-    _expired: string | null
-}
-/**
- * Type definition for the user profile.
- * @typedef {Object} userProfile
- * @property {string} email - The email of the user.
- * @property {string} username - The username of the user.
- * @property {string} ip - The ip of the user.
- */
-type userProfile = {
-    email: string;
-    name: string;
-    ip: string;
-}
-type weatherAlertType =
-    "TC1" |
-    "TC10" |
-    "TC3" |
-    "TC8NE" |
-    "TC8NW" |
-    "TC8SE" |
-    "TC8SW" |
-    "TC9" |
-    "WCOLD" |
-    "WFIRER" |
-    "WFIREY" |
-    "WFNTSA" |
-    "WFROST" |
-    "WHOT" |
-    "WL" |
-    "WMSGNL" |
-    "WRAINA" |
-    "WRAINB" |
-    "WRAINR" |
-    "WTMW" |
-    "WTS"
-
-interface weatherAlert {
-    name: string;
-    code: weatherAlertType;
-    actionCode: string;
-    type: string;
-}
-type weatherDataType = {
-    temperature: number,
-    icon: number,
-    alert: weatherAlert[],
-    humidity: number,
-    uv_index: number
-    weatherReport: {
-        forecastDesc: string,
-        outlook: string,
-        generalSituation: string,
-        tcInfo: string | "",
-        fireDangerWarning: string | "",
-    }
-}
-
-/**
- * Interface for the structure of window post messages.
- * @interface
- * @property {string} type - The type of the message, used to identify the purpose or action of the message.
- * @property {boolean} ask - A boolean flag indicating whether the message is a request for information (true) or a notification (false).
- */
-interface I_windowPostMessage {
-    type: string,
-    ask: boolean,
-}
-
-/**
- * Interface extending `I_windowPostMessage` for messages that include VM data.
- * @interface
- * @extends I_windowPostMessage
- * @property {VMData[]} data - An array of VMData objects, providing detailed information about virtual machines.
- */
-interface I_VMData_windowPostMessage extends I_windowPostMessage {
-    data: VMData[]
-}
-
-type alertMemoType = [any, weatherAlertType][]
+import {APP_VERSION} from "../constants/GlobalVariable";
+import {I_StatusUpdateCallback, I_VMData_windowPostMessage} from "../constants/Interface";
+import {
+    AlertMemoType,
+    ContextType,
+    UserProfileType,
+    VMDataType,
+    WeatherAlertType,
+    WeatherDataType,
+    WebSocketDataType
+} from "../constants/Type";
+import {toastHttpError} from "../components/ToastHttpError";
+import {fetchVPNData} from "../hook/Loader";
 
 // VM processing status
-const processingStatusText = [
+const PROCESSING_STATUS_TEXT = [
     "PROVISIONING",
     "STAGING",
     "STOPPING",
@@ -164,16 +40,41 @@ const processingStatusText = [
     "creating",
     "deallocating"
 ]
-const NODE_ENV = process.env.NODE_ENV || 'development';
-const DANGER_WEATHER_ALERT: weatherAlertType[] = ['TC8NE', 'TC8SW', 'TC8NW', 'TC8SE', 'TC9', 'TC10', 'WRAINB', 'WTMW', 'TC3']
+const DANGER_WEATHER_ALERT: WeatherAlertType[] = ['TC8NE', 'TC8SW', 'TC8NW', 'TC8SE', 'TC9', 'TC10', 'WRAINB', 'WTMW']
 
+
+// Variable to store the deferred prompt event for PWA installation
+let deferredPrompt: any;
+
+// Event listener for the 'beforeinstallprompt' event
+// This event is fired when the browser detects that the web app can be installed
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the default mini-infobar from appearing on mobile
+    e.preventDefault();
+    // Store the event for later use
+    deferredPrompt = e;
+});
+
+/**
+ * Menu component
+ *
+ * This component displays the main menu, including VM data, user profile, and weather data.
+ * It handles fetching and updating VM data, managing websocket connections, and displaying status updates.
+ *
+ * Parent component: App@src/app/App.tsx
+ *
+ * @param {Object} props - The component props
+ * @param {Object} props.data - The data object containing VM data, next update time, and last update time
+ * @param {UserProfileType} props.userProfile - The user profile data
+ * @param {WeatherDataType} props.weatherData - The weather data
+ */
 const Menu: React.FC<{
-    data: { data: VMData[], next_update: string, last_update: string },
-    userProfile: userProfile,
-    weatherData: weatherDataType
+    data: { data: VMDataType[], next_update: string, last_update: string },
+    userProfile: UserProfileType,
+    weatherData: WeatherDataType
 }> = ({data, userProfile, weatherData}) => {
-    const websocket = useWebsocket();
-    const [vm_data, setVMData] = useState<VMData[]>([]);
+    const websocket = useWebSocket();
+    const [vm_data, setVMData] = useState<VMDataType[]>([]);
     const [nextUpdateInterval, setNextUpdateInterval] = useState("00:00");
     const [lastUpdate, setLastUpdate] = useState("00:00");
     const [nextUpdate, setNextUpdate] = useState(moment());
@@ -230,12 +131,12 @@ const Menu: React.FC<{
         // event listener for websocket
         // update VM data when received message from websocket
         websocket.addEventListener('message', (event) => {
-            const data: websocketData = JSON.parse(event.data)
+            const data: WebSocketDataType = JSON.parse(event.data)
 
             if (data.url === "/vpn/vm") {
                 setVMData((prev) => {
                     const newVMData = [...prev]; // clone previous data
-                    let index = newVMData.findIndex((vm: VMData) => vm._id === data.data._id);
+                    let index = newVMData.findIndex((vm: VMDataType) => vm._id === data.data._id);
                     newVMData[index] = data.data;
                     return newVMData;
                 })
@@ -260,11 +161,11 @@ const Menu: React.FC<{
     }, [vm_data]);
 
     // audio element for playing sound when status changed
-    const SuccessAudio = useMemo(() => new Audio(require("./assets/Bing.mp3")), []);
-    const FailAudio = useMemo(() => new Audio(require("./assets/Error.mp3")), []);
+    const SuccessAudio = useMemo(() => new Audio(require("../assets/Bing.mp3")), []);
+    const FailAudio = useMemo(() => new Audio(require("../assets/Error.mp3")), []);
 
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
-    const statusUpdateCallback = useCallback<IstatusUpdateCallback>(async (target, vm_id) => {
+    const statusUpdateCallback = useCallback<I_StatusUpdateCallback>(async (target, vm_id) => {
         // show toast message
         await toast.promise(new Promise((resolve, reject) => {
 
@@ -272,7 +173,7 @@ const Menu: React.FC<{
             const callback = (event: MessageEvent<I_VMData_windowPostMessage>) => {
                 if (event.data.type === "PostVMData" && !event.data.ask) {
                     const newVMData = event.data.data;
-                    let index = newVMData.findIndex((vm: VMData) => vm._id === vm_id);
+                    let index = newVMData.findIndex((vm: VMDataType) => vm._id === vm_id);
 
                     if (newVMData[index]._isPowerOn === target) {
                         SuccessAudio.play();
@@ -389,7 +290,7 @@ const PWAInstall: React.FC = () => {
             <div className="pwa-install rounded p-2 px-3 border" onClick={installPWA}>
                 <Row className="align-items-center align-content-center">
                     <Col xs="auto">
-                        <img src={require('./assets/devcie.webp')} alt="將網頁安裝為APP" style={{height: "6rem"}}
+                        <img src={require('../assets/devcie.webp')} alt="將網頁安裝為APP" style={{height: "6rem"}}
                              className="pe-2"/>
                     </Col>
                     <Col style={{minWidth: "20rem"}}>
@@ -406,15 +307,14 @@ const PWAInstall: React.FC = () => {
 
 /**
  * Weather element for menu
- * @constructor
  */
-const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
-    const [data, setData] = useState<weatherDataType>(weatherData);
+const Weather: React.FC<{ weatherData: WeatherDataType }> = ({weatherData}) => {
+    const [data, setData] = useState<WeatherDataType>(weatherData);
 
-    const alert: alertMemoType = useMemo(() => {
+    const alert: AlertMemoType = useMemo(() => {
         console.debug(data.alert)
         return data.alert.map((item) => {
-            return [require("./assets/weather alert/" + item.code + ".webp"), item.code]
+            return [require("../assets/weather alert/" + item.code + ".webp"), item.code]
         })
     }, [data.alert]);
 
@@ -475,16 +375,16 @@ const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
  * @param vm_data VM data
  * @constructor
  */
-const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
-    const [data, setData] = useState<VMData>(vm_data);
+const Flag: React.FC<{ vm_data: VMDataType }> = ({vm_data}) => {
+    const [data, setData] = useState<VMDataType>(vm_data);
 
     // provider image element for menu item (memoized) (only update when data._provider is changed)
     const provider = useMemo(() => {
         switch (data._provider) {
             case "google":
-                return <img src={require("./assets/google.webp")} alt="google" className="providerIcon"/>;
+                return <img src={require("../assets/google.webp")} alt="google" className="providerIcon"/>;
             case "azure":
-                return <img src={require("./assets/azure.webp")} alt="azure" className="providerIcon"/>;
+                return <img src={require("../assets/azure.webp")} alt="azure" className="providerIcon"/>;
             default:
                 return null;
         }
@@ -500,7 +400,7 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
 
     // spinner element for menu item (memoized) (only update when data._status is changed)
     const spinner = useMemo(() => {
-        if (processingStatusText.includes(data._status))
+        if (PROCESSING_STATUS_TEXT.includes(data._status))
             return (
                 <>
                     <div className="spinner"><Spinner animation="border"/></div>
@@ -570,110 +470,13 @@ const Flag: React.FC<{ vm_data: VMData }> = ({vm_data}) => {
 }
 
 /**
- * Fetch VPN data
- * @param abortController AbortController
+ * Check if the web app is running as a PWA.
+ * @returns {boolean} True if the web app is running as a PWA, false otherwise.
  */
-const fetchVPNData = async (abortController: AbortController = new AbortController()) => {
-    const res = await fetch(`${API_URL}/vpn`, {
-        method: "GET",
-        credentials: "include",
-        signal: abortController.signal,
-        redirect: "error",
-        headers: {
-            "Cf-Access-Jwt-Assertion": TOKEN,
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    if (!res.ok) throw res;
-    return await res.json();
-}
-
-/**
- * Fetch profile data
- * @param abortController AbortController
- * @returns {Promise<userProfile>}
- */
-const fetchProfileData = async (abortController: AbortController = new AbortController()): Promise<userProfile> => {
-    if (NODE_ENV === 'development') return {name: "development user", email: "", ip: ""};
-
-    const res = await fetch(`${API_URL}/cdn-cgi/access/get-identity`, {
-        method: "GET",
-        credentials: "include",
-        signal: abortController.signal,
-        redirect: "error",
-        headers: {
-            "Cf-Access-Jwt-Assertion": TOKEN,
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    if (!res.ok) throw res;
-    return await res.json()
-}
-
-/**
- * Fetch weather data
- * @param abortController AbortController
- */
-const fetchWeatherData = async (abortController: AbortController = new AbortController()): Promise<weatherDataType> => {
-    let res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc`, {
-        method: "GET",
-        signal: abortController.signal
-    })
-    if (!res.ok) throw res;
-    let data = await res.json();
-    const temperature: number = data.temperature.data[1].value;
-    const icon: number = data.icon[0];
-    const humidity: number = data.humidity.data[0].value;
-    const uv_index: number = data.uvindex !== "" ? data.uvindex.data[0].value : 0;
-
-    res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc`, {
-        method: "GET",
-        signal: abortController.signal
-    })
-    if (!res.ok) throw res;
-    data = Object.values(await res.json());
-    const alert: weatherAlert[] = data.filter((item: any) => item.actionCode !== "CANCEL")
-
-    res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc`, {
-        method: "GET",
-        signal: abortController.signal
-    })
-    if (!res.ok) throw res;
-    const weatherReport = await res.json();
-
-    return {temperature, icon, alert, humidity, weatherReport, uv_index}
-
-}
-
-function isPwa() {
+function isPwa(): boolean {
     return ["fullscreen", "standalone", "minimal-ui"].some(
         (displayMode) => window.matchMedia('(display-mode: ' + displayMode + ')').matches
     );
 }
 
-/**
- * NetworkError class that implements the Error interface.
- * This class is used to create a custom error type for network related errors.
- */
-class NetworkError implements Error {
-    /**
-     * The error message.
-     */
-    message: string;
-
-    /**
-     * The name of the error. Default is "NetworkError".
-     */
-    name: string = "NetworkError";
-
-    /**
-     * Constructor for the NetworkError class.
-     * @param {string} message - The error message.
-     */
-    constructor(message: string) {
-        this.message = message;
-    }
-}
-
-export {Menu, fetchVPNData, fetchProfileData, NetworkError, fetchWeatherData};
-export type {VMData, userProfile, profile, country, provider, readOnlyMode, weatherDataType, weatherAlertType};
+export {Menu};

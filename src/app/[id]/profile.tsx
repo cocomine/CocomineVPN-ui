@@ -1,11 +1,74 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useBlocker, useNavigate, useOutletContext} from "react-router-dom";
+import {VMDataType, VPNProfileType} from "../../constants/Type";
 import {Button, Col, Form, InputGroup, Modal, Row} from "react-bootstrap";
-import {API_URL} from "./App";
-import {profile} from "./Menu";
+import {API_URL} from "../../constants/GlobalVariable";
 import {QRCodeSVG} from "qrcode.react";
 
-const Profile: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}) => {
-    const [data, setData] = useState<profile>(profile);
+/**
+ * Profile component
+ *
+ * This component displays a modal with VPN profiles for a specific virtual machine (VM).
+ * It sets the document title based on the VM name and blocks navigation when the modal is open.
+ * Path: /:id/profile
+ *
+ */
+const Profile: React.FC = () => {
+    const [show, setShow] = useState(true);
+    const {vmData} = useOutletContext<{ vmData: VMDataType }>()
+    const navigate = useNavigate();
+
+    // set title
+    useEffect(() => {
+        document.title = vmData._name + " SingleVPNProfile - Cocomine VPN"
+    }, [vmData]);
+
+    // block navigation when modal is open
+    let blocker = useBlocker(() => {
+        setShow(false)
+        return true
+    });
+
+    // redirect to home page after modal close animation
+    useEffect(() => {
+        if (show) return
+        const id = setTimeout(() => {
+            if (blocker.state === "blocked") blocker.proceed()
+        }, 150);
+        return () => clearTimeout(id);
+    }, [show, blocker]);
+
+    return (
+        <>
+            <Modal show={show} centered onHide={() => navigate('..', {replace: true})} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>下載設定檔 <small style={{color: "darkgray", fontSize: "x-small"}}>
+                        ({vmData._name})
+                    </small></Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row className={"g-5 justify-content-center"}>
+                        {vmData._profiles.map((profile) =>
+                            <SingleVPNProfile key={profile.filename} profile={profile} vm_id={vmData._id}/>)}
+                    </Row>
+                </Modal.Body>
+            </Modal>
+        </>
+    );
+};
+
+/**
+ * SingleVPNProfile component
+ *
+ * This component renders a single VPN profile based on the profile type.
+ * It updates the profile data when the profile prop changes and selects the appropriate VPN component to render.
+ *
+ * @param {Object} props - The component props
+ * @param {VPNProfileType} props.profile - The VPN profile data
+ * @param {string} props.vm_id - The ID of the virtual machine
+ */
+const SingleVPNProfile: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile, vm_id}) => {
+    const [data, setData] = useState<VPNProfileType>(profile);
 
     const elm = useMemo(() => {
         switch (data.type) {
@@ -33,8 +96,17 @@ const Profile: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}
     )
 }
 
-const OpenVPN: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}) => {
-    const [data, setData] = useState<profile>(profile);
+/**
+ * OpenVPN component
+ *
+ * This component renders the OpenVPN profile image and handles the download animation.
+ *
+ * @param {Object} props - The component props
+ * @param {VPNProfileType} props.profile - The VPN profile data
+ * @param {string} props.vm_id - The ID of the virtual machine
+ */
+const OpenVPN: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile, vm_id}) => {
+    const [data, setData] = useState<VPNProfileType>(profile);
     const a_ref = useRef<any>(null);
     const [show, setShow] = useState<JSX.Element | null>(null);
 
@@ -56,7 +128,7 @@ const OpenVPN: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}
         }
 
         setShow(<div className='download-anime active' style={style}>
-            <img src={require("./assets/openvpn.webp")} alt="OpenVPN" className="rounded-4 profileImg"
+            <img src={require("../../assets/openvpn.webp")} alt="OpenVPN" className="rounded-4 profileImg"
                  draggable={false}/>
         </div>)
 
@@ -70,7 +142,7 @@ const OpenVPN: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}
             <a href={API_URL + '/vpn/' + vm_id + '/profile/?type=' + data.type} download={data.filename}
                rel="noreferrer noopener"
                className="chooseProfile_btn position-relative" onClick={onClick}>
-                <img src={require("./assets/openvpn.webp")} alt="OpenVPN" className="rounded-4 profileImg"
+                <img src={require("../../assets/openvpn.webp")} alt="OpenVPN" className="rounded-4 profileImg"
                      draggable={false} ref={a_ref}/>
                 <p className="text-center pt-2">{data.name}</p>
             </a>
@@ -79,8 +151,17 @@ const OpenVPN: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}
     )
 }
 
-const SoftEther: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_id}) => {
-    const [data, setData] = useState<profile>(profile);
+/**
+ * SoftEther component
+ *
+ * This component renders the SoftEther profile image and handles the download animation.
+ *
+ * @param {Object} props - The component props
+ * @param {VPNProfileType} props.profile - The VPN profile data
+ * @param {string} props.vm_id - The ID of the virtual machine
+ */
+const SoftEther: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile, vm_id}) => {
+    const [data, setData] = useState<VPNProfileType>(profile);
     const a_ref = useRef<any>(null);
     const [show, setShow] = useState<JSX.Element | null>(null);
 
@@ -102,7 +183,7 @@ const SoftEther: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_i
         }
 
         setShow(<div className='download-anime active' style={style}>
-            <img src={require("./assets/softether.webp")} alt="SoftEther" className="rounded-4 profileImg"
+            <img src={require("../../assets/softether.webp")} alt="SoftEther" className="rounded-4 profileImg"
                  draggable={false}/>
         </div>)
 
@@ -116,7 +197,7 @@ const SoftEther: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_i
             <a href={API_URL + '/vpn/' + vm_id + '/profile/?type=' + data.type} download={data.filename}
                rel="noreferrer noopener"
                className="chooseProfile_btn position-relative" onClick={onClick}>
-                <img src={require("./assets/softether.webp")} alt="SoftEther" className="rounded-4 profileImg"
+                <img src={require("../../assets/softether.webp")} alt="SoftEther" className="rounded-4 profileImg"
                      draggable={false} ref={a_ref}/>
                 <p className="text-center pt-2">{data.name}</p>
             </a>
@@ -125,8 +206,16 @@ const SoftEther: React.FC<{ profile: profile, vm_id: string }> = ({profile, vm_i
     )
 }
 
-const SS: React.FC<{ profile: profile }> = ({profile}) => {
-    const [data, setData] = useState<profile>(profile);
+/**
+ * SS component
+ *
+ * This component renders the ShadowSocks profile image and handles the download animation and QR code display.
+ *
+ * @param {Object} props - The component props
+ * @param {VPNProfileType} props.profile - The VPN profile data
+ */
+const SS: React.FC<{ profile: VPNProfileType }> = ({profile}) => {
+    const [data, setData] = useState<VPNProfileType>(profile);
     const [show, setShow] = useState(false);
     const [isCopy, setIsCopy] = useState(false);
 
@@ -156,7 +245,7 @@ const SS: React.FC<{ profile: profile }> = ({profile}) => {
         <>
             {/*eslint-disable-next-line*/}
             <a onClick={onClick} className="position-relative chooseProfile_btn" href="#">
-                <img src={require("./assets/SS.webp")} alt="ShadowSocks" className="rounded-4 profileImg"
+                <img src={require("../../assets/SS.webp")} alt="ShadowSocks" className="rounded-4 profileImg"
                      draggable={false}/>
                 <p className="text-center pt-2">{data.name}</p>
             </a>
