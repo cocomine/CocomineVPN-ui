@@ -446,3 +446,17 @@ body {
 }
 
 /* bubbles end */
+
+.danger-border {
+    animation: danger-pulse 1s infinite;
+    border-radius: 5px;
+
+    @keyframes danger-pulse {
+        0% {
+            box-shadow: 0 0 0 0 $danger;
+        }
+        100% {
+            box-shadow: 0 0 0 10px rgba($danger, 0);
+        }
+    }
+}

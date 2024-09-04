@@ -85,13 +85,39 @@ type userProfile = {
     name: string;
     ip: string;
 }
-type weatherAlertType = {
-    name: string, code: string, actionCode: string, type: string
+type weatherAlertType =
+    "TC1" |
+    "TC10" |
+    "TC3" |
+    "TC8NE" |
+    "TC8NW" |
+    "TC8SE" |
+    "TC8SW" |
+    "TC9" |
+    "WCOLD" |
+    "WFIRER" |
+    "WFIREY" |
+    "WFNTSA" |
+    "WFROST" |
+    "WHOT" |
+    "WL" |
+    "WMSGNL" |
+    "WRAINA" |
+    "WRAINB" |
+    "WRAINR" |
+    "WTMW" |
+    "WTS"
+
+interface weatherAlert {
+    name: string;
+    code: weatherAlertType;
+    actionCode: string;
+    type: string;
 }
 type weatherDataType = {
     temperature: number,
     icon: number,
-    alert: weatherAlertType[],
+    alert: weatherAlert[],
     humidity: number,
     uv_index: number
     weatherReport: {
@@ -124,6 +150,8 @@ interface I_VMData_windowPostMessage extends I_windowPostMessage {
     data: VMData[]
 }
 
+type alertMemoType = [any, weatherAlertType][]
+
 // VM processing status
 const processingStatusText = [
     "PROVISIONING",
@@ -137,6 +165,7 @@ const processingStatusText = [
     "deallocating"
 ]
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const DANGER_WEATHER_ALERT: weatherAlertType[] = ['TC8NE', 'TC8SW', 'TC8NW', 'TC8SE', 'TC9', 'TC10', 'WRAINB', 'WTMW', 'TC3']
 
 const Menu: React.FC<{
     data: { data: VMData[], next_update: string, last_update: string },
@@ -382,10 +411,10 @@ const PWAInstall: React.FC = () => {
 const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
     const [data, setData] = useState<weatherDataType>(weatherData);
 
-    const alert = useMemo(() => {
+    const alert: alertMemoType = useMemo(() => {
         console.debug(data.alert)
         return data.alert.map((item) => {
-            return require("./assets/weather alert/" + item.code + ".webp")
+            return [require("./assets/weather alert/" + item.code + ".webp"), item.code]
         })
     }, [data.alert]);
 
@@ -408,7 +437,7 @@ const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
                 <img src={moisture} alt="weather" style={{width: '20px'}} className="me-1 pb-1"/>
                 <span>{data.humidity}%</span>
             </Col>
-            <Col xs={"auto"}>
+            {data.uv_index !== 0 ? <Col xs={"auto"}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"
                      strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -418,15 +447,17 @@ const Weather: React.FC<{ weatherData: weatherDataType }> = ({weatherData}) => {
                     <path d="M6 16v3a2 2 0 1 0 4 0v-3"/>
                 </svg>
                 <span>{data.uv_index}</span>
-            </Col>
+            </Col> : null}
             <Col xs={"auto"}>
-                {alert.map((item, index) => <img src={item} key={index} alt={"weather alert"}
-                                                 style={{width: "40px"}}/>)}
+                {alert.map(([item, code], index) =>
+                    <img src={item} key={index} alt={"weather alert"} style={{width: "40px"}}
+                         className={'me-2 ' + (DANGER_WEATHER_ALERT.includes(code) ? 'danger-border' : '')}/>
+                )}
             </Col>
             <Col style={{minWidth: "20rem"}}>
                 <div className="marquee"><p>
                     {data.weatherReport.tcInfo !== "" ?
-                        <span style={{paddingLeft: "3rem"}}>熱帶氣旋資訊: {data.weatherReport.tcInfo}</span> : null}
+                        <span style={{paddingLeft: "3rem"}}>⚠熱帶氣旋資訊⚠: {data.weatherReport.tcInfo}</span> : null}
                     {data.weatherReport.fireDangerWarning !== "" ?
                         <span style={{paddingLeft: "3rem"}}>火災危險警告信息: {data.weatherReport.tcInfo}</span> : null}
                     <span style={{paddingLeft: "1rem"}}>{data.weatherReport.generalSituation}</span>
@@ -601,7 +632,7 @@ const fetchWeatherData = async (abortController: AbortController = new AbortCont
     })
     if (!res.ok) throw res;
     data = Object.values(await res.json());
-    const alert: weatherAlertType[] = data.filter((item: any) => item.actionCode !== "CANCEL")
+    const alert: weatherAlert[] = data.filter((item: any) => item.actionCode !== "CANCEL")
 
     res = await fetch(`https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=flw&lang=tc`, {
         method: "GET",

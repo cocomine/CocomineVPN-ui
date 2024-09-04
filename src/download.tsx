@@ -109,7 +109,7 @@ const Download = () => {
                                 <a href={'https://chromewebstore.google.com/detail/cocomine-vpn-extension/cgmahkkfajhojihmidpkcmcdjmjniihk'}
                                    target={'_blank'}
                                    rel="noreferrer noopener" className="chooseProfile_btn position-relative">
-                                    <img src={require("./assets/extension.webp")} alt="Extension"
+                                    <img src={require("./assets/icon with extension.webp")} alt="Extension"
                                          className="rounded-4 profileImg"
                                          draggable={false}/>
                                     <p className="text-center pt-2">瀏覽器擴充</p>

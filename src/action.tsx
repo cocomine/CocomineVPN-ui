@@ -200,7 +200,7 @@ const ExtensionConnect: React.FC<{ vmData: VMData }> = ({vmData}) => {
                         <span className="text-muted small">你已經安裝了擴充功能, 可以使用一鍵連線功能</span>
                     </Col>
                     <Col xs={"auto"}>
-                        <img src={require('./assets/extension.webp')} alt="extension" className="img-fluid"
+                        <img src={require('./assets/icon with extension.webp')} alt="extension" className="img-fluid"
                              style={{width: "4rem"}}/>
                     </Col>
                 </Row>
