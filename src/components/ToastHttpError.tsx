@@ -5,7 +5,7 @@ import {toast} from "react-toastify";
  * @param status http status code
  */
 const toastHttpError = (status: number) => {
-    const audio = new Audio(require('../assets/Error.mp3'));
+    const audio = new Audio(require('../assets/sounds/Error.mp3'));
     audio.play();
 
     switch (status) {

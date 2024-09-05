@@ -141,7 +141,7 @@ const ErrorScreen: React.FC = () => {
                 }
             </Row>
             <audio autoPlay>
-                <source src={require('../assets/Error.mp3')} type="audio/mpeg"/>
+                <source src={require('../assets/sounds/Error.mp3')} type="audio/mpeg"/>
             </audio>
         </div>
     );

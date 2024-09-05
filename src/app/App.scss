@@ -132,7 +132,7 @@ body {
     z-index: $zindex-toast;
 }
 
-.pwa-install {
+.banner {
     width: 100%;
     background-color: var(--bs-body-bg);
     cursor: pointer;
@@ -369,15 +369,15 @@ body {
         transition: opacity 1s ease-in-out;
 
         &.img1 {
-            background-image: url("../assets/paperwall_2.webp");
+            background-image: url("../assets/images/webp/paperwall_2.webp");
         }
 
         &.img2 {
-            background-image: url("../assets/paperwall_3.webp");
+            background-image: url("../assets/images/webp/paperwall_3.webp");
         }
 
         &.img3 {
-            background-image: url("../assets/paperwall_4.webp");
+            background-image: url("../assets/images/webp/paperwall_4.webp");
         }
     }
 }

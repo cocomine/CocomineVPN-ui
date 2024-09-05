@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Col, Row} from "react-bootstrap";
-import loading from "../assets/loading.svg";
+import loading from "../assets/images/svg/loading.svg";
 
 /**
  * Loading screen

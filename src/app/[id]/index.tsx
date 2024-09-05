@@ -11,8 +11,8 @@ import {
     useOutletContext
 } from "react-router-dom";
 import {toast} from "react-toastify";
-import power from "../../assets/power.svg";
-import tools from "../../assets/tools.svg";
+import power from "../../assets/images/svg/power.svg";
+import tools from "../../assets/images/svg/tools.svg";
 import moment from "moment/moment";
 import {API_URL, TOKEN} from "../../constants/GlobalVariable";
 import {ContextType, VMDataType} from "../../constants/Type";
@@ -162,7 +162,7 @@ const VMAction: React.FC = () => {
 const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
-    const audio = useMemo(() => new Audio(require('../../assets/Jig 0.mp3')), []);
+    const audio = useMemo(() => new Audio(require('../../assets/sounds/Jig 0.mp3')), []);
 
     // connect to extension
     const onClick = useCallback(() => {
@@ -211,7 +211,7 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
         return () => window.removeEventListener('message', callback);
     }, [vmData, audio]);
 
-    if (!installed) return null
+    if (!installed) return null;
     return (
         <>
             <Col xs={12} className="text-center">
@@ -219,12 +219,12 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
             </Col>
             <Col xs={12}>
                 <Row className="justify-content-center align-items-center g-2 pb-2">
-                    <Col xs={"auto"} className="text-center text-sm-end">
+                    <Col xs={"auto"} className="text-center">
                         <h5>Cocomine VPN 擴充功能</h5>
                         <span className="text-muted small">你已經安裝了擴充功能, 可以使用一鍵連線功能</span>
                     </Col>
                     <Col xs={"auto"}>
-                        <img src={require('../../assets/icon with extension.webp')} alt="extension"
+                        <img src={require('../../assets/images/webp/icon with extension.webp')} alt="extension"
                              className="img-fluid"
                              style={{width: "4rem"}}/>
                     </Col>

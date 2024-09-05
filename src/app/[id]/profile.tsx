@@ -128,7 +128,7 @@ const OpenVPN: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile,
         }
 
         setShow(<div className='download-anime active' style={style}>
-            <img src={require("../../assets/openvpn.webp")} alt="OpenVPN" className="rounded-4 profileImg"
+            <img src={require("../../assets/images/webp/openvpn.webp")} alt="OpenVPN" className="rounded-4 profileImg"
                  draggable={false}/>
         </div>)
 
@@ -142,7 +142,8 @@ const OpenVPN: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile,
             <a href={API_URL + '/vpn/' + vm_id + '/profile/?type=' + data.type} download={data.filename}
                rel="noreferrer noopener"
                className="chooseProfile_btn position-relative" onClick={onClick}>
-                <img src={require("../../assets/openvpn.webp")} alt="OpenVPN" className="rounded-4 profileImg"
+                <img src={require("../../assets/images/webp/openvpn.webp")} alt="OpenVPN"
+                     className="rounded-4 profileImg"
                      draggable={false} ref={a_ref}/>
                 <p className="text-center pt-2">{data.name}</p>
             </a>
@@ -183,7 +184,8 @@ const SoftEther: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profil
         }
 
         setShow(<div className='download-anime active' style={style}>
-            <img src={require("../../assets/softether.webp")} alt="SoftEther" className="rounded-4 profileImg"
+            <img src={require("../../assets/images/webp/softether.webp")} alt="SoftEther"
+                 className="rounded-4 profileImg"
                  draggable={false}/>
         </div>)
 
@@ -197,7 +199,8 @@ const SoftEther: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profil
             <a href={API_URL + '/vpn/' + vm_id + '/profile/?type=' + data.type} download={data.filename}
                rel="noreferrer noopener"
                className="chooseProfile_btn position-relative" onClick={onClick}>
-                <img src={require("../../assets/softether.webp")} alt="SoftEther" className="rounded-4 profileImg"
+                <img src={require("../../assets/images/webp/softether.webp")} alt="SoftEther"
+                     className="rounded-4 profileImg"
                      draggable={false} ref={a_ref}/>
                 <p className="text-center pt-2">{data.name}</p>
             </a>
@@ -245,7 +248,8 @@ const SS: React.FC<{ profile: VPNProfileType }> = ({profile}) => {
         <>
             {/*eslint-disable-next-line*/}
             <a onClick={onClick} className="position-relative chooseProfile_btn" href="#">
-                <img src={require("../../assets/SS.webp")} alt="ShadowSocks" className="rounded-4 profileImg"
+                <img src={require("../../assets/images/webp/SS.webp")} alt="ShadowSocks"
+                     className="rounded-4 profileImg"
                      draggable={false}/>
                 <p className="text-center pt-2">{data.name}</p>
             </a>

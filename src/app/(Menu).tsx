@@ -4,14 +4,14 @@ import "./App.scss";
 import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
 import {Link, Outlet, useRevalidator} from "react-router-dom";
-import us_flag from "../assets/us.svg";
-import uk_flag from "../assets/uk.svg";
-import hk_flag from "../assets/hk.svg";
-import jp_flag from "../assets/jp.svg";
-import tw_flag from "../assets/tw.svg";
-import in_flag from "../assets/in.svg";
-import moisture from "../assets/moisture.svg";
-import download_svg from "../assets/download.svg";
+import us_flag from "../assets/images/svg/us.svg";
+import uk_flag from "../assets/images/svg/uk.svg";
+import hk_flag from "../assets/images/svg/hk.svg";
+import jp_flag from "../assets/images/svg/jp.svg";
+import tw_flag from "../assets/images/svg/tw.svg";
+import in_flag from "../assets/images/svg/in.svg";
+import moisture from "../assets/images/svg/moisture.svg";
+import download_svg from "../assets/images/svg/download.svg";
 import useWebSocket from "../hook/useWebSocks";
 import {toast} from "react-toastify";
 import {APP_VERSION} from "../constants/GlobalVariable";
@@ -27,6 +27,7 @@ import {
 } from "../constants/Type";
 import {toastHttpError} from "../components/ToastHttpError";
 import {fetchVPNData} from "../hook/Loader";
+import ExtensionInstallBanner from "../components/ExtensionInstallBanner";
 
 // VM processing status
 const PROCESSING_STATUS_TEXT = [
@@ -41,19 +42,6 @@ const PROCESSING_STATUS_TEXT = [
     "deallocating"
 ]
 const DANGER_WEATHER_ALERT: WeatherAlertType[] = ['TC8NE', 'TC8SW', 'TC8NW', 'TC8SE', 'TC9', 'TC10', 'WRAINB', 'WTMW']
-
-
-// Variable to store the deferred prompt event for PWA installation
-let deferredPrompt: any;
-
-// Event listener for the 'beforeinstallprompt' event
-// This event is fired when the browser detects that the web app can be installed
-window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent the default mini-infobar from appearing on mobile
-    e.preventDefault();
-    // Store the event for later use
-    deferredPrompt = e;
-});
 
 /**
  * Menu component
@@ -161,8 +149,8 @@ const Menu: React.FC<{
     }, [vm_data]);
 
     // audio element for playing sound when status changed
-    const SuccessAudio = useMemo(() => new Audio(require("../assets/Bing.mp3")), []);
-    const FailAudio = useMemo(() => new Audio(require("../assets/Error.mp3")), []);
+    const SuccessAudio = useMemo(() => new Audio(require("../assets/sounds/Bing.mp3")), []);
+    const FailAudio = useMemo(() => new Audio(require("../assets/sounds/Error.mp3")), []);
 
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
     const statusUpdateCallback = useCallback<I_StatusUpdateCallback>(async (target, vm_id) => {
@@ -248,7 +236,11 @@ const Menu: React.FC<{
                     </Row>
                 </Col>
                 <Col xs={12}>
-                    <PWAInstall/>
+                    <Row className={'gy-2'}>
+                        <Col xs={12}>
+                            <ExtensionInstallBanner/>
+                        </Col>
+                    </Row>
                 </Col>
                 <Col xs={12}>
                     <Row className="justify-content-between">
@@ -273,36 +265,6 @@ const Menu: React.FC<{
             <Outlet context={{statusUpdateCallback} satisfies ContextType}/>
         </>
     );
-}
-
-/**
- * PWA install element for menu
- * @constructor
- */
-const PWAInstall: React.FC = () => {
-    const installPWA = useCallback(async () => {
-        deferredPrompt.prompt();
-    }, []);
-
-    if (!deferredPrompt || isPwa()) return null
-    return (
-        <div>
-            <div className="pwa-install rounded p-2 px-3 border" onClick={installPWA}>
-                <Row className="align-items-center align-content-center">
-                    <Col xs="auto">
-                        <img src={require('../assets/devcie.webp')} alt="將網頁安裝為APP" style={{height: "6rem"}}
-                             className="pe-2"/>
-                    </Col>
-                    <Col style={{minWidth: "20rem"}}>
-                        <h5 className="fw-bold text-info align-bottom">
-                            將網頁安裝為APP<span className="badge rounded-pill text-bg-primary ms-2">立即安裝!</span>
-                        </h5>
-                        <p className="m-0">將網頁安裝為APP到您的裝置上。獲得原生應用程式的體驗，更快捷的訪問，無須再打開瀏覽器。</p>
-                    </Col>
-                </Row>
-            </div>
-        </div>
-    )
 }
 
 /**
@@ -382,9 +344,9 @@ const Flag: React.FC<{ vm_data: VMDataType }> = ({vm_data}) => {
     const provider = useMemo(() => {
         switch (data._provider) {
             case "google":
-                return <img src={require("../assets/google.webp")} alt="google" className="providerIcon"/>;
+                return <img src={require("../assets/images/webp/google.webp")} alt="google" className="providerIcon"/>;
             case "azure":
-                return <img src={require("../assets/azure.webp")} alt="azure" className="providerIcon"/>;
+                return <img src={require("../assets/images/webp/azure.webp")} alt="azure" className="providerIcon"/>;
             default:
                 return null;
         }
@@ -467,16 +429,6 @@ const Flag: React.FC<{ vm_data: VMDataType }> = ({vm_data}) => {
             </Col>
         )
     }
-}
-
-/**
- * Check if the web app is running as a PWA.
- * @returns {boolean} True if the web app is running as a PWA, false otherwise.
- */
-function isPwa(): boolean {
-    return ["fullscreen", "standalone", "minimal-ui"].some(
-        (displayMode) => window.matchMedia('(display-mode: ' + displayMode + ')').matches
-    );
 }
 
 export {Menu};
