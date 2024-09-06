@@ -117,7 +117,7 @@ const ErrorScreen: React.FC = () => {
                 <Col xs={12} className="text-center">
                     {error_Elm}
                 </Col>
-                {((status === 401) || (status === 403)) ?
+                {((status === 401) || (status === 403) || (status === 400)) ?
                     <Col xs={12} className="text-center">
                         <Button variant="primary" className="rounded-5" onClick={loginCallback} disabled={loading}>
                             {loading ? <><Spinner animation="grow" size="sm" className="me-2"/>

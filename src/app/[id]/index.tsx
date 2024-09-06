@@ -140,8 +140,10 @@ const VMAction: React.FC = () => {
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
                             </Col>
-                            {vmData._isPowerOn &&
-                                <ExtensionConnect vmData={vmData}/>}
+                            {vmData._isPowerOn && <>
+                                <ExtensionConnect vmData={vmData}/>
+                                <MobileAppConnect vmData={vmData}/>
+                            </>}
                             <ExtendTime expired={vmData._expired} onClick={extendTime}/>
                         </Row>
                     </Modal.Body>
@@ -222,6 +224,83 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
                     <Col xs={"auto"} className="text-center">
                         <h5>Cocomine VPN 擴充功能</h5>
                         <span className="text-muted small">你已經安裝了擴充功能, 可以使用一鍵連線功能</span>
+                    </Col>
+                    <Col xs={"auto"}>
+                        <img src={require('../../assets/images/webp/icon with extension.webp')} alt="extension"
+                             className="img-fluid"
+                             style={{width: "4rem"}}/>
+                    </Col>
+                </Row>
+                <Button variant="primary" className="w-100 rounded-5 rainbow-btn border-0" onClick={onClick}
+                        disabled={loading}>
+                    <div className="rounded-5">
+                        <Row className="justify-content-center align-content-center h-100">
+                            <Col xs="auto">
+                                {loading ? <Spinner animation="grow" size="sm" className="me-2"/> :
+                                    <i className="bi bi-link-45deg me-2"></i>}
+                                一鍵連線
+                            </Col>
+                        </Row>
+                    </div>
+                </Button>
+            </Col>
+        </>
+    )
+}
+
+const MobileAppConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
+    const [installed, setInstalled] = useState<boolean>(false)
+    const [loading, setLoading] = useState(false)
+
+    // connect to extension
+    const onClick = useCallback(() => {
+        setLoading(true)
+        window.postMessage({type: 'Connect', ask: true, data: vmData});
+    }, [vmData]);
+
+    // check if extension is installed
+    useEffect(() => {
+        // callback function
+        function callback(e: MessageEvent<I_PostMessageData>) {
+            if (e.source !== window) {
+                return;
+            }
+
+            if ((e.data.type === 'MobileAppInstalled') && !e.data.ask) {
+                const data: I_ExtensionInstalled_PostMessageData = e.data
+                if (!data.data.installed) return;
+
+                setInstalled(vmData._profiles.some(p => p.type === "socks5"))
+            }
+
+            if ((e.data.type === 'Connect') && !e.data.ask) {
+                const data: I_Connect_PostMessageData = e.data
+                if (data.data.connected) {
+                    setLoading(false)
+                } else {
+                    setLoading(false)
+                }
+            }
+        }
+
+        // add event listener
+        window.addEventListener('message', callback);
+        window.postMessage({type: 'MobileAppInstalled', ask: true});
+
+        return () => window.removeEventListener('message', callback);
+    }, [vmData]);
+
+    if (!installed) return null;
+    return (
+        <>
+            <Col xs={12} className="text-center">
+                <div className="border-top w-100"></div>
+            </Col>
+            <Col xs={12}>
+                <Row className="justify-content-center align-items-center g-2 pb-2">
+                    <Col xs={"auto"} className="text-center">
+                        <h5>Cocomine VPN 手機程式</h5>
+                        <span className="text-muted small">你已經安裝了手機程式, 可以使用一鍵連線功能</span>
                     </Col>
                     <Col xs={"auto"}>
                         <img src={require('../../assets/images/webp/icon with extension.webp')} alt="extension"

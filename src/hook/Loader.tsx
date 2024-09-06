@@ -28,7 +28,7 @@ export const fetchVPNData = async (abortController: AbortController = new AbortC
 export const fetchProfileData = async (abortController: AbortController = new AbortController()): Promise<UserProfileType> => {
     if (NODE_ENV === 'development') return {name: "development user", email: "", ip: ""};
 
-    const res = await fetch(`${API_URL}/cdn-cgi/access/get-identity`, {
+    const res = await fetch(`${API_URL}/userinfo`, {
         method: "GET",
         credentials: "include",
         signal: abortController.signal,
