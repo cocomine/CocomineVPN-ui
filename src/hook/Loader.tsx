@@ -1,4 +1,4 @@
-import {API_URL, NODE_ENV, TOKEN} from "../constants/GlobalVariable";
+import {API_URL, TOKEN} from "../constants/GlobalVariable";
 import {UserProfileType, WeatherDataType} from "../constants/Type";
 import {I_WeatherAlert} from "../constants/Interface";
 
@@ -26,8 +26,6 @@ export const fetchVPNData = async (abortController: AbortController = new AbortC
  * @returns {Promise<UserProfileType>}
  */
 export const fetchProfileData = async (abortController: AbortController = new AbortController()): Promise<UserProfileType> => {
-    if (NODE_ENV === 'development') return {name: "development user", email: "", ip: ""};
-
     const res = await fetch(`${API_URL}/userinfo`, {
         method: "GET",
         credentials: "include",

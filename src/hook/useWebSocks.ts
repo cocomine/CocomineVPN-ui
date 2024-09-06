@@ -15,7 +15,7 @@ const connectWebsocket = async () => {
     //get ticket
     let data: I_WebSocketTicket;
     try {
-        const res = await fetch(API_URL + "/vpn/ws/ticket", {
+        const res = await fetch(API_URL + "/vpn/v2/ws/ticket", {
             method: "GET",
             credentials: "include",
             redirect: "error",
