@@ -165,6 +165,7 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
     const audio = useMemo(() => new Audio(require('../../assets/sounds/Jig 0.mp3')), []);
+    const timeout = useRef<NodeJS.Timeout | null>(null)
 
     // connect to extension
     const onClick = useCallback(() => {
@@ -177,6 +178,7 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
             toast.error("連線失敗")
         }, 10000);
 
+        timeout.current = id
         return () => clearTimeout(id)
     }, [vmData]);
 
@@ -200,6 +202,7 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
                 const data: I_Connect_PostMessageData = e.data
                 if (!data.data.connected) return;
 
+                if (timeout.current) clearTimeout(timeout.current)
                 setLoading(false)
                 toast.success("已連線")
                 audio.play()
@@ -221,14 +224,14 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
             </Col>
             <Col xs={12}>
                 <Row className="justify-content-center align-items-center g-2 pb-2">
-                    <Col xs={"auto"} className="text-center">
-                        <h5>Cocomine VPN 擴充功能</h5>
-                        <span className="text-muted small">你已經安裝了擴充功能, 可以使用一鍵連線功能</span>
-                    </Col>
                     <Col xs={"auto"}>
                         <img src={require('../../assets/images/webp/icon with extension.webp')} alt="extension"
                              className="img-fluid"
                              style={{width: "4rem"}}/>
+                    </Col>
+                    <Col xs={"auto"} className="text-center">
+                        <h5>Cocomine VPN 擴充功能</h5>
+                        <span className="text-muted small">你已經安裝了擴充功能, 可以使用一鍵連線功能</span>
                     </Col>
                 </Row>
                 <Button variant="primary" className="w-100 rounded-5 rainbow-btn border-0" onClick={onClick}
@@ -255,7 +258,7 @@ const MobileAppConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
     // connect to extension
     const onClick = useCallback(() => {
         setLoading(true)
-        window.postMessage({type: 'Connect', ask: true, data: vmData});
+        window.postMessage({type: 'AppConnect', ask: true, data: vmData});
     }, [vmData]);
 
     // check if extension is installed
@@ -270,16 +273,12 @@ const MobileAppConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
                 const data: I_ExtensionInstalled_PostMessageData = e.data
                 if (!data.data.installed) return;
 
-                setInstalled(vmData._profiles.some(p => p.type === "socks5"))
+                setInstalled(vmData._profiles.some(p => p.type === "OpenVPN"))
             }
 
-            if ((e.data.type === 'Connect') && !e.data.ask) {
-                const data: I_Connect_PostMessageData = e.data
-                if (data.data.connected) {
-                    setLoading(false)
-                } else {
-                    setLoading(false)
-                }
+            if ((e.data.type === 'AppConnect') && !e.data.ask) {
+                //const data: I_Connect_PostMessageData = e.data
+                setLoading(false)
             }
         }
 
@@ -301,11 +300,6 @@ const MobileAppConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
                     <Col xs={"auto"} className="text-center">
                         <h5>Cocomine VPN 手機程式</h5>
                         <span className="text-muted small">你已經安裝了手機程式, 可以使用一鍵連線功能</span>
-                    </Col>
-                    <Col xs={"auto"}>
-                        <img src={require('../../assets/images/webp/icon with extension.webp')} alt="extension"
-                             className="img-fluid"
-                             style={{width: "4rem"}}/>
                     </Col>
                 </Row>
                 <Button variant="primary" className="w-100 rounded-5 rainbow-btn border-0" onClick={onClick}

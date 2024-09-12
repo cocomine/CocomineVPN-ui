@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Col, Modal, Row} from "react-bootstrap";
+import {Col, Container, Modal, Row} from "react-bootstrap";
 import {useBlocker, useLocation} from "react-router-dom";
 
 /**
@@ -43,13 +43,14 @@ const Download = () => {
     return (
         <>
             {location.pathname === '/download' &&
-                <Modal show={show} centered onHide={() => window.history.back()} size="lg">
+                <Modal show={show} fullscreen={'sm-down'} centered onHide={() => window.history.back()} size="lg">
                     <Modal.Header closeButton>
                         <Modal.Title>下載程式</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
+                        <Container>
                         <Row className={"g-5 justify-content-center"}>
-                            <Col xl={2} lg={3} md={4} sm={5} xs={6}>
+                            <Col lg={2} md={3} xs={4}>
                                 <a href={'https://www.softether-download.com/cn.aspx?product=softether'}
                                    target={'_blank'}
                                    rel="noreferrer noopener"
@@ -60,7 +61,7 @@ const Download = () => {
                                     <p className="text-center pt-2">SoftEther</p>
                                 </a>
                             </Col>
-                            <Col xl={2} lg={3} md={4} sm={5} xs={6}>
+                            <Col lg={2} md={3} xs={4}>
                                 <a href={'https://openvpn.net/client/'} target={'_blank'}
                                    rel="noreferrer noopener"
                                    className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
@@ -70,7 +71,7 @@ const Download = () => {
                                     <p className="text-center pt-2">OpenVPN</p>
                                 </a>
                             </Col>
-                            <Col xl={2} lg={3} md={4} sm={5} xs={6}>
+                            <Col lg={2} md={3} xs={4}>
                                 <a href={'https://github.com/shadowsocks/shadowsocks-windows/releases'}
                                    target={'_blank'}
                                    rel="noreferrer noopener"
@@ -82,7 +83,7 @@ const Download = () => {
                                     <p className="text-center pt-2">ShadowSocks (Windows)</p>
                                 </a>
                             </Col>
-                            <Col xl={2} lg={3} md={4} sm={5} xs={6}>
+                            <Col lg={2} md={3} xs={4}>
                                 <a href={'https://play.google.com/store/apps/details?id=com.github.shadowsocks'}
                                    target={'_blank'}
                                    rel="noreferrer noopener"
@@ -94,7 +95,7 @@ const Download = () => {
                                     <p className="text-center pt-2">ShadowSocks (Android)</p>
                                 </a>
                             </Col>
-                            <Col xl={2} lg={3} md={4} sm={5} xs={6}>
+                            <Col lg={2} md={3} xs={4}>
                                 <a href={'https://play.google.com/store/apps/details?id=com.github.shadowsocks.tv'}
                                    target={'_blank'}
                                    rel="noreferrer noopener"
@@ -106,7 +107,7 @@ const Download = () => {
                                     <p className="text-center pt-2">ShadowSocks (Android TV)</p>
                                 </a>
                             </Col>
-                            <Col xl={2} lg={3} md={4} sm={5} xs={6}>
+                            <Col lg={2} md={3} xs={4}>
                                 <a href={'https://github.com/shadowsocks/ShadowsocksX-NG/releases/'} target={'_blank'}
                                    rel="noreferrer noopener"
                                    className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
@@ -116,7 +117,7 @@ const Download = () => {
                                     <p className="text-center pt-2">ShadowSocks (MacOS)</p>
                                 </a>
                             </Col>
-                            <Col xl={2} lg={3} md={4} sm={5} xs={6}>
+                            <Col lg={2} md={3} xs={4}>
                                 <a href={'https://apps.apple.com/us/app/shadowrocket/id932747118'} target={'_blank'}
                                    rel="noreferrer noopener"
                                    className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
@@ -126,7 +127,7 @@ const Download = () => {
                                     <p className="text-center pt-2">ShadowSocks (ios)</p>
                                 </a>
                             </Col>
-                            <Col xl={2} lg={3} md={4} sm={5} xs={6}>
+                            <Col lg={2} md={3} xs={4}>
                                 <a href={'https://chromewebstore.google.com/detail/cocomine-vpn-extension/cgmahkkfajhojihmidpkcmcdjmjniihk'}
                                    target={'_blank'}
                                    rel="noreferrer noopener"
@@ -138,6 +139,7 @@ const Download = () => {
                                 </a>
                             </Col>
                         </Row>
+                        </Container>
                     </Modal.Body>
                 </Modal>
             }

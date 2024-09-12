@@ -48,7 +48,8 @@ const ExtensionInstallBanner: React.FC = () => {
                     </Col>
                     <Col style={{minWidth: "20rem"}}>
                         <h5 className="fw-bold text-info align-bottom">
-                            安裝瀏覽器擴充<span className="badge rounded-pill text-bg-primary ms-2">立即安裝!</span>
+                            安裝瀏覽器擴充<span
+                            className="badge rounded-pill text-bg-primary ms-2 small">立即安裝!</span>
                         </h5>
                         <p className="m-0 text-white">在公用電腦上不方便安裝軟件? 嘗試使用瀏覽器擴充無需授權直接在瀏覽器中使用!
                             一鍵連線更加方便!</p>

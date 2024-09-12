@@ -40,7 +40,7 @@ const Profile: React.FC = () => {
 
     return (
         <>
-            <Modal show={show} centered onHide={() => navigate('..', {replace: true})} size="lg">
+            <Modal show={show} centered onHide={() => navigate('..')} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>下載設定檔 <small style={{color: "darkgray", fontSize: "x-small"}}>
                         ({vmData._name})

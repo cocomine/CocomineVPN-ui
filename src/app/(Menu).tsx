@@ -28,6 +28,7 @@ import {
 import {toastHttpError} from "../components/ToastHttpError";
 import {fetchVPNData} from "../hook/Loader";
 import ExtensionInstallBanner from "../components/ExtensionInstallBanner";
+import AppInstallBanner from "../components/AppInstallBanner";
 
 // VM processing status
 const PROCESSING_STATUS_TEXT = [
@@ -239,6 +240,9 @@ const Menu: React.FC<{
                     <Row className={'gy-2'}>
                         <Col xs={12}>
                             <ExtensionInstallBanner/>
+                        </Col>
+                        <Col xs={12}>
+                            <AppInstallBanner/>
                         </Col>
                     </Row>
                 </Col>
