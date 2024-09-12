@@ -65,7 +65,7 @@ const VMAction: React.FC = () => {
             toastHttpError(e.status)
             return
         } finally {
-            navigate('..', {replace: true}) // redirect to home page
+            navigate('..') // redirect to home page
         }
 
         statusUpdateCallback(power, vmData._id)
