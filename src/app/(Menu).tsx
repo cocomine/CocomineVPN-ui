@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {Alert, Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
@@ -154,6 +154,7 @@ const Menu: React.FC<{
     const FailAudio = useMemo(() => new Audio(require("../assets/sounds/Error.mp3")), []);
 
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
+    const timeout = useRef<NodeJS.Timeout | null>(null);
     const statusUpdateCallback = useCallback<I_StatusUpdateCallback>(async (target, vm_id) => {
         // show toast message
         await toast.promise(new Promise((resolve, reject) => {
@@ -167,6 +168,7 @@ const Menu: React.FC<{
                     if (newVMData[index]._isPowerOn === target) {
                         SuccessAudio.play();
                         resolve("Success")
+                        clearTimeout(timeout.current!);
                         window.removeEventListener("message", callback); // remove event listener
                     }
                 }
@@ -175,12 +177,12 @@ const Menu: React.FC<{
             //receive message from window
             window.addEventListener("message", callback);
 
-            // timeout for 60 seconds
-            setTimeout(() => {
+            // timeout for 2 minutes
+            timeout.current = setTimeout(() => {
                 FailAudio.play();
                 reject("Timeout")
                 window.removeEventListener("message", callback); // remove event listener
-            }, 60 * 1000);
+            }, 2 * 60 * 1000);
 
             }), {
                 pending: `正在${target ? '開機' : '關機'}中...`,
