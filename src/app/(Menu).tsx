@@ -161,6 +161,8 @@ const Menu: React.FC<{
 
             // create event listener for message from window
             const callback = (event: MessageEvent<I_VMData_windowPostMessage>) => {
+                if (event.source !== window) return; // ignore message from other source
+
                 if (event.data.type === "PostVMData" && !event.data.ask) {
                     const newVMData = event.data.data;
                     let index = newVMData.findIndex((vm: VMDataType) => vm._id === vm_id);
