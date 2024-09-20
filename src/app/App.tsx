@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import './App.scss';
 import {Container} from "react-bootstrap";
 import {Menu} from "./(Menu)";
@@ -28,6 +28,7 @@ function App() {
         userProfile: UserProfileType,
         WeatherData: WeatherDataType
     };
+    const webgl = useMemo(() => webgl_support(), []);
 
     // set title
     useEffect(() => {
@@ -50,8 +51,14 @@ function App() {
             <Container className="content h-100" data-bs-theme="dark">
                 <Menu data={VMData} userProfile={userProfile} weatherData={WeatherData}/>
             </Container>
-            <AnimationBubbles/>
-            <AnimationBackground/>
+            {webgl ?
+                <iframe title="background" src="https://cocomine.github.io/threejs-earth-background/"
+                        className="iframe-background"/>
+                : <>
+                    <AnimationBackground/>
+                    <AnimationBubbles/>
+                </>
+            }
             <LoadingScreen display={navigation.state === "loading"}/>
             <ToastContainer position="bottom-right"
                             autoClose={5000}
@@ -81,6 +88,20 @@ const loader = async () => {
         WeatherData
     }
 }
+
+/**
+ * Check if WebGL is supported
+ * @Link https://stackoverflow.com/questions/11871077/proper-way-to-detect-webgl-support
+ */
+function webgl_support() {
+    try {
+        var canvas = document.createElement('canvas');
+        return !!window.WebGLRenderingContext &&
+            (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+    } catch (e) {
+        return false;
+    }
+};
 
 export default App;
 export {loader};

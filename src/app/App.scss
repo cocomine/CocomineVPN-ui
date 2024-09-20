@@ -447,6 +447,7 @@ body {
 
 /* bubbles end */
 
+/* danger-border */
 .danger-border {
     animation: danger-pulse 1s infinite;
     border-radius: 5px;
@@ -459,4 +460,15 @@ body {
             box-shadow: 0 0 0 10px rgba($danger, 0);
         }
     }
+}
+
+/* iframe-background */
+.iframe-background {
+    position: fixed;
+    z-index: -20;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
