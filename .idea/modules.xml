@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../../minecraft JDK/web dev/threejs-earth/.idea/threejs-earth.iml" filepath="$PROJECT_DIR$/../../../minecraft JDK/web dev/threejs-earth/.idea/threejs-earth.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/vpnapi_ui.iml" filepath="$PROJECT_DIR$/.idea/vpnapi_ui.iml" />
     </modules>
   </component>
