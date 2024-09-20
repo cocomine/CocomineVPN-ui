@@ -1,6 +1,6 @@
 {
   "name": "cocominevpn-ui",
-  "version": "1.13.2",
+  "version": "1.13.3",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",

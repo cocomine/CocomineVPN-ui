@@ -23,7 +23,6 @@ const ExtensionInstallBanner: React.FC = () => {
                 const data: I_ExtensionInstalled_PostMessageData = e.data
                 if (!data.data.installed) return;
                 setInstalled(true);
-                console.log(e)
             }
         }
 
