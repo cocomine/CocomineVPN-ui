@@ -13,6 +13,8 @@ import {APP_VERSION} from "./constants/GlobalVariable";
 import {ErrorScreen} from "./components/ErrorScreen";
 import {LoadingScreen} from "./components/LoadingScreen";
 import Profile from "./app/[id]/profile";
+import {AnimationBackground} from "./components/AnimationBackground";
+import {AnimationBubbles} from "./components/AnimationBubbles";
 
 // create router
 const router = createBrowserRouter([
@@ -79,8 +81,30 @@ connectWebsocket(); // connect websocket
 root.render(
     <React.StrictMode>
         <RouterProvider router={router} fallbackElement={<LoadingScreen display={true}/>} />
+        {webgl_support() ?
+            <iframe title="background" src="https://cocomine.github.io/threejs-earth-background/"
+                    className="iframe-background"/>
+            : <>
+                <AnimationBackground/>
+                <AnimationBubbles/>
+            </>
+        }
     </React.StrictMode>
 );
+
+/**
+ * Check if WebGL is supported
+ * @Link https://stackoverflow.com/questions/11871077/proper-way-to-detect-webgl-support
+ */
+function webgl_support() {
+    try {
+        var canvas = document.createElement('canvas');
+        return !!window.WebGLRenderingContext &&
+            (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+    } catch (e) {
+        return false;
+    }
+};
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
