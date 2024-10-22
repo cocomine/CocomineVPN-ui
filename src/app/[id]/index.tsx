@@ -25,6 +25,7 @@ import {
 } from "../../constants/Interface";
 import {fetchVMData} from "../../hook/Loader";
 
+
 /**
  * VMAction component
  *
@@ -165,21 +166,11 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
     const audio = useMemo(() => new Audio(require('../../assets/sounds/Jig 0.mp3')), []);
-    const timeout = useRef<NodeJS.Timeout | null>(null)
 
     // connect to extension
     const onClick = useCallback(() => {
         setLoading(true)
         window.postMessage({type: 'Connect', ask: true, data: vmData});
-
-        // timeout for loading state
-        const id = setTimeout(() => {
-            setLoading(false)
-            toast.error("連線失敗")
-        }, 10000);
-
-        timeout.current = id
-        return () => clearTimeout(id)
     }, [vmData]);
 
     // check if extension is installed
@@ -190,7 +181,6 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
                 return;
             }
 
-
             if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
                 const data: I_ExtensionInstalled_PostMessageData = e.data
                 if (!data.data.installed) return;
@@ -200,12 +190,14 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
 
             if ((e.data.type === 'Connect') && !e.data.ask) {
                 const data: I_Connect_PostMessageData = e.data
-                if (!data.data.connected) return;
-
-                if (timeout.current) clearTimeout(timeout.current)
-                setLoading(false)
-                toast.success("已連線")
-                audio.play()
+                if (data.data.connected) {
+                    setLoading(false)
+                    toast.success("已連線")
+                    audio.play()
+                } else {
+                    setLoading(false)
+                    toast.error("連線失敗")
+                }
             }
         }
 
