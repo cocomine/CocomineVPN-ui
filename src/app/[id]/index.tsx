@@ -231,9 +231,9 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
                     <div className="rounded-5">
                         <Row className="justify-content-center align-content-center h-100">
                             <Col xs="auto">
-                                {loading ? <Spinner animation="grow" size="sm" className="me-2"/> :
-                                    <i className="bi bi-link-45deg me-2"></i>}
-                                一鍵連線
+                                {loading ? <><Spinner animation="grow" size="sm" className="me-2"/> 連線中...</> :
+                                    <><i className="bi bi-link-45deg me-2"></i> 一鍵連線</>
+                                }
                             </Col>
                         </Row>
                     </div>
