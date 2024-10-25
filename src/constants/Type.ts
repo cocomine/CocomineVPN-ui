@@ -1,5 +1,6 @@
 import {I_StatusUpdateCallback, I_WeatherAlert} from "./Interface";
 
+
 /**
  * Type definition for the context.
  *
@@ -72,9 +73,14 @@ export type VMDataType = {
  * @property {string} ip - The ip of the user.
  */
 export type UserProfileType = {
-    email: string;
-    name: string;
-    ip: string;
+    email: string,
+    name: string,
+    ip: string,
+    custom: {
+        name: string,
+        [key: string]: any
+    },
+    [key: string]: any
 }
 /**
  * Type definition for the weather alert type.

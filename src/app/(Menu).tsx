@@ -52,10 +52,10 @@ const DANGER_WEATHER_ALERT: WeatherAlertType[] = ['TC8NE', 'TC8SW', 'TC8NW', 'TC
  *
  * Parent component: App@src/app/App.tsx
  *
- * @param {Object} props - The component props
- * @param {Object} props.data - The data object containing VM data, next update time, and last update time
- * @param {UserProfileType} props.userProfile - The user profile data
- * @param {WeatherDataType} props.weatherData - The weather data
+ * @param props - The component props
+ * @param props.data - The data object containing VM data, next update time, and last update time
+ * @param props.userProfile - The user profile data
+ * @param props.weatherData - The weather data
  */
 const Menu: React.FC<{
     data: { data: VMDataType[], next_update: string, last_update: string },
@@ -202,7 +202,7 @@ const Menu: React.FC<{
                 <Col xs={12} className="pt-5">
                     <Row className="justify-content-between align-items-center">
                         <Col xs="auto">
-                            <h1 className="text-truncate">Welcome {userProfile.name} !</h1>
+                            <h1 className="text-truncate">Welcome {userProfile.name ?? userProfile.custom.name ?? ""} !</h1>
                         </Col>
                         <Col xs="auto">
                             <Button variant="danger" href="/cdn-cgi/access/logout">
