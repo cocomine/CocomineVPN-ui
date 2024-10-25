@@ -196,14 +196,15 @@ const Menu: React.FC<{
         });
     }, [SuccessAudio, FailAudio]);
 
+    console.debug(userProfile) //debug
+
     return (
         <>
             <Row className="justify-content-start align-content-center g-5 py-3 mx-1 gx-xl-4">
                 <Col xs={12} className="pt-5">
                     <Row className="justify-content-between align-items-center">
                         <Col xs="auto">
-                            <h1 className="text-truncate">Welcome {userProfile.name ?? (userProfile.custom.name !== undefined
-                                ? userProfile.custom.name : "")} !</h1>
+                            <h1 className="text-truncate">Welcome {userProfile.name} !</h1>
                         </Col>
                         <Col xs="auto">
                             <Button variant="danger" href="/cdn-cgi/access/logout">
