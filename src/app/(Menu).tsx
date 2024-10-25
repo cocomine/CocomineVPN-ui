@@ -202,7 +202,8 @@ const Menu: React.FC<{
                 <Col xs={12} className="pt-5">
                     <Row className="justify-content-between align-items-center">
                         <Col xs="auto">
-                            <h1 className="text-truncate">Welcome {userProfile.name ?? (userProfile.custom['name'] || "")} !</h1>
+                            <h1 className="text-truncate">Welcome {userProfile.name ?? (userProfile.custom.name != undefined
+                                ? userProfile.custom.name : "")} !</h1>
                         </Col>
                         <Col xs="auto">
                             <Button variant="danger" href="/cdn-cgi/access/logout">
