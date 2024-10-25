@@ -74,9 +74,9 @@ export type VMDataType = {
  */
 export type UserProfileType = {
     email: string,
-    name: string,
-    ip: string,
-    custom: {
+    name?: string,
+    ip?: string,
+    custom?: {
         name: string,
         [key: string]: any
     },
