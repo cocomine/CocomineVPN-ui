@@ -57,7 +57,7 @@ function App() {
                             closeOnClick
                             rtl={false}
                             draggable
-                            pauseOnHover
+                            pauseOnFocusLoss={false}
                             theme="colored"/>
         </>
     );

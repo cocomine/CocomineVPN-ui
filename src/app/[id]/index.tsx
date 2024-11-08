@@ -10,7 +10,7 @@ import {
     useNavigate,
     useOutletContext
 } from "react-router-dom";
-import {toast} from "react-toastify";
+import {Id as ToastId, toast} from "react-toastify";
 import power from "../../assets/images/svg/power.svg";
 import tools from "../../assets/images/svg/tools.svg";
 import moment from "moment/moment";
@@ -166,11 +166,15 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
     const audio = useMemo(() => new Audio(require('../../assets/sounds/Jig 0.mp3')), []);
+    const toastID = useRef<ToastId | null>(null)
 
     // connect to extension
     const onClick = useCallback(() => {
         setLoading(true)
         window.postMessage({type: 'Connect', ask: true, data: vmData});
+
+        //create toast
+        toastID.current = toast.loading(<>連接檢查中... <br/>檢查需時, 請耐心等候</>, {});
     }, [vmData]);
 
     // check if extension is installed
@@ -181,6 +185,7 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
                 return;
             }
 
+            // receive extension installed response
             if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
                 const data: I_ExtensionInstalled_PostMessageData = e.data
                 if (!data.data.installed) return;
@@ -188,15 +193,20 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
                 setInstalled(vmData._profiles.some(p => p.type === "socks5"))
             }
 
+            // receive connect response
             if ((e.data.type === 'Connect') && !e.data.ask) {
                 const data: I_Connect_PostMessageData = e.data
                 if (data.data.connected) {
                     setLoading(false)
-                    toast.success("已連線")
-                    audio.play()
+                    toastID.current ? toast.update(toastID.current,
+                            {render: "已連線", type: "success", isLoading: false, autoClose: 5000, closeButton: true})
+                        : toast.success("已連線")
+                    audio.play();
                 } else {
                     setLoading(false)
-                    toast.error("連線失敗")
+                    toastID.current ? toast.update(toastID.current,
+                            {render: "連線失敗", type: "error", isLoading: false, autoClose: 5000, closeButton: true})
+                        : toast.error("連線失敗")
                 }
             }
         }
