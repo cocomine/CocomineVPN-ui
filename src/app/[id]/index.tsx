@@ -24,6 +24,7 @@ import {
     I_PowerControl
 } from "../../constants/Interface";
 import {fetchVMData} from "../../hook/Loader";
+import ReactGA from "react-ga4";
 
 
 /**
@@ -43,6 +44,13 @@ const VMAction: React.FC = () => {
 
     // power action
     const powerAction = useCallback(async (power: boolean) => {
+        // Google Analytics
+        ReactGA.event('vm_power_action', {
+            vm_name: vmData._name,
+            vm_id: vmData._id,
+            power: power ? "ON" : "OFF"
+        })
+
         try {
             const res = await fetch(API_URL + "/vpn/" + vmData._id, {
                 method: "PUT",
@@ -74,13 +82,19 @@ const VMAction: React.FC = () => {
 
     // extend time action
     const extendTime = useCallback(async () => {
+        // Google Analytics
+        ReactGA.event('vm_extend_time', {
+            vm_name: vmData._name,
+            vm_id: vmData._id,
+        })
+
         try {
             const res = await fetch(API_URL + "/vpn/" + vmData._id, {
                 method: "PATCH",
                 credentials: "include",
                 headers: {
                     "Cf-Access-Jwt-Assertion": TOKEN,
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
             })
             if (!res.ok) {
@@ -170,6 +184,12 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
     // connect to extension
     const onClick = useCallback(() => {
         setLoading(true)
+
+        // Google Analytics
+        ReactGA.event('extension_connect', {
+            vm_name: vmData._name,
+            vm_id: vmData._id,
+        })
 
         // show toast
         toast.promise(new Promise((resolve, reject) => {

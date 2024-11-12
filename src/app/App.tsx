@@ -7,6 +7,8 @@ import {useLoaderData, useLocation, useNavigation, useRevalidator} from "react-r
 import {LoadingScreen} from "../components/LoadingScreen";
 import {UserProfileType, WeatherDataType} from "../constants/Type";
 import {fetchProfileData, fetchVPNData, fetchWeatherData} from "../hook/Loader";
+import ReactGA from "react-ga4";
+import {GTAG_TAG_ID} from "../constants/GlobalVariable";
 
 
 /**
@@ -27,6 +29,10 @@ function App() {
         userProfile: UserProfileType,
         WeatherData: WeatherDataType
     };
+
+    useEffect(() => {
+
+    }, []);
 
     // set title
     useEffect(() => {
@@ -70,6 +76,14 @@ const loader = async () => {
     const VMData = await fetchVPNData()
     const userProfile = await fetchProfileData();
     const WeatherData = await fetchWeatherData();
+
+    // initialize Google Analytics
+    ReactGA.initialize(GTAG_TAG_ID, {
+        gaOptions: {
+            'userId': userProfile.email,
+        }
+    });
+
     console.debug(VMData, userProfile, WeatherData) //debug
     return {
         VMData,

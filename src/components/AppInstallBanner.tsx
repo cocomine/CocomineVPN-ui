@@ -4,6 +4,7 @@ import {Col, Row} from "react-bootstrap";
 import {I_ExtensionInstalled_PostMessageData, I_PostMessageData} from "../constants/Interface";
 import {Link} from "react-router-dom";
 
+
 /**
  * PWA install element for menu
  * @constructor
@@ -34,7 +35,7 @@ const AppInstallBanner: React.FC = () => {
         return () => window.removeEventListener('message', callback);
     }, []);
 
-    if (!installed) return null
+    if (installed) return null
     return (
         <Link to={'/download'}
               className='link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2'>

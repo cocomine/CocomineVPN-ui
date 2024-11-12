@@ -4,6 +4,8 @@ import {VMDataType, VPNProfileType} from "../../constants/Type";
 import {Button, Col, Form, InputGroup, Modal, Row} from "react-bootstrap";
 import {API_URL} from "../../constants/GlobalVariable";
 import {QRCodeSVG} from "qrcode.react";
+import ReactGA from "react-ga4";
+
 
 /**
  * Profile component
@@ -20,7 +22,7 @@ const Profile: React.FC = () => {
 
     // set title
     useEffect(() => {
-        document.title = vmData._name + " SingleVPNProfile - Cocomine VPN"
+        document.title = vmData._name + " VPNProfile - Cocomine VPN"
     }, [vmData]);
 
     // block navigation when modal is open
@@ -117,6 +119,12 @@ const OpenVPN: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile,
 
     // download animation
     const onClick = useCallback(() => {
+        // Google Analytics
+        ReactGA.event('vpn_profile_download', {
+            profile_type: 'OpenVPN',
+            vm_id: vm_id,
+        })
+
         const img = a_ref.current as HTMLElement
         const style = {
             top: img.getBoundingClientRect().top + "px",
@@ -173,6 +181,12 @@ const SoftEther: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profil
 
     // download animation
     const onClick = useCallback(() => {
+        // Google Analytics
+        ReactGA.event('vpn_profile_download', {
+            profile_type: 'SoftEther',
+            vm_id: vm_id,
+        })
+
         const img = a_ref.current as HTMLElement
         const style = {
             top: img.getBoundingClientRect().top + "px",
@@ -231,6 +245,11 @@ const SS: React.FC<{ profile: VPNProfileType }> = ({profile}) => {
     const onClick = useCallback((e: any) => {
         e.preventDefault()
         e.stopPropagation()
+
+        // Google Analytics
+        ReactGA.event('vpn_profile_download', {
+            profile_type: 'SS',
+        })
 
         setShow(true)
     }, [])
