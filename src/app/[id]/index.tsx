@@ -10,7 +10,7 @@ import {
     useNavigate,
     useOutletContext
 } from "react-router-dom";
-import {Id as ToastId, toast} from "react-toastify";
+import {toast} from "react-toastify";
 import power from "../../assets/images/svg/power.svg";
 import tools from "../../assets/images/svg/tools.svg";
 import moment from "moment/moment";
@@ -166,15 +166,40 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
     const audio = useMemo(() => new Audio(require('../../assets/sounds/Jig 0.mp3')), []);
-    const toastID = useRef<ToastId | null>(null)
 
     // connect to extension
     const onClick = useCallback(() => {
         setLoading(true)
-        window.postMessage({type: 'Connect', ask: true, data: vmData});
 
-        //create toast
-        toastID.current = toast.loading(<>連接檢查中... <br/>檢查需時, 請耐心等候</>, {});
+        // show toast
+        toast.promise(new Promise((resolve, reject) => {
+
+            // onMessage event callback function
+            function callback(e: MessageEvent<I_PostMessageData>) {
+                if (e.source !== window) return;
+
+                // receive connect response
+                if ((e.data.type === 'Connect') && !e.data.ask) {
+                    const data: I_Connect_PostMessageData = e.data
+                    if (data.data.connected) {
+                        resolve(true)
+                    } else {
+                        reject(false)
+                    }
+                    window.removeEventListener('message', callback); // remove event listener when call
+                }
+            }
+
+            window.addEventListener('message', callback); // add event listener on message
+        }), {
+            pending: {render: <>連接檢查中... <br/>檢查需時, 請耐心等候</>},
+            success: "連線成功",
+            error: "連線失敗"
+        }).catch((err) => {
+            console.error(err)
+        });
+
+        window.postMessage({type: 'Connect', ask: true, data: vmData}); // post message to extension for connect
     }, [vmData]);
 
     // check if extension is installed
@@ -198,15 +223,9 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
                 const data: I_Connect_PostMessageData = e.data
                 if (data.data.connected) {
                     setLoading(false)
-                    toastID.current ? toast.update(toastID.current,
-                            {render: "已連線", type: "success", isLoading: false, autoClose: 5000, closeButton: true})
-                        : toast.success("已連線")
                     audio.play();
                 } else {
                     setLoading(false)
-                    toastID.current ? toast.update(toastID.current,
-                            {render: "連線失敗", type: "error", isLoading: false, autoClose: 5000, closeButton: true})
-                        : toast.error("連線失敗")
                 }
             }
         }
