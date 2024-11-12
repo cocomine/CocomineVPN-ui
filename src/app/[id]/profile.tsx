@@ -143,7 +143,7 @@ const OpenVPN: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile,
         setTimeout(() => {
             setShow(null)
         }, 200);
-    }, [])
+    }, [vm_id])
 
     return (
         <>
@@ -206,7 +206,7 @@ const SoftEther: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profil
         setTimeout(() => {
             setShow(null)
         }, 200);
-    }, [])
+    }, [vm_id])
 
     return (
         <>
