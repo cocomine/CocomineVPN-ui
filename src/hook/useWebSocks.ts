@@ -3,6 +3,7 @@ import {API_URL, NODE_ENV, TOKEN} from "../constants/GlobalVariable";
 import {WebSocketDataType} from "../constants/Type";
 import {I_WebSocketTicket} from "../constants/Interface";
 
+
 let websocket: WebSocket;
 
 /**
@@ -47,8 +48,8 @@ const connectWebsocket = async () => {
         console.error(event)
     });
     tmp_ws.addEventListener('close', () => {
-        console.warn("WebSocket Disconnected. Reconnect in 5s.")
-        setTimeout(connectWebsocket, 5000) //reconnect at 5s
+        console.warn("WebSocket Disconnected. Reconnect in 1s.")
+        setTimeout(connectWebsocket, 1000) //reconnect at 5s
     });
     tmp_ws.addEventListener('message', (event) => {
         const data: WebSocketDataType = JSON.parse(event.data);
@@ -69,9 +70,10 @@ function useWebSocket() {
     const [ws, setWebSocket] = useState<WebSocket>(websocket);
 
     useEffect(() => {
-        setWebSocket(websocket)
-        // eslint-disable-next-line
-    }, [websocket]);
+        setInterval(() => {
+            setWebSocket(websocket)
+        }, 1000)
+    }, []);
 
     return ws;
 }

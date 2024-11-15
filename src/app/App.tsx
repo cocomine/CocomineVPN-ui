@@ -9,6 +9,7 @@ import {UserProfileType, WeatherDataType} from "../constants/Type";
 import {fetchProfileData, fetchVPNData, fetchWeatherData} from "../hook/Loader";
 import ReactGA from "react-ga4";
 import {GTAG_TAG_ID} from "../constants/GlobalVariable";
+import {clarity} from "react-microsoft-clarity";
 
 
 /**
@@ -37,7 +38,12 @@ function App() {
     // set title
     useEffect(() => {
         if (location.pathname === "/") document.title = "Home - Cocomine VPN"
-    }, [location]);
+        clarity.identify(userProfile.email, {
+            'custom-session-id': Math.floor(Math.random() * (999999 + 1)),
+            "custom-page-id": location.key,
+            "friendly-name": userProfile.name ?? 'N/A'
+        });
+    }, [location, userProfile]);
 
     // tab visibilitychange
     useEffect(() => {
@@ -83,6 +89,7 @@ const loader = async () => {
             'userId': userProfile.email,
         }
     });
+    clarity.consent(); // consent clarity
 
     console.debug(VMData, userProfile, WeatherData) //debug
     return {

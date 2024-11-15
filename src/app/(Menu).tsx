@@ -25,10 +25,7 @@ import {
     WeatherDataType,
     WebSocketDataType
 } from "../constants/Type";
-import {toastHttpError} from "../components/ToastHttpError";
-import {fetchVPNData} from "../hook/Loader";
 import ExtensionInstallBanner from "../components/ExtensionInstallBanner";
-
 // VM processing status
 const PROCESSING_STATUS_TEXT = [
     "PROVISIONING",
@@ -63,7 +60,7 @@ const Menu: React.FC<{
 }> = ({data, userProfile, weatherData}) => {
     const websocket = useWebSocket();
     const [vm_data, setVMData] = useState<VMDataType[]>([]);
-    const [nextUpdateInterval, setNextUpdateInterval] = useState("00:00");
+    const [nextUpdateInterval, setNextUpdateInterval] = useState("--:--");
     const [lastUpdate, setLastUpdate] = useState("00:00");
     const [nextUpdate, setNextUpdate] = useState(moment());
     const [wsDisconnected, setWsDisconnected] = useState(true);
@@ -74,47 +71,31 @@ const Menu: React.FC<{
         setVMData(data.data);
         setNextUpdate(moment(data.next_update));
         setLastUpdate(moment(data.last_update).format("HH:mm"));
+        setNextUpdateInterval(moment(data.next_update).format("HH:mm"));
+        console.log("VMData updated, next update: " + data.next_update);
     }, [data]);
 
     // update timeInterval every second
     useEffect(() => {
-        const abortController = new AbortController();
-
         const id = setInterval(async () => {
             const diff = nextUpdate.diff(moment())
 
             // update data if next update time is passed
             if (diff < 0) {
-                let vpnData;
-                try {
-                    vpnData = await fetchVPNData(abortController);
-                } catch (err: any) {
-                    console.error(err)
-                    if (err.name !== "AbortError") toastHttpError(err.status)
-                    setNextUpdate(moment().add(10, "seconds")); // retry after 10 seconds
-                    return;
-                }
-
-                setVMData(vpnData.data);
-                setLastUpdate(moment(vpnData.last_update).format("HH:mm"));
-                setNextUpdate(moment(vpnData.next_update));
+                revalidator.revalidate();
                 return;
             }
-
-            setNextUpdateInterval(moment(diff).format("mm:ss"));
-        }, 1000);
+        }, 5000);
 
         return () => {
             clearInterval(id);
-            abortController.abort();
         };
-    }, [nextUpdate, vm_data]);
+    }, [nextUpdate, revalidator]);
 
     // websocket event listener for updating VM data
     useEffect(() => {
         if (!websocket) return;
         setWsDisconnected(false);
-        revalidator.revalidate();
 
         // event listener for websocket
         // update VM data when received message from websocket
@@ -135,9 +116,7 @@ const Menu: React.FC<{
         websocket.addEventListener('close', () => {
             setWsDisconnected(true);
         });
-
-        // eslint-disable-next-line
-    }, [websocket]);
+    }, [websocket, revalidator]);
 
     // post message to content script when vm_data is changed
     useEffect(() => {
@@ -234,7 +213,7 @@ const Menu: React.FC<{
                         <Col xs={12}>
                             <p className="text-end">
                                 最後更新: {lastUpdate} <br/>
-                                距離下次更新: {nextUpdateInterval}
+                                下次更新: {nextUpdateInterval}
                             </p>
                         </Col>
                     </Row>
@@ -281,7 +260,6 @@ const Weather: React.FC<{ weatherData: WeatherDataType }> = ({weatherData}) => {
     const [data, setData] = useState<WeatherDataType>(weatherData);
 
     const alert: AlertMemoType = useMemo(() => {
-        console.debug(data.alert)
         return data.alert.map((item) => {
             return [require("../assets/weather alert/" + item.code + ".webp"), item.code]
         })

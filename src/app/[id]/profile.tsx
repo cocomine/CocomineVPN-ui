@@ -279,14 +279,15 @@ const SS: React.FC<{ profile: VPNProfileType }> = ({profile}) => {
                 <Modal.Body>
                     <span>掃描以下QR code</span>
                     <Row className="justify-content-center mb-3">
-                        <Col xs={"auto"}>
+                        <Col xs={"auto"} data-clarity-mask="true">
                             <QRCodeSVG value={profile.url || ''} includeMargin={true} size={218}/>
                         </Col>
                     </Row>
 
                     <span>或複製以下連結</span>
                     <InputGroup hasValidation>
-                        <Form.Control readOnly={true} value={profile.url || ''} isValid={isCopy}/>
+                        <Form.Control readOnly={true} value={profile.url || ''} isValid={isCopy}
+                                      data-clarity-mask="true"/>
                         <Button onClick={onCopy} variant={isCopy ? "outline-success" : "outline-secondary"}>
                             <i className="bi bi-clipboard"></i></Button>
                         <Form.Control.Feedback type="valid">已複製</Form.Control.Feedback>

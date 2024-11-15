@@ -15,6 +15,7 @@ import {LoadingScreen} from "./components/LoadingScreen";
 import Profile from "./app/[id]/profile";
 import {AnimationBackground} from "./components/AnimationBackground";
 import {AnimationBubbles} from "./components/AnimationBubbles";
+import {clarity} from "react-microsoft-clarity";
 
 // create router
 const router = createBrowserRouter([
@@ -74,6 +75,8 @@ figlet.text('Cocomine VPN', {
     console.log(data);
     console.log(APP_VERSION)
 });
+
+clarity.init('okh6uy1ksy'); // init clarity
 
 connectWebsocket(); // connect websocket
 
