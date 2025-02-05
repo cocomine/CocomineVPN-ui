@@ -284,6 +284,15 @@ const SS: React.FC<{ profile: VPNProfileType }> = ({profile}) => {
                         </Col>
                     </Row>
 
+                    <div className="d-grid">
+                        <a className={"btn btn-lg btn-primary"} href={profile.url} role="button" target="_blank"
+                           rel="noreferrer noopener">
+                            <i className="bi bi-box-arrow-in-down-right me-2"></i> 直接導入 (需程式支援)
+                        </a>
+                    </div>
+                </Modal.Body>
+                <hr className={"m-0"}/>
+                <Modal.Body>
                     <span>或複製以下連結</span>
                     <InputGroup hasValidation>
                         <Form.Control readOnly={true} value={profile.url || ''} isValid={isCopy}
@@ -292,6 +301,7 @@ const SS: React.FC<{ profile: VPNProfileType }> = ({profile}) => {
                             <i className="bi bi-clipboard"></i></Button>
                         <Form.Control.Feedback type="valid">已複製</Form.Control.Feedback>
                     </InputGroup>
+
                 </Modal.Body>
             </Modal>
         </>

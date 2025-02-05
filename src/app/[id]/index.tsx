@@ -292,6 +292,17 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
     )
 }
 
+/**
+ * MobileAppConnect component
+ *
+ * This component handles the connection to a mobile app for the VPN.
+ * It checks if the mobile app is installed and allows the user to connect to it.
+ *
+ * @param {Object}  - The component props.
+ * @param {VMDataType} vmData - The VM data.
+ *
+ * @returns {JSX.Element | null} - The rendered component or null if the app is not installed.
+ */
 const MobileAppConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
