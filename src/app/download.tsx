@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Col, Container, Modal, Row} from "react-bootstrap";
-import {useBlocker, useLocation} from "react-router-dom";
+import {useBlocker, useLocation, useNavigate} from "react-router-dom";
 
 /**
  * Download component
@@ -16,6 +16,7 @@ import {useBlocker, useLocation} from "react-router-dom";
 const Download = () => {
     const location = useLocation();
     const [show, setShow] = useState(true);
+    const navigate = useNavigate();
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -43,7 +44,8 @@ const Download = () => {
     return (
         <>
             {location.pathname === '/download' &&
-                <Modal show={show} fullscreen={'sm-down'} centered onHide={() => window.history.back()} size="lg">
+                <Modal show={show} fullscreen={'sm-down'} centered onHide={() => navigate('..', {replace: true})}
+                       size="lg">
                     <Modal.Header closeButton>
                         <Modal.Title>下載程式</Modal.Title>
                     </Modal.Header>

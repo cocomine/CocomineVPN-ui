@@ -8,7 +8,8 @@ import {
     useLoaderData,
     useLocation,
     useNavigate,
-    useOutletContext
+    useOutletContext,
+    useRevalidator
 } from "react-router-dom";
 import {toast} from "react-toastify";
 import power from "../../assets/images/svg/power.svg";
@@ -41,6 +42,7 @@ const VMAction: React.FC = () => {
     const navigate = useNavigate();
     const [show, setShow] = useState(true);
     const {statusUpdateCallback} = useOutletContext<ContextType>()
+    const revalidator = useRevalidator();
 
     // power action
     const powerAction = useCallback(async (power: boolean) => {
@@ -103,6 +105,7 @@ const VMAction: React.FC = () => {
                 return toastHttpError(res.status)
             }
             toast.success("延長開放時間成功")
+            revalidator.revalidate();
         } catch (e: any) {
             console.log(e)
             toastHttpError(e.status)
@@ -110,7 +113,7 @@ const VMAction: React.FC = () => {
         } finally {
             navigate('..', {replace: true}) // redirect to home page
         }
-    }, [vmData, navigate])
+    }, [vmData, navigate, revalidator])
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -384,6 +387,8 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({
     const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string>("Loading...")
     const [enableExtend, setEnableExtend] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
+    const location = useLocation();
+
     const click = useCallback(() => {
         setLoading(true);
         onClick()
@@ -404,6 +409,11 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({
             return () => clearInterval(id)
         }
     }, [expired]);
+
+    // check if hash is #extendTime
+    useEffect(() => {
+        if (location.hash === "#extendTime") click()
+    }, [click, location.hash]);
 
     if (expired === null) return null;
     return (
