@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {Alert, Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
@@ -75,7 +75,7 @@ const Menu: React.FC<{
         console.log("VMData updated, next update: " + data.next_update);
     }, [data]);
 
-    // update timeInterval every second
+    // check update every 5 second
     useEffect(() => {
         const id = setInterval(async () => {
             const diff = nextUpdate.diff(moment())
@@ -132,11 +132,12 @@ const Menu: React.FC<{
     const FailAudio = useMemo(() => new Audio(require("../assets/sounds/Error.mp3")), []);
 
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
-    const timeout = useRef<NodeJS.Timeout | null>(null);
+    //const timeout = useRef<NodeJS.Timeout | null>(null);
     const statusUpdateCallback = useCallback<I_StatusUpdateCallback>(async (target, vm_id) => {
         // show toast message
         await toast.promise(new Promise((resolve, reject) => {
 
+            let timeout: NodeJS.Timeout | null = null;
             // create event listener for message from window
             const callback = (event: MessageEvent<I_VMData_windowPostMessage>) => {
                 if (event.source !== window) return; // ignore message from other source
@@ -148,7 +149,7 @@ const Menu: React.FC<{
                     if (newVMData[index]._isPowerOn === target) {
                         SuccessAudio.play();
                         resolve("Success")
-                        clearTimeout(timeout.current!);
+                        timeout && clearTimeout(timeout); //clear timeout
                         window.removeEventListener("message", callback); // remove event listener
                     }
                 }
@@ -158,7 +159,7 @@ const Menu: React.FC<{
             window.addEventListener("message", callback);
 
             // timeout for 2 minutes
-            timeout.current = setTimeout(() => {
+            timeout = setTimeout(() => {
                 FailAudio.play();
                 reject("Timeout")
                 window.removeEventListener("message", callback); // remove event listener

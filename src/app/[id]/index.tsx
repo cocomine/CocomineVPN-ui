@@ -8,8 +8,7 @@ import {
     useLoaderData,
     useLocation,
     useNavigate,
-    useOutletContext,
-    useRevalidator
+    useOutletContext
 } from "react-router-dom";
 import {toast} from "react-toastify";
 import power from "../../assets/images/svg/power.svg";
@@ -42,7 +41,7 @@ const VMAction: React.FC = () => {
     const navigate = useNavigate();
     const [show, setShow] = useState(true);
     const {statusUpdateCallback} = useOutletContext<ContextType>()
-    const revalidator = useRevalidator();
+    //const revalidator = useRevalidator();
 
     // power action
     const powerAction = useCallback(async (power: boolean) => {
@@ -105,15 +104,14 @@ const VMAction: React.FC = () => {
                 return toastHttpError(res.status)
             }
             toast.success("延長開放時間成功")
-            revalidator.revalidate();
         } catch (e: any) {
-            console.log(e)
+            console.error(e)
             toastHttpError(e.status)
             return
         } finally {
             navigate('..', {replace: true}) // redirect to home page
         }
-    }, [vmData, navigate, revalidator])
+    }, [vmData, navigate])
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -390,9 +388,10 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({
     const location = useLocation();
 
     const click = useCallback(() => {
+        if (loading) return; //if already click
         setLoading(true);
         onClick()
-    }, [onClick]);
+    }, [loading, onClick]);
 
     // update expect_offline_time_Interval every second
     useEffect(() => {
