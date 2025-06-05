@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.scss';
 import App, {loader} from './app/App';
 import reportWebVitals from './reportWebVitals';
-import {createBrowserRouter, redirect, RouterProvider} from "react-router-dom";
+import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import VMAction, {loader as actionLoader, VMActionErrorElement} from "./app/[id]";
 import figlet from "figlet";
 import Download from "./app/download";
@@ -48,7 +48,8 @@ const router = createBrowserRouter([
                 element: <LoadingScreen display={true}/>,
                 loader: async () => {
                     const redirectUrl = sessionStorage.getItem('redirect');
-                    redirect(redirectUrl ? redirectUrl : "/")
+                    sessionStorage.removeItem('redirect');
+                    window.location.replace(redirectUrl ? redirectUrl : "/")
                 },
             }
         ]
