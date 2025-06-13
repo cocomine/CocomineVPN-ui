@@ -111,7 +111,7 @@ const ErrorScreen: React.FC = () => {
         setLoading(true)
         sessionStorage.setItem('redirect', location.pathname)
         navigate("/login", {replace: true})
-    }, []);
+    }, [navigate, location.pathname]);
 
     return (
         <div className="error-screen">
