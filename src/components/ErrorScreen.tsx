@@ -1,5 +1,5 @@
 import React, {useCallback, useMemo, useState} from "react";
-import {isRouteErrorResponse, useLocation, useNavigate, useRouteError} from "react-router-dom";
+import {isRouteErrorResponse, useLocation, useRouteError} from "react-router-dom";
 import {Button, Col, Row, Spinner} from "react-bootstrap";
 import Lottie from "lottie-react";
 
@@ -105,13 +105,12 @@ const ErrorScreen: React.FC = () => {
     }, [error]);
     const [loading, setLoading] = useState(false);
     let location = useLocation();
-    const navigate = useNavigate();
 
     const loginCallback = useCallback(() => {
         setLoading(true)
         sessionStorage.setItem('redirect', location.pathname)
-        navigate("/login", {replace: true})
-    }, [navigate, location.pathname]);
+        window.location.replace("/login")
+    }, [location.pathname]);
 
     return (
         <div className="error-screen">
