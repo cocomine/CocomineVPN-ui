@@ -1,8 +1,8 @@
 // Variable to store the deferred prompt event for PWA installation
 import React, {useEffect, useState} from "react";
 import {Col, Row} from "react-bootstrap";
-import {I_ExtensionInstalled_PostMessageData, I_PostMessageData} from "../constants/Interface";
 import {Link} from "react-router-dom";
+import {PostMessageData} from "../constants/Type";
 
 
 /**
@@ -16,14 +16,13 @@ const AppInstallBanner: React.FC = () => {
     // check if extension is installed
     useEffect(() => {
         // callback function
-        function callback(e: MessageEvent<I_PostMessageData>) {
+        function callback(e: MessageEvent<PostMessageData>) {
             if (e.source !== window) {
                 return;
             }
 
             if ((e.data.type === 'MobileAppInstalled') && !e.data.ask) {
-                const data: I_ExtensionInstalled_PostMessageData = e.data
-                if (!data.data.installed) return;
+                if (!e.data.data.installed) return;
                 setInstalled(true);
             }
         }

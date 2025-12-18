@@ -1,10 +1,9 @@
-// Variable to store the deferred prompt event for PWA installation
 import React, {useEffect, useState} from "react";
 import {Col, Row} from "react-bootstrap";
-import {I_ExtensionInstalled_PostMessageData, I_PostMessageData} from "../constants/Interface";
+import {PostMessageData} from "../constants/Type";
 
 /**
- * PWA install element for menu
+ * Extension install element for menu
  * @constructor
  */
 const ExtensionInstallBanner: React.FC = () => {
@@ -14,14 +13,13 @@ const ExtensionInstallBanner: React.FC = () => {
     // check if extension is installed
     useEffect(() => {
         // callback function
-        function callback(e: MessageEvent<I_PostMessageData>) {
+        function callback(e: MessageEvent<PostMessageData>) {
             if (e.source !== window) {
                 return;
             }
 
-            if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
-                const data: I_ExtensionInstalled_PostMessageData = e.data
-                if (!data.data.installed) return;
+            if ((e.data.type === 'ExtensionInstalled' || e.data.type === 'MobileAppInstalled') && !e.data.ask) {
+                if (!e.data.data.installed) return;
                 setInstalled(true);
             }
         }
@@ -45,10 +43,10 @@ const ExtensionInstallBanner: React.FC = () => {
                              style={{height: "6rem"}}
                              className="pe-2"/>
                     </Col>
-                    <Col style={{minWidth: "20rem"}}>
-                        <h5 className="fw-bold text-info align-bottom">
-                            安裝瀏覽器擴充<span
-                            className="badge rounded-pill text-bg-primary ms-2 small">立即安裝!</span>
+                    <Col xs="auto">
+                        <h5 className="fw-bold text-info">
+                            安裝瀏覽器擴充
+                            <span className="badge rounded-pill text-bg-primary ms-2 small">立即安裝!</span>
                         </h5>
                         <p className="m-0 text-white">在公用電腦上不方便安裝軟件? 嘗試使用瀏覽器擴充無需授權直接在瀏覽器中使用!
                             一鍵連線更加方便!</p>
