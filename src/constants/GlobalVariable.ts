@@ -1,11 +1,27 @@
 import Cookies from "js-cookie";
+import {WeatherAlertType} from "./Type";
 
 
-export const APP_VERSION = "1.13.15";
+export const APP_VERSION = "1.13.16";
 export const GTAG_TAG_ID = "G-W8JXQWDERZ";
 export const TOKEN = Cookies.get('CF_Authorization') ?? ""; // get token from cookie
 export const NODE_ENV = process.env.NODE_ENV || 'development';
 export const API_URL = NODE_ENV === 'development' ? 'http://localhost:8088' : 'https://vpn.cocomine.cc/api'; // API URL
 
+// VM processing status
+export const PROCESSING_STATUS_TEXT = [
+    "PROVISIONING",
+    "STAGING",
+    "STOPPING",
+    "SUSPENDING",
+    "REPAIRING",
+    "starting",
+    "stopping",
+    "creating",
+    "deallocating"
+]
+
+// Weather alert types that are considered dangerous
+export const DANGER_WEATHER_ALERT: WeatherAlertType[] = ['TC8NE', 'TC8SW', 'TC8NW', 'TC8SE', 'TC9', 'TC10', 'WRAINB', 'WTMW']
 
 NODE_ENV === 'development' ? console.log("Development mode") : console.log("Production mode");

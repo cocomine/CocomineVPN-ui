@@ -1,15 +1,17 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.scss';
-import {Container} from "react-bootstrap";
+import {Alert, Container} from "react-bootstrap";
 import {Menu} from "./(Menu)";
 import {ToastContainer} from "react-toastify";
 import {useLoaderData, useLocation, useNavigation, useRevalidator} from "react-router-dom";
 import {LoadingScreen} from "../components/LoadingScreen";
-import {UserProfileType, WeatherDataType} from "../constants/Type";
+import {UserProfileType, VMDataType, WeatherDataType, WebSocketDataType} from "../constants/Type";
 import {fetchProfileData, fetchVPNData, fetchWeatherData} from "../hook/Loader";
 import ReactGA from "react-ga4";
 import {GTAG_TAG_ID} from "../constants/GlobalVariable";
 import {clarity} from "react-microsoft-clarity";
+import {VMDataContext} from "../constants/VMDataContext";
+import useWebSocket from "../hook/useWebSocks";
 
 
 /**
@@ -22,18 +24,17 @@ import {clarity} from "react-microsoft-clarity";
  * Path: /
  */
 function App() {
+    const websocket = useWebSocket();
     const navigation = useNavigation();
     let revalidator = useRevalidator();
     const location = useLocation();
-    const {VMData, userProfile, WeatherData} = useLoaderData() as {
-        VMData: any,
+    const {data, userProfile, WeatherData} = useLoaderData() as {
+        data: VMDataType,
         userProfile: UserProfileType,
         WeatherData: WeatherDataType
     };
-
-    useEffect(() => {
-
-    }, []);
+    const [wsDisconnected, setWsDisconnected] = React.useState<boolean>(false);
+    const [vm_data, setVMData] = useState<VMDataType>(data);
 
     // set title
     useEffect(() => {
@@ -56,10 +57,65 @@ function App() {
         return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
     }, [revalidator]);
 
+    //websocket event listener for updating VM data
+    useEffect(() => {
+        if (!websocket) return;
+        setWsDisconnected(false);
+
+        // websocket message handler
+        function handleMessage(event: MessageEvent) {
+            const web_socket_data: WebSocketDataType = JSON.parse(event.data)
+
+            // VM data update
+            if (web_socket_data.uri === "/vpn/vm") {
+                console.debug("WebSocket VM Data Update:", web_socket_data.data);
+                setVMData((prev) => {
+                    // find and update the VM data, copy to trigger re-render
+                    const newVMData = [...prev.data];
+                    const index = newVMData.findIndex((vm) => vm._id === web_socket_data.data._id);
+
+                    if (index !== -1) {
+                        newVMData[index] = web_socket_data.data;
+                    }
+
+                    return {
+                        ...prev,
+                        data: newVMData
+                    };
+                })
+            }
+        }
+
+        // update VM data when received message from websocket
+        websocket.addEventListener('message', handleMessage);
+
+        // websocket close handler
+        function handleClose() {
+            setWsDisconnected(true);
+        }
+
+        // event listener for websocket close
+        websocket.addEventListener('close', handleClose);
+
+        // cleanup
+        return () => {
+            websocket.removeEventListener('message', handleMessage);
+            websocket.removeEventListener('close', handleClose);
+        };
+    }, [websocket, revalidator]);
+
+    useEffect(() => {
+        setVMData(data)
+    }, [data]);
+
     return (
         <>
+            <Alert variant={"warning"} show={wsDisconnected} className="wsDisconnected">
+                與伺服器的連線中斷! 正在重新連線...</Alert>
             <Container className="content h-100" data-bs-theme="dark">
-                <Menu data={VMData} userProfile={userProfile} weatherData={WeatherData}/>
+                <VMDataContext.Provider value={vm_data}>
+                    <Menu userProfile={userProfile} weatherData={WeatherData}/>
+                </VMDataContext.Provider>
             </Container>
             <LoadingScreen display={navigation.state === "loading"}/>
             <ToastContainer position="bottom-right"
@@ -79,7 +135,7 @@ function App() {
  * Loader for menu
  */
 const loader = async () => {
-    const VMData = await fetchVPNData()
+    const data = await fetchVPNData()
     const userProfile = await fetchProfileData();
     const WeatherData = await fetchWeatherData();
 
@@ -91,9 +147,9 @@ const loader = async () => {
     });
     clarity.consent(); // consent clarity
 
-    console.debug(VMData, userProfile, WeatherData) //debug
+    console.debug(data, userProfile, WeatherData) //debug
     return {
-        VMData,
+        data,
         userProfile,
         WeatherData
     }

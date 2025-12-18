@@ -1,30 +1,17 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Button, Col, Modal, Ratio, Row, Spinner} from "react-bootstrap";
-import {
-    Link,
-    Navigate,
-    Outlet,
-    useBlocker,
-    useLoaderData,
-    useLocation,
-    useNavigate,
-    useOutletContext
-} from "react-router-dom";
+import {Link, Navigate, Outlet, useBlocker, useLocation, useNavigate, useOutletContext} from "react-router-dom";
 import {toast} from "react-toastify";
 import power from "../../assets/images/svg/power.svg";
 import tools from "../../assets/images/svg/tools.svg";
 import moment from "moment/moment";
-import {API_URL, TOKEN} from "../../constants/GlobalVariable";
-import {ContextType, VMDataType} from "../../constants/Type";
+import {API_URL, PROCESSING_STATUS_TEXT, TOKEN} from "../../constants/GlobalVariable";
+import {MenuContextType, PostMessageData, VMInstanceDataType} from "../../constants/Type";
 import {toastHttpError} from "../../components/ToastHttpError";
-import {
-    I_Connect_PostMessageData,
-    I_ExtensionInstalled_PostMessageData,
-    I_PostMessageData,
-    I_PowerControl
-} from "../../constants/Interface";
+import {I_PowerControl} from "../../constants/Interface";
 import {fetchVMData} from "../../hook/Loader";
 import ReactGA from "react-ga4";
+import {useVMData} from "../../constants/VMDataContext";
 
 
 /**
@@ -36,24 +23,34 @@ import ReactGA from "react-ga4";
  * Path: `/:id`
  */
 const VMAction: React.FC = () => {
-    const {vmData} = useLoaderData() as { vmData: VMDataType };
+    const [vm_instance_data, setVMInstanceData] = useState<VMInstanceDataType | null>(null)
+    const data = useVMData();
     const location = useLocation();
     const navigate = useNavigate();
     const [show, setShow] = useState(true);
-    const {statusUpdateCallback} = useOutletContext<ContextType>()
-    //const revalidator = useRevalidator();
+    const {statusUpdateCallback} = useOutletContext<MenuContextType>()
+    const [is_loading, setIsLoading] = useState<boolean>(false);
+
+    // set vm_instance_data when data changes
+    useEffect(() => {
+        if (data === null) return;
+        setVMInstanceData(data.data.find(v => v._id === location.pathname.split('/')[1]) || null)
+    }, [data, data?.data]);
 
     // power action
     const powerAction = useCallback(async (power: boolean) => {
+        if (vm_instance_data === null) return;
+
         // Google Analytics
         ReactGA.event('vm_power_action', {
-            vm_name: vmData._name,
-            vm_id: vmData._id,
+            vm_name: vm_instance_data._name,
+            vm_id: vm_instance_data._id,
             power: power ? "ON" : "OFF"
         })
+        setIsLoading(true);
 
         try {
-            const res = await fetch(API_URL + "/vpn/" + vmData._id, {
+            const res = await fetch(API_URL + "/vpn/" + vm_instance_data._id, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -66,31 +63,31 @@ const VMAction: React.FC = () => {
                 })
             })
             if (!res.ok) {
-                if (res.status === 460) return toast.error(`節點只允許 ${vmData._readonly} 操作`)
-                if (res.status === 461) return toast.error(`節點已經處於${vmData._isPowerOn ? '開機' : '關機'}狀態`)
+                if (res.status === 460) return toast.error(`節點只允許 ${vm_instance_data._readonly} 操作`)
+                if (res.status === 461) return toast.error(`節點已經處於${vm_instance_data._isPowerOn ? '開機' : '關機'}狀態`)
                 return toastHttpError(res.status)
             }
         } catch (e: any) {
             console.log(e)
             toastHttpError(e.status)
             return
-        } finally {
-            navigate('..') // redirect to home page
         }
 
-        statusUpdateCallback(power, vmData._id)
-    }, [vmData, statusUpdateCallback, navigate]);
+        statusUpdateCallback(power, vm_instance_data._id)
+    }, [vm_instance_data, statusUpdateCallback, navigate]);
 
     // extend time action
     const extendTime = useCallback(async () => {
+        if (vm_instance_data === null) return;
+
         // Google Analytics
         ReactGA.event('vm_extend_time', {
-            vm_name: vmData._name,
-            vm_id: vmData._id,
+            vm_name: vm_instance_data._name,
+            vm_id: vm_instance_data._id,
         })
 
         try {
-            const res = await fetch(API_URL + "/vpn/" + vmData._id, {
+            const res = await fetch(API_URL + "/vpn/" + vm_instance_data._id, {
                 method: "PATCH",
                 credentials: "include",
                 headers: {
@@ -111,7 +108,7 @@ const VMAction: React.FC = () => {
         } finally {
             navigate('..', {replace: true}) // redirect to home page
         }
-    }, [vmData, navigate])
+    }, [vm_instance_data, navigate])
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -130,25 +127,36 @@ const VMAction: React.FC = () => {
 
     // set title
     useEffect(() => {
-        if (location.pathname === '/' + vmData._id) {
-            document.title = vmData._name + " - Cocomine VPN"
+        if (vm_instance_data === null) return;
+        if (location.pathname === '/' + vm_instance_data._id) {
+            document.title = vm_instance_data._name + " - Cocomine VPN"
             setShow(true)
         }
-    }, [location, vmData]);
+    }, [location, vm_instance_data]);
 
+    // set is_loading when vm_instance_data._status changes
+    useEffect(() => {
+        if (vm_instance_data === null) return;
+        setIsLoading(PROCESSING_STATUS_TEXT.includes(vm_instance_data._status))
+    }, [vm_instance_data]);
+
+    if (vm_instance_data === null) return null;
     return (
         <>
-            {location.pathname === '/' + vmData._id &&
+            {location.pathname === '/' + vm_instance_data._id &&
                 <Modal show={show} centered onHide={() => navigate('..', {replace: true})}>
                     <Modal.Header closeButton>
                         <Modal.Title>你想? <small
-                            style={{color: "darkgray", fontSize: "x-small"}}>({vmData._name})</small></Modal.Title>
+                            style={{
+                                color: "darkgray",
+                                fontSize: "x-small"
+                            }}>({vm_instance_data._name})</small></Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Row className="gx-5 gy-4">
                             <Col>
-                                <PowerControl isPower={vmData._isPowerOn} action={powerAction}
-                                              readonly={vmData._readonly}/>
+                                <PowerControl isPower={vm_instance_data._isPowerOn} action={powerAction}
+                                              readonly={vm_instance_data._readonly} loading={is_loading}/>
                             </Col>
                             <Col className="border-start">
                                 <Link to={location.pathname + '/profile'} className="chooseProfile_btn">
@@ -156,16 +164,16 @@ const VMAction: React.FC = () => {
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
                             </Col>
-                            {vmData._isPowerOn && <>
-                                <ExtensionConnect vmData={vmData}/>
-                                <MobileAppConnect vmData={vmData}/>
+                            {vm_instance_data._isPowerOn && <>
+                                <ExtensionConnect data={vm_instance_data}/>
+                                <MobileAppConnect data={vm_instance_data}/>
                             </>}
-                            <ExtendTime expired={vmData._expired} onClick={extendTime}/>
+                            <ExtendTime expired={vm_instance_data._expired} onClick={extendTime}/>
                         </Row>
                     </Modal.Body>
                 </Modal>
             }
-            <Outlet context={{vmData}}/>
+            <Outlet context={{vmData: vm_instance_data}}/>
         </>
     );
 }
@@ -177,7 +185,7 @@ const VMAction: React.FC = () => {
  * @param {VMDataType} props.vmData - The VM data.
  *
  */
-const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
+const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
     const audio = useMemo(() => new Audio(require('../../assets/sounds/Jig 0.mp3')), []);
@@ -188,21 +196,20 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
 
         // Google Analytics
         ReactGA.event('extension_connect', {
-            vm_name: vmData._name,
-            vm_id: vmData._id,
+            vm_name: data._name,
+            vm_id: data._id,
         })
 
         // show toast
         toast.promise(new Promise((resolve, reject) => {
 
             // onMessage event callback function
-            function callback(e: MessageEvent<I_PostMessageData>) {
+            function callback(e: MessageEvent<PostMessageData>) {
                 if (e.source !== window) return;
 
                 // receive connect response
                 if ((e.data.type === 'Connect') && !e.data.ask) {
-                    const data: I_Connect_PostMessageData = e.data
-                    if (data.data.connected) {
+                    if (e.data.data.connected) {
                         resolve(true)
                     } else {
                         reject(false)
@@ -220,34 +227,29 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
             console.error(err)
         });
 
-        window.postMessage({type: 'Connect', ask: true, data: vmData}); // post message to extension for connect
-    }, [vmData]);
+        window.postMessage({type: 'Connect', ask: true, data: data}); // post message to extension for connect
+    }, [data]);
 
     // check if extension is installed
     useEffect(() => {
         // callback function
-        function callback(e: MessageEvent<I_PostMessageData>) {
+        function callback(e: MessageEvent<PostMessageData>) {
             if (e.source !== window) {
                 return;
             }
 
             // receive extension installed response
             if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
-                const data: I_ExtensionInstalled_PostMessageData = e.data
-                if (!data.data.installed) return;
-
-                setInstalled(vmData._profiles.some(p => p.type === "socks5"))
+                if (!(e.data.data.installed && data._profiles.some(p => p.type === "socks5"))) return;
+                setInstalled(true)
             }
 
             // receive connect response
             if ((e.data.type === 'Connect') && !e.data.ask) {
-                const data: I_Connect_PostMessageData = e.data
-                if (data.data.connected) {
-                    setLoading(false)
+                if (e.data.data.connected) {
                     audio.play();
-                } else {
-                    setLoading(false)
                 }
+                setLoading(false)
             }
         }
 
@@ -256,7 +258,7 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
         window.postMessage({type: 'ExtensionInstalled', ask: true});
 
         return () => window.removeEventListener('message', callback);
-    }, [vmData, audio]);
+    }, [data, audio]);
 
     if (!installed) return null;
     return (
@@ -304,33 +306,30 @@ const ExtensionConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
  *
  * @returns {JSX.Element | null} - The rendered component or null if the app is not installed.
  */
-const MobileAppConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
+const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
     const [installed, setInstalled] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
 
     // connect to extension
     const onClick = useCallback(() => {
         setLoading(true)
-        window.postMessage({type: 'AppConnect', ask: true, data: vmData});
-    }, [vmData]);
+        window.postMessage({type: 'AppConnect', ask: true, data: data});
+    }, [data]);
 
     // check if extension is installed
     useEffect(() => {
         // callback function
-        function callback(e: MessageEvent<I_PostMessageData>) {
+        function callback(e: MessageEvent<PostMessageData>) {
             if (e.source !== window) {
                 return;
             }
 
             if ((e.data.type === 'MobileAppInstalled') && !e.data.ask) {
-                const data: I_ExtensionInstalled_PostMessageData = e.data
-                if (!data.data.installed) return;
-
-                setInstalled(vmData._profiles.some(p => p.type === "OpenVPN"))
+                if (!(e.data.data.installed && data._profiles.some(p => p.type === "SS"))) return;
+                setInstalled(true)
             }
 
             if ((e.data.type === 'AppConnect') && !e.data.ask) {
-                //const data: I_Connect_PostMessageData = e.data
                 setLoading(false)
             }
         }
@@ -340,7 +339,7 @@ const MobileAppConnect: React.FC<{ vmData: VMDataType }> = ({vmData}) => {
         window.postMessage({type: 'MobileAppInstalled', ask: true});
 
         return () => window.removeEventListener('message', callback);
-    }, [vmData]);
+    }, [data]);
 
     if (!installed) return null;
     return (
@@ -445,14 +444,12 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({
  * @param {Function} props.action - The function to call to change the power state
  * @param {string} props.readonly - The readonly state of the node
  */
-const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly}) => {
+const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly, loading}) => {
     const timeout = useRef<NodeJS.Timeout | null>(null)
-    const [loading, setLoading] = useState(false) // loading state
 
     // on mouse down start timeout for long press event
     const onMouseDown = useCallback(() => {
         timeout.current = setTimeout(() => {
-            setLoading(true)
             action(!isPower)
         }, 2000)
     }, [action, isPower]);
@@ -525,6 +522,7 @@ const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly}) => 
 
 /**
  * Loader function for Index
+ * @deprecated Not used anymore
  */
 const loader = async ({params}: any) => {
     try {

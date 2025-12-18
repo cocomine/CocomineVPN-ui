@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from "react";
-import {Alert, Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
+import {Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
@@ -12,33 +12,19 @@ import tw_flag from "../assets/images/svg/tw.svg";
 import in_flag from "../assets/images/svg/in.svg";
 import moisture from "../assets/images/svg/moisture.svg";
 import download_svg from "../assets/images/svg/download.svg";
-import useWebSocket from "../hook/useWebSocks";
 import {toast} from "react-toastify";
-import {APP_VERSION} from "../constants/GlobalVariable";
-import {I_StatusUpdateCallback, I_VMData_windowPostMessage} from "../constants/Interface";
+import {APP_VERSION, DANGER_WEATHER_ALERT, PROCESSING_STATUS_TEXT} from "../constants/GlobalVariable";
+import {I_StatusUpdateCallback} from "../constants/Interface";
 import {
     AlertMemoType,
-    ContextType,
+    MenuContextType,
+    PostMessageData,
     UserProfileType,
-    VMDataType,
-    WeatherAlertType,
-    WeatherDataType,
-    WebSocketDataType
+    VMInstanceDataType,
+    WeatherDataType
 } from "../constants/Type";
 import ExtensionInstallBanner from "../components/ExtensionInstallBanner";
-// VM processing status
-const PROCESSING_STATUS_TEXT = [
-    "PROVISIONING",
-    "STAGING",
-    "STOPPING",
-    "SUSPENDING",
-    "REPAIRING",
-    "starting",
-    "stopping",
-    "creating",
-    "deallocating"
-]
-const DANGER_WEATHER_ALERT: WeatherAlertType[] = ['TC8NE', 'TC8SW', 'TC8NW', 'TC8SE', 'TC9', 'TC10', 'WRAINB', 'WTMW']
+import {useVMData} from "../constants/VMDataContext";
 
 /**
  * Menu component
@@ -49,31 +35,29 @@ const DANGER_WEATHER_ALERT: WeatherAlertType[] = ['TC8NE', 'TC8SW', 'TC8NW', 'TC
  * Parent component: App@src/app/App.tsx
  *
  * @param props - The component props
- * @param props.data - The data object containing VM data, next update time, and last update time
  * @param props.userProfile - The user profile data
  * @param props.weatherData - The weather data
  */
 const Menu: React.FC<{
-    data: { data: VMDataType[], next_update: string, last_update: string },
     userProfile: UserProfileType,
     weatherData: WeatherDataType
-}> = ({data, userProfile, weatherData}) => {
-    const websocket = useWebSocket();
-    const [vm_data, setVMData] = useState<VMDataType[]>([]);
+}> = ({userProfile, weatherData}) => {
+    const data = useVMData();
+    const [vm_data, setVMData] = useState<VMInstanceDataType[]>([]);
     const [nextUpdateInterval, setNextUpdateInterval] = useState("--:--");
     const [lastUpdate, setLastUpdate] = useState("00:00");
     const [nextUpdate, setNextUpdate] = useState(moment());
-    const [wsDisconnected, setWsDisconnected] = useState(true);
     let revalidator = useRevalidator();
 
     // fetch data when data is changed
     useEffect(() => {
+        if (data === null) return;
         setVMData(data.data);
         setNextUpdate(moment(data.next_update));
         setLastUpdate(moment(data.last_update).format("HH:mm"));
         setNextUpdateInterval(moment(data.next_update).format("HH:mm"));
         console.log("VMData updated, next update: " + data.next_update);
-    }, [data]);
+    }, [data, data?.data]);
 
     // check update every 5 second
     useEffect(() => {
@@ -91,32 +75,6 @@ const Menu: React.FC<{
             clearInterval(id);
         };
     }, [nextUpdate, revalidator]);
-
-    // websocket event listener for updating VM data
-    useEffect(() => {
-        if (!websocket) return;
-        setWsDisconnected(false);
-
-        // event listener for websocket
-        // update VM data when received message from websocket
-        websocket.addEventListener('message', (event) => {
-            const data: WebSocketDataType = JSON.parse(event.data)
-
-            if (data.url === "/vpn/vm") {
-                setVMData((prev) => {
-                    const newVMData = [...prev]; // clone previous data
-                    let index = newVMData.findIndex((vm: VMDataType) => vm._id === data.data._id);
-                    newVMData[index] = data.data;
-                    return newVMData;
-                })
-            }
-        });
-
-        // event listener for websocket close
-        websocket.addEventListener('close', () => {
-            setWsDisconnected(true);
-        });
-    }, [websocket, revalidator]);
 
     // post message to content script when vm_data is changed
     useEffect(() => {
@@ -139,12 +97,12 @@ const Menu: React.FC<{
 
             let timeout: NodeJS.Timeout | null = null;
             // create event listener for message from window
-            const callback = (event: MessageEvent<I_VMData_windowPostMessage>) => {
+            function callback(event: MessageEvent<PostMessageData>) {
                 if (event.source !== window) return; // ignore message from other source
 
                 if (event.data.type === "PostVMData" && !event.data.ask) {
                     const newVMData = event.data.data;
-                    let index = newVMData.findIndex((vm: VMDataType) => vm._id === vm_id);
+                    let index = newVMData.findIndex((vm) => vm._id === vm_id);
 
                     if (newVMData[index]._isPowerOn === target) {
                         SuccessAudio.play();
@@ -191,13 +149,9 @@ const Menu: React.FC<{
                         <Col xs={12}>
                             <Weather weatherData={weatherData}/>
                         </Col>
-                        <Col xs={12}>
-                            <Alert variant={"warning"} show={wsDisconnected} className="wsDisconnected">
-                                與伺服器的連線中斷! 正在重新連線...</Alert>
-                        </Col>
                     </Row>
                 </Col>
-                {vm_data.map((vm) => <Flag key={vm._id} vm_data={vm}/>)}
+                {vm_data.map((vm) => <Flag key={vm._id} data={vm}/>)}
                 <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
                     <Link to={`/download`}>
                         <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
@@ -249,7 +203,7 @@ const Menu: React.FC<{
                     </Row>
                 </Col>
             </Row>
-            <Outlet context={{statusUpdateCallback} satisfies ContextType}/>
+            <Outlet context={{statusUpdateCallback} satisfies MenuContextType}/>
         </>
     );
 }
@@ -323,12 +277,12 @@ const Weather: React.FC<{ weatherData: WeatherDataType }> = ({weatherData}) => {
  * @param vm_data VM data
  * @constructor
  */
-const Flag: React.FC<{ vm_data: VMDataType }> = ({vm_data}) => {
-    const [data, setData] = useState<VMDataType>(vm_data);
+const Flag: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
+    const [vm_data, setVm_data] = useState(data);
 
     // provider image element for menu item (memoized) (only update when data._provider is changed)
     const provider = useMemo(() => {
-        switch (data._provider) {
+        switch (vm_data._provider) {
             case "google":
                 return <img src={require("../assets/images/webp/google.webp")} alt="google" className="providerIcon"/>;
             case "azure":
@@ -336,19 +290,19 @@ const Flag: React.FC<{ vm_data: VMDataType }> = ({vm_data}) => {
             default:
                 return null;
         }
-    }, [data._provider]);
+    }, [vm_data._provider]);
 
     // status mark element for menu item (memoized) (only update when data._isPowerOn is changed)
     const statusMark = useMemo(() => {
-        if (data._isPowerOn)
+        if (vm_data._isPowerOn)
             return <div className="statusMark online"></div>;
 
         return <div className="statusMark offline"></div>;
-    }, [data._isPowerOn]);
+    }, [vm_data._isPowerOn]);
 
     // spinner element for menu item (memoized) (only update when data._status is changed)
     const spinner = useMemo(() => {
-        if (PROCESSING_STATUS_TEXT.includes(data._status))
+        if (PROCESSING_STATUS_TEXT.includes(vm_data._status))
             return (
                 <>
                     <div className="spinner"><Spinner animation="border"/></div>
@@ -357,11 +311,11 @@ const Flag: React.FC<{ vm_data: VMDataType }> = ({vm_data}) => {
             );
 
         return null;
-    }, [data._status]);
+    }, [vm_data._status]);
 
     // flag image element for menu item (memoized) (only update when data._country is changed)
     const flag = useMemo(() => {
-        switch (data._country) {
+        switch (vm_data._country) {
             case "TW":
                 return <img src={tw_flag} alt="TW Flag" className="flag fit-left" draggable={false}/>;
             case "JP":
@@ -377,23 +331,23 @@ const Flag: React.FC<{ vm_data: VMDataType }> = ({vm_data}) => {
             default:
                 return null;
         }
-    }, [data._country]);
+    }, [vm_data._country]);
 
     // update data when vm_data is changed
     useEffect(() => {
-        setData(vm_data)
-    }, [vm_data]);
+        setVm_data(data)
+    }, [data]);
 
     if (spinner === null) {
         return (
             <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
-                <Link to={`/${data._id}`}>
+                <Link to={`/${vm_data._id}`}>
                     <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
                         <div>
                             {flag}
                             {provider}
                             {statusMark}
-                            {!data._isPowerOn ? <div className="offlineDimDark"></div> : null}
+                            {!vm_data._isPowerOn ? <div className="offlineDimDark"></div> : null}
                             {spinner}
                         </div>
                     </Ratio>
@@ -408,7 +362,7 @@ const Flag: React.FC<{ vm_data: VMDataType }> = ({vm_data}) => {
                         {flag}
                         {provider}
                         {statusMark}
-                        {!data._isPowerOn ? <div className="offlineDimDark"></div> : null}
+                        {!vm_data._isPowerOn ? <div className="offlineDimDark"></div> : null}
                         {spinner}
                     </div>
                 </Ratio>

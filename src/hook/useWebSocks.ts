@@ -4,7 +4,8 @@ import {WebSocketDataType} from "../constants/Type";
 import {I_WebSocketTicket} from "../constants/Interface";
 
 
-let websocket: WebSocket;
+let websocket: WebSocket | null = null;
+const listeners = new Set<(ws: WebSocket) => void>(); // 儲存訂閱者
 
 /**
  * Connects to the WebSocket server.
@@ -49,6 +50,8 @@ const connectWebsocket = async () => {
     });
     tmp_ws.addEventListener('close', () => {
         console.warn("WebSocket Disconnected. Reconnect in 1s.")
+        websocket = null; // 清空
+        listeners.forEach(l => l(null as any)); // 通知斷線 (如果需要處理斷線狀態)
         setTimeout(connectWebsocket, 1000) //reconnect at 5s
     });
     tmp_ws.addEventListener('message', (event) => {
@@ -57,6 +60,8 @@ const connectWebsocket = async () => {
         if (data.data.auth) {
             websocket = tmp_ws;
             console.log("WebSocket Authentication successful")
+            // 通知所有 Hook 更新狀態
+            listeners.forEach(listener => listener(websocket!));
         }
     });
 }
@@ -67,12 +72,26 @@ const connectWebsocket = async () => {
  * This hook initializes the WebSocket state and updates it whenever the global `websocket` variable changes.
  **/
 function useWebSocket() {
-    const [ws, setWebSocket] = useState<WebSocket>(websocket);
+    const [ws, setWebSocket] = useState<WebSocket | null>(websocket);
 
     useEffect(() => {
-        setInterval(() => {
-            setWebSocket(websocket)
-        }, 1000)
+        // 當 WebSocket 改變時的處理函式
+        const handler = (newWs: WebSocket) => {
+            setWebSocket(newWs);
+        };
+
+        // 註冊監聽
+        listeners.add(handler);
+
+        // 如果當前已經有連線，直接設定 (避免 Hook 載入時錯過事件)
+        if (websocket) {
+            setWebSocket(websocket);
+        }
+
+        // Cleanup: 移除監聽
+        return () => {
+            listeners.delete(handler);
+        };
     }, []);
 
     return ws;

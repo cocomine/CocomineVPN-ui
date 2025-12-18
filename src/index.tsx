@@ -4,7 +4,7 @@ import './index.scss';
 import App, {loader} from './app/App';
 import reportWebVitals from './reportWebVitals';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import VMAction, {loader as actionLoader, VMActionErrorElement} from "./app/[id]";
+import VMAction, {VMActionErrorElement} from "./app/[id]";
 import figlet from "figlet";
 import Download from "./app/download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
@@ -27,7 +27,6 @@ const router = createBrowserRouter([
         children: [
             {
                 path: ':id',
-                loader: actionLoader,
                 element: <VMAction/>,
                 errorElement: <VMActionErrorElement/>,
                 children: [

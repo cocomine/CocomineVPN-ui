@@ -79,6 +79,7 @@ export const fetchWeatherData = async (abortController: AbortController = new Ab
  * @param vm_id VM id
  * @param abortController AbortController
  * @param patch update data or not
+ * @deprecated Not used anymore
  */
 export const fetchVMData = async (vm_id: string, abortController: AbortController = new AbortController(), patch = false) => {
     const res = await fetch(API_URL + "/vpn/" + vm_id, {
