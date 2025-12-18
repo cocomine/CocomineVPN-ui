@@ -101,15 +101,23 @@ const Menu: React.FC<{
                 if (event.source !== window) return; // ignore message from other source
 
                 if (event.data.type === "PostVMData" && !event.data.ask) {
-                    const newVMData = event.data.data;
-                    let index = newVMData.findIndex((vm) => vm._id === vm_id);
+                    const data = event.data.data;
+                    let index = data.findIndex((vm) => vm._id === vm_id);
 
-                    if (newVMData[index]._isPowerOn === target) {
+                    if (data[index]._isPowerOn === target) {
                         SuccessAudio.play();
                         resolve("Success")
                         timeout && clearTimeout(timeout); //clear timeout
                         window.removeEventListener("message", callback); // remove event listener
                     }
+
+                    //todo: handle fail status
+                    /*if(!PROCESSING_STATUS_TEXT.includes(data[index]._status)){
+                        FailAudio.play();
+                        reject("Fail")
+                        timeout && clearTimeout(timeout); //clear timeout
+                        window.removeEventListener("message", callback); // remove event listener
+                    }*/
                 }
             }
 

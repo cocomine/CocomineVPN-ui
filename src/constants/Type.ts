@@ -172,7 +172,7 @@ export type AlertMemoType = [any, WeatherAlertType][]
  * @property {any} data - The data payload.
  */
 export type WebSocketDataType = {
-    uri: string,
+    url: string,
     data: any,
 }
 

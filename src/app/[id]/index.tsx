@@ -35,7 +35,7 @@ const VMAction: React.FC = () => {
     useEffect(() => {
         if (data === null) return;
         setVMInstanceData(data.data.find(v => v._id === location.pathname.split('/')[1]) || null)
-    }, [data, data?.data]);
+    }, [data, data?.data, location.pathname]);
 
     // power action
     const powerAction = useCallback(async (power: boolean) => {
@@ -74,7 +74,7 @@ const VMAction: React.FC = () => {
         }
 
         statusUpdateCallback(power, vm_instance_data._id)
-    }, [vm_instance_data, statusUpdateCallback, navigate]);
+    }, [vm_instance_data, statusUpdateCallback]);
 
     // extend time action
     const extendTime = useCallback(async () => {

@@ -59,15 +59,17 @@ function App() {
 
     //websocket event listener for updating VM data
     useEffect(() => {
-        if (!websocket) return;
-        setWsDisconnected(false);
+        if (websocket === null) {
+            setWsDisconnected(true);
+            return;
+        }
 
         // websocket message handler
-        function handleMessage(event: MessageEvent) {
+        const handleMessage = (event: MessageEvent<string>) => {
             const web_socket_data: WebSocketDataType = JSON.parse(event.data)
 
             // VM data update
-            if (web_socket_data.uri === "/vpn/vm") {
+            if (web_socket_data.url === "/vpn/vm") {
                 console.debug("WebSocket VM Data Update:", web_socket_data.data);
                 setVMData((prev) => {
                     // find and update the VM data, copy to trigger re-render
@@ -88,19 +90,11 @@ function App() {
 
         // update VM data when received message from websocket
         websocket.addEventListener('message', handleMessage);
-
-        // websocket close handler
-        function handleClose() {
-            setWsDisconnected(true);
-        }
-
-        // event listener for websocket close
-        websocket.addEventListener('close', handleClose);
+        setWsDisconnected(false);
 
         // cleanup
         return () => {
             websocket.removeEventListener('message', handleMessage);
-            websocket.removeEventListener('close', handleClose);
         };
     }, [websocket, revalidator]);
 
