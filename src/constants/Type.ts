@@ -156,6 +156,7 @@ export type WeatherDataType = {
         generalSituation: string,
         tcInfo: string | "",
         fireDangerWarning: string | "",
+        forecastPeriod: string
     }
 }
 

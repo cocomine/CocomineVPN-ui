@@ -259,11 +259,18 @@ const Weather: React.FC<{ weatherData: WeatherDataType }> = ({weatherData}) => {
             <Col style={{minWidth: "20rem"}}>
                 <div className="marquee"><p>
                     {data.weatherReport.tcInfo !== "" ?
-                        <span style={{paddingLeft: "3rem"}}>⚠熱帶氣旋資訊⚠: {data.weatherReport.tcInfo}</span> : null}
+                        <span>
+                            <i className="bi bi-exclamation-triangle-fill text-warning"></i>
+                            熱帶氣旋資訊: {data.weatherReport.tcInfo}
+                        </span> : null}
                     {data.weatherReport.fireDangerWarning !== "" ?
-                        <span style={{paddingLeft: "3rem"}}>火災危險警告信息: {data.weatherReport.tcInfo}</span> : null}
-                    <span style={{paddingLeft: "1rem"}}>{data.weatherReport.generalSituation}</span>
-                    <span style={{paddingLeft: "3rem"}}>今日天氣預測: {data.weatherReport.forecastDesc}</span>
+                        <span style={{paddingLeft: "3rem"}}>
+                            <i className="bi bi-exclamation-triangle-fill text-warning"></i>
+                            火災危險警告信息: {data.weatherReport.tcInfo}
+                        </span> : null}
+                    <span style={{paddingLeft: "3rem"}}>{data.weatherReport.generalSituation}</span>
+                    <span
+                        style={{paddingLeft: "3rem"}}>{data.weatherReport.forecastPeriod}: {data.weatherReport.forecastDesc}</span>
                     <span style={{paddingLeft: "3rem"}}>展望: {data.weatherReport.outlook}</span>
                 </p></div>
             </Col>
