@@ -100,6 +100,7 @@ const Menu: React.FC<{
             function callback(event: MessageEvent<PostMessageData>) {
                 if (event.source !== window) return; // ignore message from other source
 
+                // check VM data message
                 if (event.data.type === "PostVMData" && !event.data.ask) {
                     const data = event.data.data;
                     let index = data.findIndex((vm) => vm._id === vm_id);
@@ -110,14 +111,17 @@ const Menu: React.FC<{
                         timeout && clearTimeout(timeout); //clear timeout
                         window.removeEventListener("message", callback); // remove event listener
                     }
+                }
 
-                    //todo: handle fail status
-                    /*if(!PROCESSING_STATUS_TEXT.includes(data[index]._status)){
+                // check VM operation fail message
+                if (event.data.type === "VMOperationFail" && !event.data.ask) {
+                    const data = event.data.data;
+                    if (data.id === vm_id) {
                         FailAudio.play();
-                        reject("Fail")
+                        reject("Operation Failed: " + data.message)
                         timeout && clearTimeout(timeout); //clear timeout
                         window.removeEventListener("message", callback); // remove event listener
-                    }*/
+                    }
                 }
             }
 
@@ -159,7 +163,15 @@ const Menu: React.FC<{
                         </Col>
                     </Row>
                 </Col>
-                {vm_data.map((vm) => <Flag key={vm._id} data={vm}/>)}
+                {vm_data.length >= 0 ?
+                    <Col xs={12} className="text-center">
+                        <div>
+                            <Spinner animation={'grow'} style={{width: 50, height: 50}}/>
+                            <p>請稍後, 我們正在加快為你準備</p>
+                        </div>
+                    </Col> :
+                    vm_data.map((vm) => <Flag key={vm._id} data={vm}/>)
+                }
                 <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
                     <Link to={`/download`}>
                         <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">

@@ -86,6 +86,15 @@ function App() {
                     };
                 })
             }
+
+            if (web_socket_data.url === "/vpn/vm/error") {
+                console.debug("WebSocket VM operation fail: ", web_socket_data.data);
+                window.postMessage({
+                    type: 'VMOperationFail',
+                    ask: false,
+                    data: web_socket_data.data
+                })
+            }
         }
 
         // update VM data when received message from websocket

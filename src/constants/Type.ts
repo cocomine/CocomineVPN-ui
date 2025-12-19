@@ -4,6 +4,7 @@ import {
     I_MobileAppInstalled_PostMessageData,
     I_PostVMData_PostMessageData,
     I_StatusUpdateCallback,
+    I_VMOperationFail_PostMessageData,
     I_WeatherAlert
 } from "./Interface";
 
@@ -185,3 +186,4 @@ export type PostMessageData =
     | I_Connect_PostMessageData
     | I_MobileAppInstalled_PostMessageData
     | I_PostVMData_PostMessageData
+    | I_VMOperationFail_PostMessageData;

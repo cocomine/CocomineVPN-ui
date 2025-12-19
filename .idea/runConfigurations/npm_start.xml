@@ -6,9 +6,13 @@
       <script value="start" />
     </scripts>
     <node-interpreter value="project" />
+    <package-manager value="yarn" />
     <envs>
       <env name="NODE_ENV" value="development" />
     </envs>
+    <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+      <browser with-js-debugger="true" />
+    </EXTENSION>
     <method v="2" />
   </configuration>
 </component>

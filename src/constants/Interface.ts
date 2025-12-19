@@ -28,17 +28,6 @@ export interface I_WeatherAlert {
 }
 
 /**
- * Interface for the structure of window post messages.
- * @interface
- * @property {string} type - The type of the message, used to identify the purpose or action of the message.
- * @property {boolean} ask - A boolean flag indicating whether the message is a request for information (true) or a notification (false).
- */
-export interface I_windowPostMessage {
-    type: string,
-    ask: boolean,
-}
-
-/**
  * Interface for the power control.
  * @interface
  * @property {boolean} isPower - Indicates if the power is currently on.
@@ -118,13 +107,30 @@ export interface I_Connect_PostMessageData extends I_BasePostMessageData {
 }
 
 /**
- * Mobile App Installed 訊息介面 (根據 index.tsx 推斷)
+ * Mobile App Installed 訊息介面
  */
 export interface I_MobileAppInstalled_PostMessageData extends I_BasePostMessageData {
     type: 'MobileAppInstalled';
     data: {
         installed: boolean;
         version: string;
+    }
+}
+
+/**
+ * VM Operation Fail 訊息介面
+ */
+export interface I_VMOperationFail_PostMessageData extends I_BasePostMessageData {
+    type: 'VMOperationFail';
+    data: {
+        id: string,
+        provider: string,
+        zone: string,
+        action: "START" | "STOP",
+        reason: "CPU_QUOTA" | "GENERAL",
+        message: string,
+        operation: string,
+        timestamp: string
     }
 }
 
