@@ -118,7 +118,7 @@ const Menu: React.FC<{
                     const data = event.data.data;
                     if (data.id === vm_id) {
                         FailAudio.play();
-                        reject("Operation Failed: " + data.message)
+                        reject(data.reason)
                         timeout && clearTimeout(timeout); //clear timeout
                         window.removeEventListener("message", callback); // remove event listener
                     }
@@ -138,7 +138,15 @@ const Menu: React.FC<{
             }), {
                 pending: `正在${target ? '開機' : '關機'}中...`,
                 success: '節點已成功' + (target ? '開機' : '關機') + '!',
-                error: '節點' + (target ? '開機' : '關機') + '失敗!',
+            error: {
+                render({data}) {
+                    return (<>
+                        節點{(target ? '開機' : '關機')}失敗!<br/>
+                        {data === 'CPU_QUOTA' ?
+                            <small className={'text-muted'}>雲端供應商 CPU 配額不足, 請稍後再試</small> : null}
+                    </>)
+                }
+            },
             }
         ).catch((err) => {
             console.error(err)
@@ -163,7 +171,7 @@ const Menu: React.FC<{
                         </Col>
                     </Row>
                 </Col>
-                {vm_data.length >= 0 ?
+                {vm_data.length <= 0 ?
                     <Col xs={12} className="text-center">
                         <div>
                             <Spinner animation={'grow'} style={{width: 50, height: 50}}/>

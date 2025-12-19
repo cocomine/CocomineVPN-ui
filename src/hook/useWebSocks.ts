@@ -57,12 +57,16 @@ const connectWebsocket = async () => {
     tmp_ws.addEventListener('message', (event) => {
         const data: WebSocketDataType = JSON.parse(event.data);
         console.debug(data)
-        if (data.data.auth) {
-            websocket = tmp_ws;
-            console.log("WebSocket Authentication successful")
-            // 通知所有 Hook 更新狀態
-            listeners.forEach(listener => listener(websocket!));
+
+        if (data.url === "/ping") {
+            // 回應 ping
+            tmp_ws.send(JSON.stringify({url: "/pong", data: null}));
         }
+
+        websocket = tmp_ws;
+        console.log("WebSocket Authorized successful")
+        // 通知所有 Hook 更新狀態
+        listeners.forEach(listener => listener(websocket!));
     });
 }
 

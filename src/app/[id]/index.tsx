@@ -168,7 +168,8 @@ const VMAction: React.FC = () => {
                                 <ExtensionConnect data={vm_instance_data}/>
                                 <MobileAppConnect data={vm_instance_data}/>
                             </>}
-                            <ExtendTime expired={vm_instance_data._expired} onClick={extendTime}/>
+                            <ExtendTime expired={vm_instance_data._isPowerOn ? vm_instance_data._expired : null}
+                                        onClick={extendTime}/>
                         </Row>
                     </Modal.Body>
                 </Modal>
@@ -182,7 +183,7 @@ const VMAction: React.FC = () => {
  * ExtensionConnect component for connecting to a browser extension.
  *
  * @param {Object} props - The component props.
- * @param {VMDataType} props.vmData - The VM data.
+ * @param {VMInstanceDataType} props.data - The VM data.
  *
  */
 const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
@@ -302,7 +303,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  * It checks if the mobile app is installed and allows the user to connect to it.
  *
  * @param {Object}  - The component props.
- * @param {VMDataType} vmData - The VM data.
+ * @param {VMInstanceDataType} props.data - The VM data.
  *
  * @returns {JSX.Element | null} - The rendered component or null if the app is not installed.
  */
@@ -378,7 +379,7 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  *
  * @param {Object} props - The component props
  * @param {string | null} props.expired - The expiration time as a string or null
- * @param {Function} props.onClick - The function to call when the extend time button is clicked
+ * @param {Function} props.onClick - The function to call when the extent time button is clicked
  */
 const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({expired, onClick}) => {
     const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string>("Loading...")
