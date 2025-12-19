@@ -50,7 +50,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.1.0, @babel/core@npm:^7.11.1, @babel/core@npm:^7.12.3, @babel/core@npm:^7.16.0, @babel/core@npm:^7.28.5, @babel/core@npm:^7.7.2, @babel/core@npm:^7.8.0":
+"@babel/core@npm:^7.1.0, @babel/core@npm:^7.11.1, @babel/core@npm:^7.12.3, @babel/core@npm:^7.16.0, @babel/core@npm:^7.7.2, @babel/core@npm:^7.8.0":
   version: 7.28.5
   resolution: "@babel/core@npm:7.28.5"
   dependencies:
@@ -4907,9 +4907,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "cocominevpn-ui@workspace:."
   dependencies:
-    "@babel/core": "npm:^7.28.5"
     "@babel/plugin-proposal-private-property-in-object": "npm:^7.21.11"
-    "@popperjs/core": "npm:^2.11.8"
     "@testing-library/dom": "npm:^10.4.1"
     "@testing-library/jest-dom": "npm:^5.17.0"
     "@testing-library/react": "npm:^13.4.0"
@@ -4922,6 +4920,7 @@ __metadata:
     "@types/react-dom": "npm:^18.2.17"
     bootstrap: "npm:^5.3.2"
     bootstrap-icons: "npm:^1.11.2"
+    eslint: "npm:^8.57.0"
     figlet: "npm:^1.7.0"
     js-cookie: "npm:^3.0.5"
     lottie-react: "npm:^2.4.0"
@@ -6553,7 +6552,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.3.0":
+"eslint@npm:^8.3.0, eslint@npm:^8.57.0":
   version: 8.57.1
   resolution: "eslint@npm:8.57.1"
   dependencies:
