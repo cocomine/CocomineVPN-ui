@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from "react";
-import {Button, Col, Ratio, Row, Spinner} from "react-bootstrap";
+import {Button, Col, Placeholder, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
 import 'react-toastify/dist/ReactToastify.min.css';
@@ -96,6 +96,7 @@ const Menu: React.FC<{
         await toast.promise(new Promise((resolve, reject) => {
 
             let timeout: NodeJS.Timeout | null = null;
+
             // create event listener for message from window
             function callback(event: MessageEvent<PostMessageData>) {
                 if (event.source !== window) return; // ignore message from other source
@@ -172,13 +173,18 @@ const Menu: React.FC<{
                     </Row>
                 </Col>
                 {vm_data.length <= 0 ?
-                    <Col xs={12} className="text-center">
-                        <div>
-                            <Spinner animation={'grow'} style={{width: 50, height: 50}}/>
-                            <p>請稍後, 我們正在加快為你準備</p>
-                        </div>
-                    </Col> :
-                    vm_data.map((vm) => <Flag key={vm._id} data={vm}/>)
+                    Array(7).fill('').map(() =>
+                        <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
+                            <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
+                                <div>
+                                    <Placeholder as={'div'} animation="glow" className="w-100 h-100">
+                                        <Placeholder xs={12} className="flag"/>
+                                    </Placeholder>
+                                </div>
+                            </Ratio>
+                        </Col>
+                    )
+                    : vm_data.map((vm) => <Flag key={vm._id} data={vm}/>)
                 }
                 <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
                     <Link to={`/download`}>

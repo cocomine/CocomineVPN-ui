@@ -434,7 +434,7 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => Promise<any>
             location.hash = ""
             click();
         }
-    }, [click, location.hash]);
+    }, [click, location, location.hash]);
 
     if (expired === null) return null;
     return (
