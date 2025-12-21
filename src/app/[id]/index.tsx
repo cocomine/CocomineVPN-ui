@@ -1,6 +1,15 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Button, Col, Modal, Ratio, Row, Spinner} from "react-bootstrap";
-import {Link, Navigate, Outlet, useBlocker, useLocation, useNavigate, useOutletContext} from "react-router-dom";
+import {
+    Link,
+    Navigate,
+    Outlet,
+    useBlocker,
+    useLocation,
+    useNavigate,
+    useOutletContext,
+    useRevalidator
+} from "react-router-dom";
 import {toast} from "react-toastify";
 import power from "../../assets/images/svg/power.svg";
 import tools from "../../assets/images/svg/tools.svg";
@@ -27,6 +36,7 @@ const VMAction: React.FC = () => {
     const data = useVMData();
     const location = useLocation();
     const navigate = useNavigate();
+    const revalidator = useRevalidator()
     const [show, setShow] = useState(true);
     const {statusUpdateCallback} = useOutletContext<MenuContextType>()
     const [is_loading, setIsLoading] = useState<boolean>(false);
@@ -70,6 +80,7 @@ const VMAction: React.FC = () => {
         } catch (e: any) {
             console.log(e)
             toastHttpError(e.status)
+            setIsLoading(false);
             return
         }
 
@@ -101,14 +112,21 @@ const VMAction: React.FC = () => {
                 return toastHttpError(res.status)
             }
             toast.success("延長開放時間成功")
+
+            // immediately update vm_instance_data._expired in UI
+            const data: { data: VMInstanceDataType } = await res.json();
+            setVMInstanceData((prev) => {
+                if (prev === null) return prev;
+                prev._expired = data.data._expired;
+                return prev
+            });
+
+            revalidator.revalidate() // revalidate data, fetch new data from server to update gobal state
         } catch (e: any) {
             console.error(e)
             toastHttpError(e.status)
-            return
-        } finally {
-            navigate('..', {replace: true}) // redirect to home page
         }
-    }, [vm_instance_data, navigate])
+    }, [vm_instance_data, revalidator])
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -381,7 +399,7 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  * @param {string | null} props.expired - The expiration time as a string or null
  * @param {Function} props.onClick - The function to call when the extent time button is clicked
  */
-const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({expired, onClick}) => {
+const ExtendTime: React.FC<{ expired: string | null, onClick: () => Promise<any> }> = ({expired, onClick}) => {
     const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string>("Loading...")
     const [enableExtend, setEnableExtend] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
@@ -404,6 +422,7 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({
                 if (diff < 60 * 60 * 1000) setEnableExtend(true)
                 setExpect_offline_time_Interval(diff > 0 ? tmp : "00:00:00");
             }, 1000)
+            setLoading(false);
 
             return () => clearInterval(id)
         }
@@ -411,7 +430,10 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => void }> = ({
 
     // check if hash is #extendTime
     useEffect(() => {
-        if (location.hash === "#extendTime") click()
+        if (location.hash === "#extendTime") {
+            location.hash = ""
+            click();
+        }
     }, [click, location.hash]);
 
     if (expired === null) return null;
@@ -523,7 +545,7 @@ const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly, load
 
 /**
  * Loader function for Index
- * @deprecated Not used anymore
+ *  @deprecated Not used anymore
  */
 const loader = async ({params}: any) => {
     try {
