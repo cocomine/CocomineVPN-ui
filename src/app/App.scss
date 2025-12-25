@@ -220,7 +220,6 @@ body {
             &:active:not(.loading) {
                 opacity: 1;
                 stroke-dashoffset: 0;
-                stroke: $color;
                 transition: stroke-dashoffset 2s linear, stroke 2s linear;
             }
 

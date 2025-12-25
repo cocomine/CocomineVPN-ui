@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {Button, Col, Modal, Ratio, Row, Spinner} from "react-bootstrap";
+import {Button, Col, Modal, Placeholder, Ratio, Row, Spinner} from "react-bootstrap";
 import {
     Link,
     Navigate,
@@ -400,7 +400,7 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  * @param {Function} props.onClick - The function to call when the extent time button is clicked
  */
 const ExtendTime: React.FC<{ expired: string | null, onClick: () => Promise<any> }> = ({expired, onClick}) => {
-    const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string>("Loading...")
+    const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string | null>(null)
     const [enableExtend, setEnableExtend] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
     const location = useLocation();
@@ -443,7 +443,13 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => Promise<any>
                 <div className="border-top w-100"></div>
             </Col>
             <Col xs={12} className="text-center">
-                <h3>{expect_offline_time_Interval}</h3>
+                {expect_offline_time_Interval ? (
+                    <h3>{expect_offline_time_Interval}</h3>
+                ) : (
+                    <Placeholder animation="wave" as={'h3'}>
+                        <Placeholder xs={3} className={'rounded'}/>
+                    </Placeholder>
+                )}
                 <p className="small text-muted">距離預計離線</p>
                 <Button variant={enableExtend ? "primary" : "outline-primary"}
                         className="w-100 rounded-5" onClick={click}

@@ -1,6 +1,6 @@
 {
   "name": "cocominevpn-ui",
-  "version": "1.14.2",
+  "version": "1.14.3",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
