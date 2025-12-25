@@ -81,17 +81,17 @@ export const fetchWeatherData = async (abortController: AbortController = new Ab
  * @param patch update data or not
  * @deprecated Not used anymore
  */
-export const fetchVMData = async (vm_id: string, abortController: AbortController = new AbortController(), patch = false) => {
-    const res = await fetch(API_URL + "/vpn/" + vm_id, {
-        method: patch ? "PATCH" : "GET",
-        credentials: "include",
-        signal: abortController.signal,
-        redirect: "error",
-        headers: {
-            "Cf-Access-Jwt-Assertion": TOKEN,
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    });
-    if (!res.ok) throw res;
-    return await res.json();
-}
+// export const fetchVMData = async (vm_id: string, abortController: AbortController = new AbortController(), patch = false) => {
+//     const res = await fetch(API_URL + "/vpn/" + vm_id, {
+//         method: patch ? "PATCH" : "GET",
+//         credentials: "include",
+//         signal: abortController.signal,
+//         redirect: "error",
+//         headers: {
+//             "Cf-Access-Jwt-Assertion": TOKEN,
+//             'X-Requested-With': 'XMLHttpRequest'
+//         }
+//     });
+//     if (!res.ok) throw res;
+//     return await res.json();
+// }
