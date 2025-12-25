@@ -4,7 +4,7 @@ import './index.scss';
 import App, {loader} from './app/App';
 import reportWebVitals from './reportWebVitals';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import VMAction, {VMActionErrorElement} from "./app/[id]";
+import VMAction from "./app/[id]";
 import figlet from "figlet";
 import Download from "./app/download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
@@ -28,19 +28,16 @@ const router = createBrowserRouter([
             {
                 path: ':id',
                 element: <VMAction/>,
-                errorElement: <VMActionErrorElement/>,
                 children: [
                     {
                         path: 'profile',
                         element: <Profile/>,
-                        errorElement: <VMActionErrorElement/>,
                     }
                 ]
             },
             {
                 path: 'download',
                 element: <Download/>,
-                errorElement: <VMActionErrorElement/>,
             },
             {
                 path: 'login',
@@ -48,7 +45,8 @@ const router = createBrowserRouter([
                 loader: async () => {
                     const redirectUrl = sessionStorage.getItem('redirect');
                     sessionStorage.removeItem('redirect');
-                    window.location.replace(redirectUrl ? redirectUrl : "/")
+                    window.location.replace(redirectUrl ? redirectUrl : "/") // redirect to the original page
+                    return null;
                 },
             }
         ]
@@ -101,13 +99,13 @@ root.render(
  */
 function webgl_support() {
     try {
-        var canvas = document.createElement('canvas');
+        const canvas = document.createElement('canvas');
         return !!window.WebGLRenderingContext &&
             (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
     } catch (e) {
         return false;
     }
-};
+}
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

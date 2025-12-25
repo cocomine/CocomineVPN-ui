@@ -1,15 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Button, Col, Modal, Placeholder, Ratio, Row, Spinner} from "react-bootstrap";
-import {
-    Link,
-    Navigate,
-    Outlet,
-    useBlocker,
-    useLocation,
-    useNavigate,
-    useOutletContext,
-    useRevalidator
-} from "react-router-dom";
+import {Link, Outlet, useBlocker, useLocation, useNavigate, useOutletContext, useRevalidator} from "react-router-dom";
 import {toast} from "react-toastify";
 import power from "../../assets/images/svg/power.svg";
 import tools from "../../assets/images/svg/tools.svg";
@@ -18,10 +9,8 @@ import {API_URL, PROCESSING_STATUS_TEXT, TOKEN} from "../../constants/GlobalVari
 import {MenuContextType, PostMessageData, VMInstanceDataType} from "../../constants/Type";
 import {toastHttpError} from "../../components/ToastHttpError";
 import {I_PowerControl} from "../../constants/Interface";
-import {fetchVMData} from "../../hook/Loader";
 import ReactGA from "react-ga4";
 import {useVMData} from "../../constants/VMDataContext";
-
 
 /**
  * VMAction component
@@ -200,9 +189,7 @@ const VMAction: React.FC = () => {
 /**
  * ExtensionConnect component for connecting to a browser extension.
  *
- * @param {Object} props - The component props.
- * @param {VMInstanceDataType} props.data - The VM data.
- *
+ * @param data - The VM data.
  */
 const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
     const [installed, setInstalled] = useState<boolean>(false)
@@ -320,10 +307,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  * This component handles the connection to a mobile app for the VPN.
  * It checks if the mobile app is installed and allows the user to connect to it.
  *
- * @param {Object}  - The component props.
- * @param {VMInstanceDataType} props.data - The VM data.
- *
- * @returns {JSX.Element | null} - The rendered component or null if the app is not installed.
+ * @param data - The VM data.
  */
 const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
     const [installed, setInstalled] = useState<boolean>(false)
@@ -395,9 +379,8 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  *
  * This component displays the remaining time until the expected offline time and allows the user to extend the time.
  *
- * @param {Object} props - The component props
- * @param {string | null} props.expired - The expiration time as a string or null
- * @param {Function} props.onClick - The function to call when the extent time button is clicked
+ * @param expired - The expiration time as a string or null
+ * @param onClick - The function to call when the extent time button is clicked
  */
 const ExtendTime: React.FC<{ expired: string | null, onClick: () => Promise<any> }> = ({expired, onClick}) => {
     const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string | null>(null)
@@ -468,10 +451,10 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => Promise<any>
  * This component renders a button that allows the user to control the power state of a node.
  * The button supports a long press event to trigger the power action.
  *
- * @param {Object} props - The component props
- * @param {boolean} props.isPower - The current power state of the node
- * @param {Function} props.action - The function to call to change the power state
- * @param {string} props.readonly - The readonly state of the node
+ * @param isPower - The current power state of the node
+ * @param action - The function to call to change the power state
+ * @param readonly - The readonly state of the node
+ * @param loading - Indicates if the power action is in progress
  */
 const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly, loading}) => {
     const timeout = useRef<NodeJS.Timeout | null>(null)
@@ -553,16 +536,16 @@ const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly, load
  * Loader function for Index
  *  @deprecated Not used anymore
  */
-const loader = async ({params}: any) => {
-    try {
-        const VMData = await fetchVMData(params.id);
-        console.debug(VMData)
-        return {vmData: VMData.data}
-    } catch (e: any) {
-        toastHttpError(e.status)
-        throw e
-    }
-}
+// const loader = async ({params}: any) => {
+//     try {
+//         const VMData = await fetchVMData(params.id);
+//         console.debug(VMData)
+//         return {vmData: VMData.data}
+//     } catch (e: any) {
+//         toastHttpError(e.status)
+//         throw e
+//     }
+// }
 
 /**
  * VMActionErrorElement component
@@ -571,9 +554,8 @@ const loader = async ({params}: any) => {
  * It redirects the user to the parent route when an error occurs.
  *
  */
-const VMActionErrorElement: React.FC = () => {
-    return (<Navigate to=".." replace={true} relative="path"/>);
-}
+// const VMActionErrorElement: React.FC = () => {
+//     return (<Navigate to=".." replace={true} relative="path"/>);
+// }
 
 export default VMAction;
-export {loader, VMActionErrorElement};
