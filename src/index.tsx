@@ -17,6 +17,22 @@ import {AnimationBackground} from "./components/AnimationBackground";
 import {AnimationBubbles} from "./components/AnimationBubbles";
 import {clarity} from "react-microsoft-clarity";
 import {TurnstileWidgetProvider} from "./components/TurnstileWidget";
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+    dsn: process.env.REACT_APP_SENTRY_DSN,
+    // Setting this option to true will send default PII data to Sentry.
+    // For example, automatic IP address collection on events
+    sendDefaultPii: true,
+    integrations: [
+        Sentry.replayIntegration({
+            blockAllMedia: false,
+        })
+    ],
+    // Session Replay
+    replaysSessionSampleRate: 0.2,
+    replaysOnErrorSampleRate: 1.0
+});
 
 // create router
 const router = createBrowserRouter([
