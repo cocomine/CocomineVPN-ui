@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useBlocker, useNavigate, useOutletContext} from "react-router-dom";
-import {VMInstanceDataType, VPNProfileType} from "../../constants/Type";
+import {ProfileContextType, VPNProfileType} from "../../constants/Type";
 import {Button, Col, Form, InputGroup, Modal, Row} from "react-bootstrap";
 import {API_URL} from "../../constants/GlobalVariable";
 import {QRCodeSVG} from "qrcode.react";
@@ -17,13 +17,13 @@ import ReactGA from "react-ga4";
  */
 const Profile: React.FC = () => {
     const [show, setShow] = useState(true);
-    const {vm_data} = useOutletContext<{ vm_data: VMInstanceDataType }>()
+    const {data} = useOutletContext<ProfileContextType>()
     const navigate = useNavigate();
 
     // set title
     useEffect(() => {
-        document.title = vm_data._name + " VPNProfile - Cocomine VPN"
-    }, [vm_data]);
+        document.title = data._name + " VPNProfile - Cocomine VPN"
+    }, [data]);
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -45,13 +45,13 @@ const Profile: React.FC = () => {
             <Modal show={show} centered onHide={() => navigate('..')} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>下載設定檔 <small style={{color: "darkgray", fontSize: "x-small"}}>
-                        ({vm_data._name})
+                        ({data._name})
                     </small></Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Row className={"g-5 justify-content-center"}>
-                        {vm_data._profiles.map((profile) =>
-                            <SingleVPNProfile key={profile.filename} profile={profile} vm_id={vm_data._id}/>)}
+                        {data._profiles.map((profile) =>
+                            <SingleVPNProfile key={profile.filename} profile={profile} vm_id={data._id}/>)}
                     </Row>
                 </Modal.Body>
             </Modal>

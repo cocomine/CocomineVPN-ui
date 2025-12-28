@@ -7,6 +7,7 @@ import {
     I_VMOperationFail_PostMessageData,
     I_WeatherAlert
 } from "./Interface";
+import {TurnstileProps} from "@marsidev/react-turnstile";
 
 /**
  * Type definition for the context.
@@ -15,6 +16,10 @@ import {
  */
 export type MenuContextType = {
     statusUpdateCallback: I_StatusUpdateCallback
+}
+
+export type ProfileContextType = {
+    data: VMInstanceDataType
 }
 
 /**
@@ -194,3 +199,12 @@ export type PostMessageData =
     | I_PostVMData_PostMessageData
     | I_VMOperationFail_PostMessageData;
 
+/**
+ * Turnstile 元件的參數，移除 `siteKey` 由組件統一注入。
+ */
+export type TurnstileWidgetProps = Omit<TurnstileProps, "siteKey">;
+
+/**
+ * Turnstile Context 函數類型，返回一個 Promise，解析為驗證 token 字串。
+ */
+export type TurnstileContextType = () => Promise<string>;

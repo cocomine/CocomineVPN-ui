@@ -1,14 +1,23 @@
-import {Turnstile, TurnstileInstance, TurnstileProps} from '@marsidev/react-turnstile'
+import {Turnstile, TurnstileInstance} from '@marsidev/react-turnstile'
 import {Col, Row} from "react-bootstrap";
 import React, {useCallback, useRef} from "react";
 import {TurnstileContext} from "../constants/TurnstileContext";
+import {TurnstileWidgetProps} from "../constants/Type";
 
-type TurnstileWidgetProps = Omit<TurnstileProps, "siteKey">;
-
+/**
+ * 提供 Turnstile 驗證流程的 Context Provider。
+ * - 負責顯示 Turnstile 視窗並執行驗證。
+ * - 透過 Context 將 `execute` 方法暴露給子層。
+ */
 export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<TurnstileWidgetProps>> = (props) => {
     const [display, setDisplay] = React.useState<boolean>(false);
     const ref = useRef<TurnstileInstance>();
 
+    /**
+     * 觸發 Turnstile 驗證，返回 token。
+     * @returns Promise<string> 驗證成功的 token。
+     * @throws Error 當 ref 尚未就緒時拋出錯誤。
+     */
     const execute = useCallback(() => {
         return new Promise<string>((resolve, reject) => {
             setDisplay(true);

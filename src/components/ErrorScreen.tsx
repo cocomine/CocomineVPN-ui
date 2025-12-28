@@ -116,7 +116,7 @@ const ErrorScreen: React.FC = () => {
     }, [location.pathname]);
 
     useEffect(() => {
-        if (isRouteErrorResponse(error) && status === 403) {
+        if (status === 403) {
             execute().then(() => {
                 window.location.reload()
             }).catch(e => {
@@ -124,7 +124,7 @@ const ErrorScreen: React.FC = () => {
                 toast.error("未通過驗證! 請重新嘗試!")
             })
         }
-    }, [status]);
+    }, [status, execute]);
 
     return (
         <div className="error-screen">

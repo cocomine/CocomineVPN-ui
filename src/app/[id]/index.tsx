@@ -6,7 +6,7 @@ import power from "../../assets/images/svg/power.svg";
 import tools from "../../assets/images/svg/tools.svg";
 import moment from "moment/moment";
 import {API_URL, PROCESSING_STATUS_TEXT, TOKEN} from "../../constants/GlobalVariable";
-import {MenuContextType, PostMessageData, VMInstanceDataType} from "../../constants/Type";
+import {MenuContextType, PostMessageData, ProfileContextType, VMInstanceDataType} from "../../constants/Type";
 import {toastHttpError} from "../../components/ToastHttpError";
 import {ExtendTimeProps, I_PowerControl} from "../../constants/Interface";
 import ReactGA from "react-ga4";
@@ -147,7 +147,7 @@ const VMAction: React.FC = () => {
         } finally {
             setIsExtendTimeLoading(false);
         }
-    }, [vm_instance_data, revalidator])
+    }, [vm_instance_data, revalidator, execute])
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
@@ -213,7 +213,7 @@ const VMAction: React.FC = () => {
                     </Modal.Body>
                 </Modal>
             }
-            <Outlet context={{vmData: vm_instance_data}}/>
+            <Outlet context={{data: vm_instance_data} satisfies ProfileContextType}/>
         </>
     );
 }
