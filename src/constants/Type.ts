@@ -11,7 +11,6 @@ import {
 /**
  * Type definition for the context.
  *
- * @typedef {Object} MenuContextType
  * @property {I_StatusUpdateCallback} statusUpdateCallback - The status update callback function.
  */
 export type MenuContextType = {
@@ -19,23 +18,24 @@ export type MenuContextType = {
 }
 
 /**
- * Type definition for the country.
+ * VM country code type.
+ * Common short codes are provided, but any string is allowed to support extensions.
  */
 export type VMCountryType = "TW" | "JP" | "US" | "HK" | "UK" | string
 
 /**
- * Type definition for the provider.
- * @typedef {("google" | "azure")} VMProviderType
+ * VM provider type.
+ * Enumerates supported VM/cloud providers.
  */
 export type VMProviderType = "google" | "azure"
 
 /**
- * Type definition for the profile.
- * @typedef {Object} VPNProfileType
- * @property {("OpenVPN" | "SoftEther" | "SS" | "socks5")} type - The type of the profile.
- * @property {string} name - The name of the profile.
- * @property {string} filename - The filename of the profile.
- * @property {string} [url] - The url of the profile.
+ * VPN profile representation.
+ *
+ * @property {"OpenVPN" | "SoftEther" | "SS" | "socks5"} type - Profile transport/type.
+ * @property {string} name - Human readable profile name.
+ * @property {string} filename - Local filename associated with the profile.
+ * @property {string} [url] - Optional remote URL where profile can be downloaded.
  */
 export type VPNProfileType = {
     "type": "OpenVPN" | "SoftEther" | "SS" | "socks5",
@@ -45,8 +45,11 @@ export type VPNProfileType = {
 }
 
 /**
- * Type definition for the read only mode.
- * @typedef {("startOnly" | "stopOnly" | "readOnly" | "disable")} ReadOnlyModeType
+ * Read-only mode controls UI action availability.
+ * - `startOnly`: only allow start action
+ * - `stopOnly`: only allow stop action
+ * - `readOnly`: all actions are disabled (read-only)
+ * - `disable`: do not apply read-only restrictions
  */
 export type ReadOnlyModeType = "startOnly" | "stopOnly" | "readOnly" | "disable"
 
@@ -64,18 +67,21 @@ export type VMDataType = {
 }
 
 /**
- * Type definition for the VM Instance data.
- * @typedef {Object} VMInstanceDataType
- * @property {string} _name - The name of the VM.
- * @property {string} _status - The status of the VM.
- * @property {string} _id - The id of the VM.
- * @property {string} _zone - The zone of the VM.
- * @property {string} _url - The url of the VM.
- * @property {VMCountryType} _country - The country of the VM.
- * @property {VPNProfileType[]} _profiles - The profiles of the VM.
- * @property {VMProviderType} _provider - The provider of the VM.
- * @property {boolean} _isPowerOn - The power status of the VM.
- * @property {ReadOnlyModeType} _readonly - The read only mode of the VM.
+ * VM instance data shape used across UI and runtime messaging.
+ *
+ * Fields prefixed with `readonly` should not be mutated after creation.
+ *
+ * @property {string} _name - Display name of the VM.
+ * @property {string} _status - Current VM status (e.g. "running", "stopped").
+ * @property {string} _id - Unique VM identifier.
+ * @property {string} _zone - Zone or region where VM is located.
+ * @property {string} _url - Access URL for VM.
+ * @property {VMCountryType} _country - Country/region code for VM.
+ * @property {VPNProfileType[]} _profiles - Array of associated VPN profiles.
+ * @property {VMProviderType} _provider - Cloud/provider for the VM.
+ * @property {boolean} _isPowerOn - Whether the VM is powered on.
+ * @property {ReadOnlyModeType} _readonly - Readonly mode for the VM controls.
+ * @property {string | null} _expired - Optional expiration timestamp or null if not set.
  */
 export type VMInstanceDataType = {
     readonly _name: string;
@@ -187,3 +193,4 @@ export type PostMessageData =
     | I_MobileAppInstalled_PostMessageData
     | I_PostVMData_PostMessageData
     | I_VMOperationFail_PostMessageData;
+

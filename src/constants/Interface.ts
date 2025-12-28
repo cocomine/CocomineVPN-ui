@@ -134,3 +134,15 @@ export interface I_VMOperationFail_PostMessageData extends I_BasePostMessageData
     }
 }
 
+/**
+ * Type definition for the Extend Time button props.
+ * @interface
+ * @property {string | null} expired - The expiration time as a string or null.
+ * @property {boolean} loading - Indicates if the operation is in progress.
+ * @property {() => Promise<any>} onClick - The click handler function that returns a Promise.
+ */
+export interface ExtendTimeProps {
+    expired: string | null,
+    loading: boolean,
+    onClick: () => Promise<any>
+}

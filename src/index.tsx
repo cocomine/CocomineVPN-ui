@@ -16,14 +16,15 @@ import Profile from "./app/[id]/profile";
 import {AnimationBackground} from "./components/AnimationBackground";
 import {AnimationBubbles} from "./components/AnimationBubbles";
 import {clarity} from "react-microsoft-clarity";
+import {TurnstileWidgetProvider} from "./components/TurnstileWidget";
 
 // create router
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <App />,
+        element: <App/>,
         loader: loader,
-        errorElement: <ErrorScreen />,
+        errorElement: <ErrorScreen/>,
         children: [
             {
                 path: ':id',
@@ -81,15 +82,17 @@ connectWebsocket(); // connect websocket
 // render app
 root.render(
     <React.StrictMode>
-        <RouterProvider router={router} fallbackElement={<LoadingScreen display={true}/>} />
-        {webgl_support() ?
-            <iframe title="background" src="https://cocomine.github.io/threejs-earth-background/"
-                    className="iframe-background"/>
-            : <>
-                <AnimationBackground/>
-                <AnimationBubbles/>
-            </>
-        }
+        <TurnstileWidgetProvider>
+            <RouterProvider router={router} fallbackElement={<LoadingScreen display={true}/>}/>
+            {webgl_support() ?
+                <iframe title="background" src="https://cocomine.github.io/threejs-earth-background/"
+                        className="iframe-background"/>
+                : <>
+                    <AnimationBackground/>
+                    <AnimationBubbles/>
+                </>
+            }
+        </TurnstileWidgetProvider>
     </React.StrictMode>
 );
 

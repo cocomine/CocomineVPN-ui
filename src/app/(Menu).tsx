@@ -229,7 +229,8 @@ const Menu: React.FC<{
                                target="_blank" rel="noopener noreferrer">Privacy Policy</a>
                         </Col>
                         <Col xs="auto">
-                            <Button variant="link" href="https://github.com/cocomine/cocomine_vpnapi_ui" target="_blank"
+                            <Button variant="link" href="https://github.com/cocomine/cocomine_vpnapi_ui"
+                                    target="_blank"
                                     rel="noopener noreferrer">
                                 <i className="bi bi-github me-2"></i>Source Code on Github
                             </Button>

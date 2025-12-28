@@ -1,9 +1,11 @@
-import React, {useCallback, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {isRouteErrorResponse, useLocation, useRouteError} from "react-router-dom";
 import {Button, Col, Row, Spinner} from "react-bootstrap";
 import Lottie from "lottie-react";
 
 import {NetworkError} from "../hook/NetworkError";
+import {useTurnstile} from "../constants/TurnstileContext";
+import {toast} from "react-toastify";
 
 /**
  * Error screen
@@ -11,6 +13,7 @@ import {NetworkError} from "../hook/NetworkError";
  */
 const ErrorScreen: React.FC = () => {
     const error = useRouteError();
+    const execute = useTurnstile();
     const [status, setStatus] = useState(0);
     const error_Elm = useMemo(() => {
         console.error(error)
@@ -35,15 +38,6 @@ const ErrorScreen: React.FC = () => {
                         </Row>
                         <p>這裡不存在任何東西! 你確定去對地方了?</p>
                     </>);
-                case 403:
-                    return (<>
-                        <h1>403</h1>
-                        <Row className="justify-content-center">
-                            <Lottie animationData={require("../assets/403.json")}
-                                    style={{width: "400px", height: "300px"}}/>
-                        </Row>
-                        <p>你不可以看這個東西!</p>
-                    </>);
                 case 401:
                     return (<>
                         <h1>401</h1>
@@ -52,6 +46,15 @@ const ErrorScreen: React.FC = () => {
                                     style={{width: "400px", height: "300px"}}/>
                         </Row>
                         <p>你被登出了! 你需要再一次登入!!</p>
+                    </>);
+                case 403:
+                    return (<>
+                        <h1>403</h1>
+                        <Row className="justify-content-center">
+                            <Lottie animationData={require("../assets/403.json")}
+                                    style={{width: "400px", height: "300px"}}/>
+                        </Row>
+                        <p>你不可以看這個東西!</p>
                     </>);
                 case 500:
                     return (<>
@@ -111,6 +114,17 @@ const ErrorScreen: React.FC = () => {
         sessionStorage.setItem('redirect', location.pathname)
         window.location.replace("/login")
     }, [location.pathname]);
+
+    useEffect(() => {
+        if (isRouteErrorResponse(error) && status === 403) {
+            execute().then(() => {
+                window.location.reload()
+            }).catch(e => {
+                console.error(e)
+                toast.error("未通過驗證! 請重新嘗試!")
+            })
+        }
+    }, [status]);
 
     return (
         <div className="error-screen">

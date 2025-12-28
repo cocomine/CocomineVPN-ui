@@ -8,9 +8,10 @@ import moment from "moment/moment";
 import {API_URL, PROCESSING_STATUS_TEXT, TOKEN} from "../../constants/GlobalVariable";
 import {MenuContextType, PostMessageData, VMInstanceDataType} from "../../constants/Type";
 import {toastHttpError} from "../../components/ToastHttpError";
-import {I_PowerControl} from "../../constants/Interface";
+import {ExtendTimeProps, I_PowerControl} from "../../constants/Interface";
 import ReactGA from "react-ga4";
 import {useVMData} from "../../constants/VMDataContext";
+import {useTurnstile} from "../../constants/TurnstileContext";
 
 /**
  * VMAction component
@@ -24,11 +25,13 @@ const VMAction: React.FC = () => {
     const [vm_instance_data, setVMInstanceData] = useState<VMInstanceDataType | null>(null)
     const data = useVMData();
     const location = useLocation();
+    const execute = useTurnstile();
     const navigate = useNavigate();
     const revalidator = useRevalidator()
     const [show, setShow] = useState(true);
     const {statusUpdateCallback} = useOutletContext<MenuContextType>()
     const [is_loading, setIsLoading] = useState<boolean>(false);
+    const [is_extend_time_loading, setIsExtendTimeLoading] = useState<boolean>(false);
 
     // set vm_instance_data when data changes
     useEffect(() => {
@@ -62,19 +65,33 @@ const VMAction: React.FC = () => {
                 })
             })
             if (!res.ok) {
-                if (res.status === 460) return toast.error(`節點只允許 ${vm_instance_data._readonly} 操作`)
-                if (res.status === 461) return toast.error(`節點已經處於${vm_instance_data._isPowerOn ? '開機' : '關機'}狀態`)
+                if (res.status === 460) toast.error(`節點只允許 ${vm_instance_data._readonly} 操作`)
+                if (res.status === 461) toast.error(`節點已經處於${vm_instance_data._isPowerOn ? '開機' : '關機'}狀態`)
+                //handle turnstile challenge
+                if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
+                    try {
+                        await execute()
+                        await powerAction(power); // retry
+                        return
+                    } catch (e) {
+                        console.error(e)
+                        toast.error("未通過驗證! 請重新嘗試!")
+                    }
+                    setIsLoading(false);
+                    return
+                }
+                setIsLoading(false);
                 return toastHttpError(res.status)
             }
         } catch (e: any) {
-            console.log(e)
+            console.error(e)
             toastHttpError(e.status)
             setIsLoading(false);
             return
         }
 
         statusUpdateCallback(power, vm_instance_data._id)
-    }, [vm_instance_data, statusUpdateCallback]);
+    }, [vm_instance_data, statusUpdateCallback, execute]);
 
     // extend time action
     const extendTime = useCallback(async () => {
@@ -85,6 +102,7 @@ const VMAction: React.FC = () => {
             vm_name: vm_instance_data._name,
             vm_id: vm_instance_data._id,
         })
+        setIsExtendTimeLoading(true);
 
         try {
             const res = await fetch(API_URL + "/vpn/" + vm_instance_data._id, {
@@ -98,22 +116,36 @@ const VMAction: React.FC = () => {
             if (!res.ok) {
                 if (res.status === 462) return toast.error(`只允許離線前一小時操作`)
                 if (res.status === 463) return toast.error(`節點沒有開啟`)
-                return toastHttpError(res.status)
-            }
-            toast.success("延長開放時間成功")
+                //handle turnstile challenge
+                if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
+                    try {
+                        await execute()
+                        await extendTime(); // retry
+                    } catch (e) {
+                        console.error(e)
+                        toast.error("未通過驗證! 請重新嘗試!")
+                    }
+                    return
+                }
+                toastHttpError(res.status)
+            } else {
+                toast.success("延長開放時間成功")
 
-            // immediately update vm_instance_data._expired in UI
-            const data: { data: VMInstanceDataType } = await res.json();
-            setVMInstanceData((prev) => {
-                if (prev === null) return prev;
-                prev._expired = data.data._expired;
-                return prev
-            });
+                // immediately update vm_instance_data._expired in UI
+                const data: { data: VMInstanceDataType } = await res.json();
+                setVMInstanceData((prev) => {
+                    if (prev === null) return prev;
+                    prev._expired = data.data._expired;
+                    return prev
+                });
+            }
 
             revalidator.revalidate() // revalidate data, fetch new data from server to update gobal state
         } catch (e: any) {
             console.error(e)
             toastHttpError(e.status)
+        } finally {
+            setIsExtendTimeLoading(false);
         }
     }, [vm_instance_data, revalidator])
 
@@ -176,7 +208,7 @@ const VMAction: React.FC = () => {
                                 <MobileAppConnect data={vm_instance_data}/>
                             </>}
                             <ExtendTime expired={vm_instance_data._isPowerOn ? vm_instance_data._expired : null}
-                                        onClick={extendTime}/>
+                                        onClick={extendTime} loading={is_extend_time_loading}/>
                         </Row>
                     </Modal.Body>
                 </Modal>
@@ -378,19 +410,14 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  * ExtendTime component
  *
  * This component displays the remaining time until the expected offline time and allows the user to extend the time.
- *
- * @param expired - The expiration time as a string or null
- * @param onClick - The function to call when the extent time button is clicked
  */
-const ExtendTime: React.FC<{ expired: string | null, onClick: () => Promise<any> }> = ({expired, onClick}) => {
+const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
     const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string | null>(null)
     const [enableExtend, setEnableExtend] = useState<boolean>(false)
-    const [loading, setLoading] = useState(false)
     const location = useLocation();
 
     const click = useCallback(() => {
         if (loading) return; //if already click
-        setLoading(true);
         onClick()
     }, [loading, onClick]);
 
@@ -402,10 +429,10 @@ const ExtendTime: React.FC<{ expired: string | null, onClick: () => Promise<any>
                 const diff = expect_offline_time.diff(Date.now())
                 const tmp = moment.utc(diff).format('HH:mm:ss')
 
-                if (diff < 60 * 60 * 1000) setEnableExtend(true)
+                //if (diff < 60 * 60 * 1000) setEnableExtend(true)
+                setEnableExtend(true)
                 setExpect_offline_time_Interval(diff > 0 ? tmp : "00:00:00");
             }, 1000)
-            setLoading(false);
 
             return () => clearInterval(id)
         }

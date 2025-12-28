@@ -13,7 +13,6 @@ import {clarity} from "react-microsoft-clarity";
 import {VMDataContext} from "../constants/VMDataContext";
 import useWebSocket from "../hook/useWebSocks";
 
-
 /**
  * App component
  *
@@ -107,6 +106,7 @@ function App() {
         };
     }, [websocket, revalidator]);
 
+    // update VM data when loader data changes
     useEffect(() => {
         setVMData(data)
     }, [data]);
