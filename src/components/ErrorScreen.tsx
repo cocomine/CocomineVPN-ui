@@ -5,7 +5,6 @@ import Lottie from "lottie-react";
 
 import {NetworkError} from "../hook/NetworkError";
 import {useTurnstile} from "../constants/TurnstileContext";
-import {toast} from "react-toastify";
 
 /**
  * Error screen
@@ -116,15 +115,15 @@ const ErrorScreen: React.FC = () => {
     }, [location.pathname]);
 
     useEffect(() => {
-        if (status === 403) {
-            execute().then(() => {
-                window.location.reload()
-            }).catch(e => {
-                console.error(e)
-                toast.error("未通過驗證! 請重新嘗試!")
-            })
-        }
-    }, [status, execute]);
+        // if (isRouteErrorResponse(error) && error.status === 403 && error.data.headers.has('cf-mitigated') && error.data.headers.get('cf-mitigated') === 'challenge') {
+        //     execute().then(() => {
+        //         window.location.reload()
+        //     }).catch(e => {
+        //         console.error(e)
+        //         toast.error("未通過驗證! 請重新嘗試!")
+        //     })
+        // }
+    }, [status, execute, error]);
 
     return (
         <div className="error-screen">

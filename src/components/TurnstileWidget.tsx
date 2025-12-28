@@ -24,12 +24,12 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
             if (ref && ref.current) {
                 ref.current.reset();
                 ref.current.getResponsePromise().then((token) => {
+                    setDisplay(false);
                     resolve(token);
                 }).catch((error) => {
-                    reject(error);
-                }).finally(() => {
                     setDisplay(false);
-                });
+                    reject(error);
+                })
             } else {
                 reject(new Error("Turnstile ref is not available"));
             }
@@ -44,7 +44,8 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
                         <h1>確認你不是機械人</h1>
                         <p>輕輕點一下下面的驗證，證明你是活力滿滿的小夥伴!</p>
                         <Row className="justify-content-center">
-                            <Turnstile ref={ref} {...props} siteKey='0x4AAAAAACJZcbwcsCxDsvKa' children={undefined}/>
+                            <Turnstile ref={ref} {...props} siteKey={process.env.REACT_APP_TURNSTILE_KEY}
+                                       children={undefined}/>
                         </Row>
                     </Col>
                 </Row>

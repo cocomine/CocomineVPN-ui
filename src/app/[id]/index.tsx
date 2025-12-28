@@ -65,8 +65,10 @@ const VMAction: React.FC = () => {
                 })
             })
             if (!res.ok) {
-                if (res.status === 460) toast.error(`節點只允許 ${vm_instance_data._readonly} 操作`)
-                if (res.status === 461) toast.error(`節點已經處於${vm_instance_data._isPowerOn ? '開機' : '關機'}狀態`)
+                setIsLoading(false);
+                if (res.status === 460) return toast.error(`節點只允許 ${vm_instance_data._readonly} 操作`)
+                if (res.status === 461) return toast.error(`節點已經處於${vm_instance_data._isPowerOn ? '開機' : '關機'}狀態`)
+
                 //handle turnstile challenge
                 if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
                     try {
@@ -77,17 +79,16 @@ const VMAction: React.FC = () => {
                         console.error(e)
                         toast.error("未通過驗證! 請重新嘗試!")
                     }
-                    setIsLoading(false);
-                    return
+                    return;
                 }
-                setIsLoading(false);
-                return toastHttpError(res.status)
+
+                return toastHttpError(res.status); // other errors
             }
         } catch (e: any) {
             console.error(e)
             toastHttpError(e.status)
             setIsLoading(false);
-            return
+            return;
         }
 
         statusUpdateCallback(power, vm_instance_data._id)
@@ -95,7 +96,7 @@ const VMAction: React.FC = () => {
 
     // extend time action
     const extendTime = useCallback(async () => {
-        if (vm_instance_data === null) return;
+        if (vm_instance_data === null || is_extend_time_loading) return; //if already click) return;
 
         // Google Analytics
         ReactGA.event('vm_extend_time', {
@@ -114,6 +115,7 @@ const VMAction: React.FC = () => {
                 },
             })
             if (!res.ok) {
+                setIsExtendTimeLoading(false);
                 if (res.status === 462) return toast.error(`只允許離線前一小時操作`)
                 if (res.status === 463) return toast.error(`節點沒有開啟`)
                 //handle turnstile challenge
@@ -125,9 +127,10 @@ const VMAction: React.FC = () => {
                         console.error(e)
                         toast.error("未通過驗證! 請重新嘗試!")
                     }
-                    return
+                    return;
                 }
-                toastHttpError(res.status)
+
+                return toastHttpError(res.status) // other errors
             } else {
                 toast.success("延長開放時間成功")
 
@@ -140,11 +143,11 @@ const VMAction: React.FC = () => {
                 });
             }
 
+            setIsExtendTimeLoading(false);
             revalidator.revalidate() // revalidate data, fetch new data from server to update gobal state
         } catch (e: any) {
             console.error(e)
             toastHttpError(e.status)
-        } finally {
             setIsExtendTimeLoading(false);
         }
     }, [vm_instance_data, revalidator, execute])
@@ -416,11 +419,6 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
     const [enableExtend, setEnableExtend] = useState<boolean>(false)
     const location = useLocation();
 
-    const click = useCallback(() => {
-        if (loading) return; //if already click
-        onClick()
-    }, [loading, onClick]);
-
     // update expect_offline_time_Interval every second
     useEffect(() => {
         if (expired !== null) {
@@ -429,8 +427,7 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
                 const diff = expect_offline_time.diff(Date.now())
                 const tmp = moment.utc(diff).format('HH:mm:ss')
 
-                //if (diff < 60 * 60 * 1000) setEnableExtend(true)
-                setEnableExtend(true)
+                if (diff < 60 * 60 * 1000) setEnableExtend(true)
                 setExpect_offline_time_Interval(diff > 0 ? tmp : "00:00:00");
             }, 1000)
 
@@ -442,9 +439,9 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
     useEffect(() => {
         if (location.hash === "#extendTime") {
             location.hash = ""
-            click();
+            onClick();
         }
-    }, [click, location, location.hash]);
+    }, [onClick, location, location.hash]);
 
     if (expired === null) return null;
     return (
@@ -462,7 +459,7 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
                 )}
                 <p className="small text-muted">距離預計離線</p>
                 <Button variant={enableExtend ? "primary" : "outline-primary"}
-                        className="w-100 rounded-5" onClick={click}
+                        className="w-100 rounded-5" onClick={onClick}
                         disabled={!enableExtend || loading}>
                     {loading && <Spinner animation="grow" size="sm" className="me-2"/>}
                     {enableExtend ? "延長開放時間" : "離線前一小時可以延長開放時間"}

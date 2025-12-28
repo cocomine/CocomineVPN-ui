@@ -74,7 +74,7 @@ export type VMDataType = {
 /**
  * VM instance data shape used across UI and runtime messaging.
  *
- * Fields prefixed with `readonly` should not be mutated after creation.
+ * Fields marked with the `readonly` modifier should not be mutated after creation.
  *
  * @property {string} _name - Display name of the VM.
  * @property {string} _status - Current VM status (e.g. "running", "stopped").
@@ -200,11 +200,11 @@ export type PostMessageData =
     | I_VMOperationFail_PostMessageData;
 
 /**
- * Turnstile 元件的參數，移除 `siteKey` 由組件統一注入。
+ * Turnstile 元件的參數， `siteKey` 已移除並由組件統一注入。
  */
 export type TurnstileWidgetProps = Omit<TurnstileProps, "siteKey">;
 
 /**
- * Turnstile Context 函數類型，返回一個 Promise，解析為驗證 token 字串。
+ * Turnstile Context 函式類型，返回一個 Promise，解析為驗證 token 字串。
  */
 export type TurnstileContextType = () => Promise<string>;
