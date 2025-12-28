@@ -166,3 +166,6 @@ dist
 /.idea/copilot.data.migration.ask.xml
 /.idea/copilot.data.migration.ask2agent.xml
 /.idea/copilot.data.migration.edit.xml
+
+# Sentry Config File
+.sentryclirc
