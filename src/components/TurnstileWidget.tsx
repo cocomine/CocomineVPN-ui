@@ -21,7 +21,7 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
     const execute = useCallback(() => {
         return new Promise<string>((resolve, reject) => {
             setDisplay(true);
-            if (ref && ref.current) {
+            if (ref.current) {
                 ref.current.reset();
                 ref.current.getResponsePromise().then((token) => {
                     setDisplay(false);

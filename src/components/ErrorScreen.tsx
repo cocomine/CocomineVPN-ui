@@ -1,10 +1,9 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
+import React, {useCallback, useMemo, useState} from "react";
 import {isRouteErrorResponse, useLocation, useRouteError} from "react-router-dom";
 import {Button, Col, Row, Spinner} from "react-bootstrap";
 import Lottie from "lottie-react";
 
 import {NetworkError} from "../hook/NetworkError";
-import {useTurnstile} from "../constants/TurnstileContext";
 
 /**
  * Error screen
@@ -12,7 +11,7 @@ import {useTurnstile} from "../constants/TurnstileContext";
  */
 const ErrorScreen: React.FC = () => {
     const error = useRouteError();
-    const execute = useTurnstile();
+    //const execute = useTurnstile();
     const [status, setStatus] = useState(0);
     const error_Elm = useMemo(() => {
         console.error(error)
@@ -114,16 +113,17 @@ const ErrorScreen: React.FC = () => {
         window.location.replace("/login")
     }, [location.pathname]);
 
-    useEffect(() => {
-        // if (isRouteErrorResponse(error) && error.status === 403 && error.data.headers.has('cf-mitigated') && error.data.headers.get('cf-mitigated') === 'challenge') {
-        //     execute().then(() => {
-        //         window.location.reload()
-        //     }).catch(e => {
-        //         console.error(e)
-        //         toast.error("未通過驗證! 請重新嘗試!")
-        //     })
-        // }
-    }, [status, execute, error]);
+    // todo: 另外尋找解決方法
+    // useEffect(() => {
+    //     if (isRouteErrorResponse(error) && error.status === 403 && error.data.headers.has('cf-mitigated') && error.data.headers.get('cf-mitigated') === 'challenge') {
+    //         execute().then(() => {
+    //             window.location.reload()
+    //         }).catch(e => {
+    //             console.error(e)
+    //             toast.error("未通過驗證! 請重新嘗試!")
+    //         })
+    //     }
+    // }, [status, execute, error]);
 
     return (
         <div className="error-screen">

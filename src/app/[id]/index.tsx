@@ -74,7 +74,6 @@ const VMAction: React.FC = () => {
                     try {
                         await execute()
                         await powerAction(power); // retry
-                        return
                     } catch (e) {
                         console.error(e)
                         toast.error("未通過驗證! 請重新嘗試!")
@@ -96,7 +95,7 @@ const VMAction: React.FC = () => {
 
     // extend time action
     const extendTime = useCallback(async () => {
-        if (vm_instance_data === null || is_extend_time_loading) return; //if already click) return;
+        if (vm_instance_data === null || is_extend_time_loading) return;
 
         // Google Analytics
         ReactGA.event('vm_extend_time', {
@@ -132,6 +131,7 @@ const VMAction: React.FC = () => {
 
                 return toastHttpError(res.status) // other errors
             } else {
+                setIsExtendTimeLoading(false);
                 toast.success("延長開放時間成功")
 
                 // immediately update vm_instance_data._expired in UI
@@ -143,14 +143,13 @@ const VMAction: React.FC = () => {
                 });
             }
 
-            setIsExtendTimeLoading(false);
             revalidator.revalidate() // revalidate data, fetch new data from server to update gobal state
         } catch (e: any) {
             console.error(e)
-            toastHttpError(e.status)
             setIsExtendTimeLoading(false);
+            toastHttpError(e.status)
         }
-    }, [vm_instance_data, revalidator, execute])
+    }, [vm_instance_data, revalidator, execute, is_extend_time_loading])
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
