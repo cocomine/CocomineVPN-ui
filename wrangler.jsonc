@@ -1,0 +1,7 @@
+{
+  "name": "test",
+  "compatibility_date": "2025-12-28",
+  "assets": {
+    "directory": "./build"
+  }
+}

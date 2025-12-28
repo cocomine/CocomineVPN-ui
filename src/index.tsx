@@ -16,14 +16,31 @@ import Profile from "./app/[id]/profile";
 import {AnimationBackground} from "./components/AnimationBackground";
 import {AnimationBubbles} from "./components/AnimationBubbles";
 import {clarity} from "react-microsoft-clarity";
+import {TurnstileWidgetProvider} from "./components/TurnstileWidget";
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+    dsn: process.env.REACT_APP_SENTRY_DSN,
+    // Setting this option to true will send default PII data to Sentry.
+    // For example, automatic IP address collection on events
+    sendDefaultPii: true,
+    integrations: [
+        Sentry.replayIntegration({
+            blockAllMedia: false,
+        })
+    ],
+    // Session Replay
+    replaysSessionSampleRate: 0.2,
+    replaysOnErrorSampleRate: 1.0
+});
 
 // create router
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <App />,
+        element: <App/>,
         loader: loader,
-        errorElement: <ErrorScreen />,
+        errorElement: <ErrorScreen/>,
         children: [
             {
                 path: ':id',
@@ -81,15 +98,17 @@ connectWebsocket(); // connect websocket
 // render app
 root.render(
     <React.StrictMode>
-        <RouterProvider router={router} fallbackElement={<LoadingScreen display={true}/>} />
-        {webgl_support() ?
-            <iframe title="background" src="https://cocomine.github.io/threejs-earth-background/"
-                    className="iframe-background"/>
-            : <>
-                <AnimationBackground/>
-                <AnimationBubbles/>
-            </>
-        }
+        <TurnstileWidgetProvider>
+            <RouterProvider router={router} fallbackElement={<LoadingScreen display={true}/>}/>
+            {webgl_support() ?
+                <iframe title="background" src="https://cocomine.github.io/threejs-earth-background/"
+                        className="iframe-background"/>
+                : <>
+                    <AnimationBackground/>
+                    <AnimationBubbles/>
+                </>
+            }
+        </TurnstileWidgetProvider>
     </React.StrictMode>
 );
 

@@ -325,7 +325,7 @@ body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background-color: rgba(47, 47, 47, 0.5);
+    background-color: rgba(47, 47, 47, 0.8);
     transition: opacity .5s ease-in-out;
 }
 
@@ -333,6 +333,12 @@ body {
 .error-screen {
     @extend .loading-screen;
     background-color: rgba(47, 47, 47);
+}
+
+/* turnstile-screen */
+.turnstile-screen {
+    @extend .loading-screen;
+    z-index: $zindex-toast + 10;
 }
 
 /* anime-background */
