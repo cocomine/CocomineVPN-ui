@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Col, Row} from "react-bootstrap";
 import {PostMessageData} from "../constants/Type";
 import {API_URL} from "../constants/GlobalVariable";
@@ -11,6 +11,7 @@ import {useTurnstile} from "../hook/Turnstile";
 const ExtensionInstallBanner: React.FC = () => {
     const execute = useTurnstile()
     const [installed, setInstalled] = useState<boolean>(false); // check if extension is installed
+    const lock_retrieve_track = useRef(false); // to prevent multiple simultaneous sends
 
     // check if extension is installed
     useEffect(() => {
@@ -29,8 +30,9 @@ const ExtensionInstallBanner: React.FC = () => {
             }
 
             //todo: silently retrieve tracked VPN usage from extension/mobile app
-            if (e.data.type === 'RetrieveTrackedUsage' && !e.data.ask) {
-                let data = e.data.data ?? []
+            if (e.data.type === 'RetrieveTrackedUsage' && !e.data.ask && !lock_retrieve_track.current) {
+                lock_retrieve_track.current = true; //lock to prevent multiple sends
+                let data = e.data.data ?? [];
 
                 //merge with stored retry data if exists
                 const storedRetry = window.localStorage.getItem('trackedUsageRetry');
@@ -50,6 +52,9 @@ const ExtensionInstallBanner: React.FC = () => {
                     }
                 }
 
+                if (data.length <= 0) return; //nothing to send
+                window.localStorage.setItem('trackedUsageRetry', JSON.stringify(data));
+
                 //send to backend endpoint
                 const sendToBackend = async (retryCount = 0) => {
                     console.debug(data)
@@ -67,7 +72,7 @@ const ExtensionInstallBanner: React.FC = () => {
                             if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge' && retryCount < 5) {
                                 console.warn('Cloudflare turnstile challenge detected, executing turnstile verification before retrying...');
                                 await execute()
-                                await sendToBackend(retryCount++); //retry after turnstile
+                                await sendToBackend(++retryCount); //retry after turnstile
                                 return;
                             }
                             throw new Error(`Backend responded with status ${res.status}`);
@@ -80,11 +85,9 @@ const ExtensionInstallBanner: React.FC = () => {
                             const delay = Math.pow(2, retryCount) * 1000; // exponential backoff
                             console.warn(`Error sending tracked usage data to backend, retrying in ${delay / 1000} seconds...`, error);
                             await new Promise(resolve => setTimeout(resolve, delay));
-                            await sendToBackend(retryCount++); // retry after delay
+                            await sendToBackend(++retryCount); // retry after delay
                         } else {
                             console.error('Error sending tracked usage data to backend, retry next time.', error);
-                            //save to localStorage for retry next time
-                            window.localStorage.setItem('trackedUsageRetry', JSON.stringify(data));
                         }
                     }
                 }
