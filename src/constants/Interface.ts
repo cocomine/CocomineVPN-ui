@@ -143,7 +143,7 @@ export interface I_RetrieveTrackedUsage_PostMessageData extends I_BasePostMessag
         datetime: string;
         country: VMCountryType;
         // True is connect, false is disconnect.
-        target: boolean;
+        isConnect: boolean;
     }[]
 }
 

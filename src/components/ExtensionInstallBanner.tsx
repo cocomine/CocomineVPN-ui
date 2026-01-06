@@ -3,6 +3,7 @@ import {Col, Row} from "react-bootstrap";
 import {PostMessageData} from "../constants/Type";
 import {API_URL} from "../constants/GlobalVariable";
 import {useTurnstile} from "../hook/Turnstile";
+import {wait} from "@testing-library/user-event/dist/utils";
 
 /**
  * Extension install element for menu
@@ -28,17 +29,30 @@ const ExtensionInstallBanner: React.FC = () => {
                 window.postMessage({type: 'RetrieveTrackedUsage', ask: true}); // retrieve tracked usage after extension/mobile app is installed
             }
 
-            //todo: silence retrieve tracked VPN usage from extension/mobile app
+            //todo: silently retrieve tracked VPN usage from extension/mobile app
             if (e.data.type === 'RetrieveTrackedUsage' && !e.data.ask) {
-                let data = e.data.data || []
+                let data = e.data.data ?? []
 
                 //merge with stored retry data if exists
                 const storedRetry = window.localStorage.getItem('trackedUsageRetry');
                 if (storedRetry) {
-                    data.push(...JSON.parse(storedRetry))
+                    // merge arrays, if parsing fails, clear the stored data
+                    try {
+                        const parsedRetry = JSON.parse(storedRetry);
+                        if (Array.isArray(parsedRetry)) {
+                            data.push(...parsedRetry);
+                        } else {
+                            console.warn('Invalid format for trackedUsageRetry in localStorage, clearing it.');
+                            window.localStorage.removeItem('trackedUsageRetry');
+                        }
+                    } catch (err) {
+                        console.warn('Failed to parse trackedUsageRetry from localStorage, clearing it.', err);
+                        window.localStorage.removeItem('trackedUsageRetry');
+                    }
                 }
 
                 //send to backend endpoint
+                let retryCount = 0;
                 const sendToBackend = async () => {
                     console.debug(data)
                     try {
@@ -54,6 +68,7 @@ const ExtensionInstallBanner: React.FC = () => {
                             // CF turnstile verification on failure
                             if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
                                 await execute()
+                                await sendToBackend(); //retry after turnstile
                                 return;
                             }
                             throw new Error(`Backend responded with status ${res.status}`);
@@ -62,9 +77,15 @@ const ExtensionInstallBanner: React.FC = () => {
                             window.localStorage.removeItem('trackedUsageRetry'); //clear retry data
                         }
                     } catch (error) {
-                        console.error('Error sending tracked usage data to backend, retry next time.', error);
-                        //save to localStorage for retry next time
-                        window.localStorage.setItem('trackedUsageRetry', JSON.stringify(data));
+                        if (retryCount < 5) {
+                            retryCount++;
+                            await wait(1000);
+                            await sendToBackend(); // retry after delay
+                        } else {
+                            console.error('Error sending tracked usage data to backend, retry next time.', error);
+                            //save to localStorage for retry next time
+                            window.localStorage.setItem('trackedUsageRetry', JSON.stringify(data));
+                        }
                     }
                 }
 
@@ -77,7 +98,7 @@ const ExtensionInstallBanner: React.FC = () => {
         window.postMessage({type: 'ExtensionInstalled', ask: true});
 
         return () => window.removeEventListener('message', callback);
-    }, []);
+    }, [execute]);
 
     if (installed) return null
     return (
