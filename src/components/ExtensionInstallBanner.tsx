@@ -29,7 +29,7 @@ const ExtensionInstallBanner: React.FC = () => {
                 window.postMessage({type: 'RetrieveTrackedUsage', ask: true}); // retrieve tracked usage after extension/mobile app is installed
             }
 
-            //todo: silently retrieve tracked VPN usage from extension/mobile app
+            // silently retrieve tracked VPN usage from extension/mobile app
             if (e.data.type === 'RetrieveTrackedUsage' && !e.data.ask && !lock_retrieve_track.current) {
                 lock_retrieve_track.current = true; //lock to prevent multiple sends
                 let data = e.data.data ?? [];
