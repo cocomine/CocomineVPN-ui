@@ -1,4 +1,4 @@
-import {ReadOnlyModeType, VMInstanceDataType, WeatherAlertType} from "./Type";
+import {ReadOnlyModeType, VMCountryType, VMInstanceDataType, WeatherAlertType} from "./Type";
 
 /**
  * Interface for the status update callback function.
@@ -132,6 +132,19 @@ export interface I_VMOperationFail_PostMessageData extends I_BasePostMessageData
         operation: string,
         timestamp: string
     }
+}
+
+/**
+ * Retrieve Tracked Usage 訊息介面
+ */
+export interface I_RetrieveTrackedUsage_PostMessageData extends I_BasePostMessageData {
+    type: 'RetrieveTrackedUsage';
+    data: {
+        datetime: string;
+        country: VMCountryType;
+        // True is connect, false is disconnect.
+        target: boolean;
+    }[]
 }
 
 /**

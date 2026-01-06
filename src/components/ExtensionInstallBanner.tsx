@@ -1,26 +1,74 @@
 import React, {useEffect, useState} from "react";
 import {Col, Row} from "react-bootstrap";
 import {PostMessageData} from "../constants/Type";
+import {API_URL} from "../constants/GlobalVariable";
+import {useTurnstile} from "../hook/Turnstile";
 
 /**
  * Extension install element for menu
  * @constructor
  */
 const ExtensionInstallBanner: React.FC = () => {
-
+    const execute = useTurnstile()
     const [installed, setInstalled] = useState<boolean>(false); // check if extension is installed
 
     // check if extension is installed
     useEffect(() => {
         // callback function
-        function callback(e: MessageEvent<PostMessageData>) {
+        async function callback(e: MessageEvent<PostMessageData>) {
             if (e.source !== window) {
                 return;
             }
 
+            // check for extension installed message
             if ((e.data.type === 'ExtensionInstalled' || e.data.type === 'MobileAppInstalled') && !e.data.ask) {
                 if (!e.data.data.installed) return;
                 setInstalled(true);
+
+                window.postMessage({type: 'RetrieveTrackedUsage', ask: true}); // retrieve tracked usage after extension/mobile app is installed
+            }
+
+            //todo: silence retrieve tracked VPN usage from extension/mobile app
+            if (e.data.type === 'RetrieveTrackedUsage' && !e.data.ask) {
+                let data = e.data.data || []
+
+                //merge with stored retry data if exists
+                const storedRetry = window.localStorage.getItem('trackedUsageRetry');
+                if (storedRetry) {
+                    data.push(...JSON.parse(storedRetry))
+                }
+
+                //send to backend endpoint
+                const sendToBackend = async () => {
+                    console.debug(data)
+                    try {
+                        const res = await fetch(API_URL + '/vpn/track', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        })
+
+                        if (!res.ok) {
+                            // CF turnstile verification on failure
+                            if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
+                                await execute()
+                                return;
+                            }
+                            throw new Error(`Backend responded with status ${res.status}`);
+                        } else {
+                            console.log('Tracked usage data sent to backend successfully!');
+                            window.localStorage.removeItem('trackedUsageRetry'); //clear retry data
+                        }
+                    } catch (error) {
+                        console.error('Error sending tracked usage data to backend, retry next time.', error);
+                        //save to localStorage for retry next time
+                        window.localStorage.setItem('trackedUsageRetry', JSON.stringify(data));
+                    }
+                }
+
+                await sendToBackend();
             }
         }
 

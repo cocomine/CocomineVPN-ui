@@ -1,5 +1,5 @@
 import {createContext, useContext} from "react";
-import {TurnstileContextType} from "./Type";
+import {TurnstileContextType} from "../constants/Type";
 
 /**
  * 預設的 Turnstile 驗證執行函數，當未提供 TurnstileContext 時使用。

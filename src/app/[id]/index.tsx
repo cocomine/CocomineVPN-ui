@@ -11,7 +11,7 @@ import {toastHttpError} from "../../components/ToastHttpError";
 import {ExtendTimeProps, I_PowerControl} from "../../constants/Interface";
 import ReactGA from "react-ga4";
 import {useVMData} from "../../constants/VMDataContext";
-import {useTurnstile} from "../../constants/TurnstileContext";
+import {useTurnstile} from "../../hook/Turnstile";
 
 /**
  * VMAction component
