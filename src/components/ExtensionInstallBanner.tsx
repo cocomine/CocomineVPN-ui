@@ -3,7 +3,6 @@ import {Col, Row} from "react-bootstrap";
 import {PostMessageData} from "../constants/Type";
 import {API_URL} from "../constants/GlobalVariable";
 import {useTurnstile} from "../hook/Turnstile";
-import {wait} from "@testing-library/user-event/dist/utils";
 
 /**
  * Extension install element for menu
@@ -16,7 +15,7 @@ const ExtensionInstallBanner: React.FC = () => {
     // check if extension is installed
     useEffect(() => {
         // callback function
-        async function callback(e: MessageEvent<PostMessageData>) {
+        function callback(e: MessageEvent<PostMessageData>) {
             if (e.source !== window) {
                 return;
             }
@@ -52,8 +51,7 @@ const ExtensionInstallBanner: React.FC = () => {
                 }
 
                 //send to backend endpoint
-                let retryCount = 0;
-                const sendToBackend = async () => {
+                const sendToBackend = async (retryCount = 0) => {
                     console.debug(data)
                     try {
                         const res = await fetch(API_URL + '/vpn/track', {
@@ -66,9 +64,10 @@ const ExtensionInstallBanner: React.FC = () => {
 
                         if (!res.ok) {
                             // CF turnstile verification on failure
-                            if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
+                            if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge' && retryCount < 5) {
+                                console.warn('Cloudflare turnstile challenge detected, executing turnstile verification before retrying...');
                                 await execute()
-                                await sendToBackend(); //retry after turnstile
+                                await sendToBackend(retryCount++); //retry after turnstile
                                 return;
                             }
                             throw new Error(`Backend responded with status ${res.status}`);
@@ -78,9 +77,10 @@ const ExtensionInstallBanner: React.FC = () => {
                         }
                     } catch (error) {
                         if (retryCount < 5) {
-                            retryCount++;
-                            await wait(1000);
-                            await sendToBackend(); // retry after delay
+                            const delay = Math.pow(2, retryCount) * 1000; // exponential backoff
+                            console.warn(`Error sending tracked usage data to backend, retrying in ${delay / 1000} seconds...`, error);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            await sendToBackend(retryCount++); // retry after delay
                         } else {
                             console.error('Error sending tracked usage data to backend, retry next time.', error);
                             //save to localStorage for retry next time
@@ -89,7 +89,7 @@ const ExtensionInstallBanner: React.FC = () => {
                     }
                 }
 
-                await sendToBackend();
+                sendToBackend();
             }
         }
 
