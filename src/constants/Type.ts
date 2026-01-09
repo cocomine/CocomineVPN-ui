@@ -3,6 +3,7 @@ import {
     I_ExtensionInstalled_PostMessageData,
     I_MobileAppInstalled_PostMessageData,
     I_PostVMData_PostMessageData,
+    I_RetrieveTrackedUsage_PostMessageData,
     I_StatusUpdateCallback,
     I_VMOperationFail_PostMessageData,
     I_WeatherAlert
@@ -197,7 +198,8 @@ export type PostMessageData =
     | I_Connect_PostMessageData
     | I_MobileAppInstalled_PostMessageData
     | I_PostVMData_PostMessageData
-    | I_VMOperationFail_PostMessageData;
+    | I_VMOperationFail_PostMessageData
+    | I_RetrieveTrackedUsage_PostMessageData;
 
 /**
  * Turnstile 元件的參數， `siteKey` 已移除並由組件統一注入。

@@ -1,7 +1,7 @@
 import {Turnstile, TurnstileInstance} from '@marsidev/react-turnstile'
 import {Col, Row} from "react-bootstrap";
 import React, {useCallback, useRef} from "react";
-import {TurnstileContext} from "../constants/TurnstileContext";
+import {TurnstileContext} from "../hook/Turnstile";
 import {TurnstileWidgetProps} from "../constants/Type";
 
 /**

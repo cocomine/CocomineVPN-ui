@@ -173,8 +173,8 @@ const Menu: React.FC<{
                     </Row>
                 </Col>
                 {vm_data.length <= 0 ?
-                    Array(7).fill('').map(() =>
-                        <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
+                    Array(7).fill('').map((_, index) =>
+                        <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4" key={index}>
                             <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
                                 <div>
                                     <Placeholder as={'div'} animation="glow" className="w-100 h-100">
