@@ -53,7 +53,7 @@ const ExtensionInstallBanner: React.FC = () => {
                 }
 
                 if (data.length <= 0) return; //nothing to send
-                window.localStorage.setItem('trackedUsageRetry', JSON.stringify(data));
+                window.localStorage.setItem('trackedUsageRetry', JSON.stringify(data)); //store data for retry if needed
 
                 //send to backend endpoint
                 const sendToBackend = async (retryCount = 0) => {
@@ -64,6 +64,7 @@ const ExtensionInstallBanner: React.FC = () => {
                             headers: {
                                 'Content-Type': 'application/json'
                             },
+                            credentials: 'include',
                             body: JSON.stringify(data)
                         })
 
