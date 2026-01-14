@@ -1,4 +1,4 @@
-import {ReadOnlyModeType, VMCountryType, VMInstanceDataType, WeatherAlertType} from "./Type";
+import {ReadOnlyModeType, TroubleshootStatus, VMCountryType, VMInstanceDataType, WeatherAlertType} from "./Type";
 
 /**
  * Interface for the status update callback function.
@@ -148,6 +148,17 @@ export interface I_RetrieveTrackedUsage_PostMessageData extends I_BasePostMessag
 }
 
 /**
+ * Retrieve Tracked Usage 訊息介面
+ */
+export interface I_ConnectByExtension_PostMessageData extends I_BasePostMessageData {
+    type: 'ConnectByExtension';
+    data: {
+        // True is connect, false is disconnect.
+        isConnect: boolean;
+    }
+}
+
+/**
  * Type definition for the Extend Time button props.
  * @interface
  * @property {string | null} expired - The expiration time as a string or null.
@@ -158,4 +169,19 @@ export interface ExtendTimeProps {
     expired: string | null,
     loading: boolean,
     onClick: () => Promise<any>
+}
+
+/**
+ * Interface for the Troubleshoot response.
+ * @interface
+ * @property {number} id - The unique identifier for the Troubleshoot response.
+ * @property {string} message - The message describing the Troubleshoot status.
+ * @property {string} timestamp - The timestamp of the Troubleshoot response.
+ * @property {'pending' | 'success' | 'failed' | 'info' | 'warning' | 'finished'} status - The status of the Troubleshoot process.
+ */
+export interface TroubleshootResponse {
+    id: number;
+    message: string;
+    timestamp: string;
+    status: TroubleshootStatus;
 }

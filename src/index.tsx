@@ -18,6 +18,7 @@ import {AnimationBubbles} from "./components/AnimationBubbles";
 import {clarity} from "react-microsoft-clarity";
 import {TurnstileWidgetProvider} from "./components/TurnstileWidget";
 import * as Sentry from "@sentry/react";
+import Troubleshoot from "./app/[id]/troubleshoot";
 
 Sentry.init({
     dsn: process.env.REACT_APP_SENTRY_DSN,
@@ -49,6 +50,9 @@ const router = createBrowserRouter([
                     {
                         path: 'profile',
                         element: <Profile/>,
+                    }, {
+                        path: 'troubleshoot',
+                        element: <Troubleshoot/>,
                     }
                 ]
             },

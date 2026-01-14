@@ -213,6 +213,10 @@ const VMAction: React.FC = () => {
                                         onClick={extendTime} loading={is_extend_time_loading}/>
                         </Row>
                     </Modal.Body>
+                    <Modal.Footer>
+                        <Link to={'troubleshoot'} className={'text-muted small'}><i
+                            className="bi bi-question-octagon-fill"></i> 排解疑難</Link>
+                    </Modal.Footer>
                 </Modal>
             }
             <Outlet context={{data: vm_instance_data} satisfies ProfileContextType}/>
