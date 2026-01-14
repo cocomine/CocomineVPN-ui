@@ -154,7 +154,7 @@ export interface I_ConnectByExtension_PostMessageData extends I_BasePostMessageD
     type: 'ConnectByExtension';
     data: {
         // True is connect, false is disconnect.
-        isConnect: boolean;
+        connectByExtension: boolean;
     }
 }
 

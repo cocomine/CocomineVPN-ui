@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import {useBlocker, useNavigate, useOutletContext} from "react-router-dom";
-import {PostMessageData, ProfileContextType} from "../../constants/Type";
+import {PostMessageData, ProfileContextType, TurnstileContextType, VMInstanceDataType} from "../../constants/Type";
 import {Col, Modal, Row, Spinner} from "react-bootstrap";
 import {TroubleshootResponse} from "../../constants/Interface";
 import {API_URL} from "../../constants/GlobalVariable";
@@ -19,9 +19,9 @@ const Troubleshoot: React.FC = () => {
     const [show, setShow] = useState(true);
     const {data} = useOutletContext<ProfileContextType>()
     const [steps, setSteps] = useState<TroubleshootResponse[]>([]);
-    const execute = useTurnstile();
     const navigate = useNavigate();
     const lock = useRef(false)
+    const execute = useTurnstile();
 
     // set title
     useEffect(() => {
@@ -52,241 +52,33 @@ const Troubleshoot: React.FC = () => {
             let id_counter = 0;
 
             // Step 1: Check internet connectivity
-            const step1: TroubleshootResponse = {
-                id: id_counter++,
-                status: 'pending',
-                message: '檢查網絡連接...',
-                timestamp: new Date().toISOString(),
-            };
-            setSteps([step1]);
-
-            await delay(500);
             try {
-                await fetch('https://1.1.1.1', {method: 'HEAD', mode: 'no-cors'});
-                step1.status = 'success';
-                step1.message = '網絡連接正常';
-                setSteps(prev => [...prev.filter(s => s.id !== step1.id), step1]);
-            } catch (error) {
-                step1.status = 'failed';
-                step1.message = '無法連接到互聯網, 請檢查您的網絡設置';
-                setSteps(prev => [...prev.filter(s => s.id !== step1.id), step1]);
-                return;
+                id_counter = await step1_CheckInternet(id_counter, (step) => {
+                    setSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
+                });
+            } catch {
+                return; // stop further steps if internet check failed
             }
 
             // Step 2: Check VPN server status
-            const step2: TroubleshootResponse = {
-                id: id_counter++,
-                status: 'pending',
-                message: '正在請求檢查節點狀態...',
-                timestamp: new Date().toISOString(),
-            };
-            setSteps(prev => [...prev, step2]);
-
-            await delay(1000);
-            const serverSide = async (): Promise<boolean> => {
-                let isFinished = false;
-                try {
-                    const response = await fetch(API_URL + `/vpn/${data._id}/troubleshoot`);
-                    if (!response.ok) {
-                        //handle turnstile challenge
-                        if (response.status === 403 && response.headers.has('cf-mitigated') && response.headers.get('cf-mitigated') === 'challenge') {
-                            try {
-                                await execute()
-                                return await serverSide(); // retry
-                            } catch (e) {
-                                step2.status = 'failed';
-                                step2.message = '無法通過防火牆驗證, 請稍後再試';
-                                setSteps(prev => [...prev.filter(s => s.id !== step2.id), step2]);
-                                console.error(e)
-                                return false;
-                            }
-                        }
-
-                        toastHttpError(response.status); // other errors
-                        throw response;
-                    }
-
-                    if (!response.body) {
-                        console.error("ReadableStream not supported or verified.");
-                        throw response;
-                    }
-
-                    step2.status = 'success';
-                    step2.message = '節點狀態檢查請求已發送';
-                    setSteps(prev => [...prev.filter(s => s.id !== step2.id), step2]);
-
-                    //Step 2.1: process ndjson response
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder("utf-8");
-                    let buffer = '';
-
-                    while (true) {
-                        const {value, done} = await reader.read(); // read the chunk
-                        if (done) break; // read complete
-
-                        // decode the chunk and append to buffer
-                        const chunk = decoder.decode(value, {stream: true});
-                        buffer += chunk;
-
-                        // split buffer into lines
-                        const lines = buffer.split('\n');
-
-                        // keep the last partial line in the buffer for the next chunk
-                        buffer = lines.pop() || '';
-
-                        // process each complete line
-                        for (const line of lines) {
-                            const trimmedLine = line.trim();
-                            if (!trimmedLine) continue; // skip empty lines
-
-                            try {
-                                const data: TroubleshootResponse = JSON.parse(trimmedLine);
-                                console.debug(data);
-                                data.id += id_counter;
-                                setSteps(prev => [...prev.filter(s => s.id !== data.id), data]);
-
-                                if (data.status === 'finished') {
-                                    id_counter = data.id + 1;
-                                    isFinished = true;
-                                }
-                            } catch (e) {
-                                step2.status = 'failed';
-                                step2.message = '無法解析伺服器回應, 請稍後再試';
-                                setSteps(prev => [...prev.filter(s => s.id !== step2.id), step2]);
-                                console.error("解析 JSON 失敗:", trimmedLine, e);
-                                throw e;
-                            }
-                        }
-                    }
-                } catch (error) {
-                    step2.status = 'failed';
-                    step2.message = '無法請求檢查節點狀態, 請稍後再試';
-                    setSteps(prev => [...prev.filter(s => s.id !== step2.id), step2]);
-                    console.error(error)
-                }
-                return isFinished;
+            try {
+                id_counter = await step2_ServerSideCheck(id_counter, data, execute, (step) => {
+                    setSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
+                });
+                await delay(500);
+            } catch {
+                return; // stop further steps if server-side check failed
             }
-            if (!await serverSide()) return;
 
             // Step 3: Check browser VPN extension
-            const step3: TroubleshootResponse = {
-                id: id_counter++,
-                status: 'pending',
-                message: '檢查是否有安裝覽器VPN擴充...',
-                timestamp: new Date().toISOString(),
-            };
-            setSteps(prev => [...prev, step3]);
-
-            await delay(1000);
-            const extensionSide = new Promise((resolve, reject) => {
-                // callback function
-                let step3_1: TroubleshootResponse, timer: NodeJS.Timeout;
-
-                async function callback(e: MessageEvent<PostMessageData>) {
-                    if (e.source !== window) {
-                        return;
-                    }
-
-                    // check for extension installed message
-                    if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
-                        if (!e.data.data.installed) {
-                            step3.status = 'info';
-                            step3.message = '未偵測到安裝Cocomine VPN擴充';
-                            setSteps(prev => [...prev.filter(s => s.id !== step3.id), step3]);
-                            removeListener()
-                            return resolve('Extension not installed');
-                        }
-
-                        // check extension version
-                        if (e.data.data.version < '2.2.0') {
-                            step3.status = 'warning';
-                            step3.message = '偵測到Cocomine VPN擴充版本過舊, 請更新至最新版本以獲得最佳使用體驗';
-                            setSteps(prev => [...prev.filter(s => s.id !== step3.id), step3]);
-                            removeListener();
-                            return reject('Extension outdated');
-                        }
-
-                        // extension is installed and up-to-date
-                        step3.status = 'success';
-                        step3.message = '已偵測到安裝Cocomine VPN擴充';
-                        setSteps(prev => [...prev.filter(s => s.id !== step3.id), step3]);
-                        await delay(1000);
-
-                        // Step 3.1: Check VPN connection status through extension
-                        step3_1 = {
-                            id: id_counter,
-                            status: 'pending',
-                            message: '透過擴充重新連線VPN...',
-                            timestamp: new Date().toISOString(),
-                        };
-                        setSteps(prev => [...prev, step3_1]);
-                        await delay(1000);
-
-                        window.postMessage({type: 'ConnectByExtension', ask: true});
-                    }
-
-                    if ((e.data.type === 'ConnectByExtension') && !e.data.ask) {
-                        if (!e.data.data.isConnect) {
-                            const step3_1: TroubleshootResponse = {
-                                id: id_counter++,
-                                status: 'warning',
-                                message: 'VPN目前未連線, 請手動嘗試連線',
-                                timestamp: new Date().toISOString(),
-                            };
-                            setSteps(prev => [...prev, step3_1]);
-                            removeListener()
-                            return reject('VPN not connected');
-                        }
-                        window.postMessage({type: 'Connect', ask: true, data});
-                    }
-
-                    // receive connect response
-                    if ((e.data.type === 'Connect') && !e.data.ask) {
-                        let step3_2: TroubleshootResponse;
-                        if (e.data.data.connected) {
-                            step3_2 = {
-                                id: id_counter++,
-                                status: 'success',
-                                message: 'VPN重新連線成功',
-                                timestamp: new Date().toISOString(),
-                            };
-                            resolve('VPN reconnect successful');
-                        } else {
-                            step3_2 = {
-                                id: id_counter++,
-                                status: 'failed',
-                                message: 'VPN重新連線失敗, 請手動嘗試連線',
-                                timestamp: new Date().toISOString(),
-                            };
-                            reject('VPN reconnect failed');
-                        }
-                        setSteps(prev => [...prev.filter(s => s.id !== step3_2.id), step3_2]);
-                        removeListener()
-                    }
-                }
-
-                function removeListener() {
-                    window.removeEventListener('message', callback);
-                    clearTimeout(timer)
-                }
-
-                // timeout handler, in case no response from extension
-                timer = setTimeout(() => {
-                    step3.status = 'info';
-                    step3.message = '未偵測到安裝Cocomine VPN擴充';
-                    setSteps(prev => [...prev.filter(s => s.id !== step3.id), step3]);
-                    return resolve('Extension not installed');
-                }, 5000); // timeout after 5 seconds
-
-                window.addEventListener('message', callback);
-                window.postMessage({type: 'ExtensionInstalled', ask: true});
-            });
             try {
-                await extensionSide;
-            } catch (e) {
-                console.error(e);
+                id_counter = await step3_ExtensionCheck(id_counter, data, (step) => {
+                    setSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
+                });
+                await delay(500);
+            } catch {
+                return; // stop further steps if server-side check failed
             }
-            await delay(1000);
 
             // Final Step: Troubleshoot complete
             const finalStep1: TroubleshootResponse = {
@@ -305,7 +97,7 @@ const Troubleshoot: React.FC = () => {
             };
             setSteps(prev => [...prev, finalStep2]);
         })()
-    }, [data._id]);
+    }, [data, execute]);
 
     return (
         <>
@@ -330,6 +122,11 @@ const Troubleshoot: React.FC = () => {
     );
 };
 
+/**
+ * Troubleshoot step component
+ * @param data - Troubleshoot step data
+ * @constructor
+ */
 const TroubleshootStep: React.FC<{ data: TroubleshootResponse }> = ({data}) => {
     return (
         <Col xs={12} className={"text-center troubleshoot-step"} style={{fontSize: '1.1em'}}>
@@ -349,6 +146,320 @@ const TroubleshootStep: React.FC<{ data: TroubleshootResponse }> = ({data}) => {
             </div>
         </Col>
     );
+}
+
+/**
+ * Step 1: Check internet connectivity
+ * @param id_counter - Current step ID counter
+ * @param stepMessageCallback - Callback to update step message
+ * @returns Promise<number> - Updated step ID counter
+ */
+function step1_CheckInternet(id_counter: number, stepMessageCallback: (step: TroubleshootResponse) => void) {
+    return new Promise<number>(async (resolve, reject) => {
+        stepMessageCallback({
+            id: id_counter,
+            status: 'pending',
+            message: '檢查網絡連接...',
+            timestamp: new Date().toISOString(),
+        })
+        await delay(1000);
+
+        try {
+            await fetch('https://1.1.1.1', {method: 'HEAD', mode: 'no-cors'});
+            stepMessageCallback({
+                id: id_counter,
+                status: 'success',
+                message: '網絡連接正常',
+                timestamp: new Date().toISOString(),
+            })
+        } catch (error) {
+            stepMessageCallback({
+                id: id_counter,
+                status: 'failed',
+                message: '無法連接到互聯網, 請檢查您的網絡設置',
+                timestamp: new Date().toISOString(),
+            })
+            console.error(error)
+            reject(++id_counter) // stop further steps
+            return;
+        }
+        resolve(++id_counter); // proceed to next step
+    })
+}
+
+/**
+ * Step 2: Check VPN server status
+ * @param id_counter - Current step ID counter
+ * @param data - VM instance data
+ * @param execute - Turnstile execute function
+ * @param stepMessageCallback - Callback to update step message
+ * @returns Promise<number> - Updated step ID counter
+ */
+function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, execute: TurnstileContextType, stepMessageCallback: (step: TroubleshootResponse) => void) {
+    return new Promise<number>(async (resolve, reject) => {
+        stepMessageCallback({
+            id: id_counter,
+            status: 'pending',
+            message: '正在請求檢查節點狀態...',
+            timestamp: new Date().toISOString(),
+        });
+        await delay(1000);
+
+        // Step 2.1: request server-side troubleshoot
+        const serverSide = () => new Promise<Response>(async (resolve1, reject1) => {
+            try {
+                const response = await fetch(API_URL + `/vpn/${data._id}/troubleshoot`);
+                if (!response.ok) {
+                    //handle turnstile challenge
+                    if (response.status === 403 && response.headers.has('cf-mitigated') && response.headers.get('cf-mitigated') === 'challenge') {
+                        try {
+                            await execute()
+                        } catch (e) {
+                            stepMessageCallback({
+                                id: id_counter,
+                                status: 'failed',
+                                message: '無法通過防火牆驗證, 請稍後再試',
+                                timestamp: new Date().toISOString(),
+                            });
+                            console.error(e)
+                            reject1(e)
+                            return;
+                        }
+                        resolve1(await serverSide()); // retry
+                    }
+
+                    // other errors
+                    toastHttpError(response.status);
+                    reject1(response);
+                    return;
+                }
+
+                resolve1(response); // return the response for further processing
+            } catch (error) {
+                stepMessageCallback({
+                    id: id_counter,
+                    status: 'failed',
+                    message: '無法請求檢查節點狀態, 請稍後再試',
+                    timestamp: new Date().toISOString(),
+                });
+                console.error(error)
+                reject1(error)
+            }
+        });
+
+        //Step 2.2: process ndjson response
+        try {
+            const response = await serverSide()
+
+            // verify ReadableStream support
+            if (!response.body) {
+                console.error("ReadableStream not supported or verified.");
+                reject(++id_counter);
+                return;
+            }
+            const reader = response.body.getReader();
+
+            stepMessageCallback({
+                id: id_counter++,
+                status: 'success',
+                message: '節點狀態檢查請求已送出',
+                timestamp: new Date().toISOString(),
+            });
+
+            const decoder = new TextDecoder("utf-8");
+            let buffer = '';
+            let internal_id_counter = id_counter;
+            while (true) {
+                const {value, done} = await reader.read(); // read the chunk
+                // read complete
+                if (done) break;
+
+                // decode the chunk and append to buffer
+                const chunk = decoder.decode(value, {stream: true});
+                buffer += chunk;
+
+                // split buffer into lines
+                const lines = buffer.split('\n');
+
+                // keep the last partial line in the buffer for the next chunk
+                buffer = lines.pop() || '';
+
+                // process each complete line
+                for (const line of lines) {
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine) continue; // skip empty lines
+
+                    try {
+                        const data: TroubleshootResponse = JSON.parse(trimmedLine);
+                        internal_id_counter = id_counter + data.id;
+                        stepMessageCallback({
+                            ...data,
+                            id: internal_id_counter,
+                        });
+                        console.debug(data);
+
+                        if (data.status === 'finished') {
+                            resolve(++internal_id_counter); // proceed to next step
+                            return;
+                        }
+
+                        if (data.status === 'pending') await delay(1000);
+
+                        // stop further steps on failure
+                        if (data.status === 'failed') {
+                            reject(++internal_id_counter); // stop further steps
+                            return;
+                        }
+
+                    } catch (e) {
+                        stepMessageCallback({
+                            id: internal_id_counter,
+                            status: 'failed',
+                            message: '伺服器回應格式錯誤, 請稍後再試',
+                            timestamp: new Date().toISOString(),
+                        });
+                        reject(++internal_id_counter) // stop further steps
+                        return;
+                    }
+                }
+            }
+        } catch (e) {
+            stepMessageCallback({
+                id: id_counter,
+                status: 'failed',
+                message: '無法解析伺服器回應, 請稍後再試',
+                timestamp: new Date().toISOString(),
+            });
+            reject(++id_counter) // stop further steps
+            return;
+        }
+    });
+}
+
+/**
+ * Step 3: Check browser VPN extension
+ * @param id_counter
+ * @param data
+ * @param stepMessageCallback
+ */
+function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, stepMessageCallback: (step: TroubleshootResponse) => void) {
+    return new Promise<number>(async (resolve, reject) => {
+        stepMessageCallback({
+            id: id_counter,
+            status: 'pending',
+            message: '檢查是否有安裝覽器VPN擴充...',
+            timestamp: new Date().toISOString(),
+        });
+        await delay(1000);
+
+        // callback function
+        let timer: NodeJS.Timeout;
+
+        async function callback(e: MessageEvent<PostMessageData>) {
+            if (e.source !== window) return;
+
+            // check for extension installed message
+            if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
+                if (!e.data.data.installed) {
+                    stepMessageCallback({
+                        id: id_counter,
+                        status: 'info',
+                        message: '檢查是否有安裝覽器VPN擴充...',
+                        timestamp: new Date().toISOString(),
+                    });
+                    removeListener()
+                    return resolve(++id_counter);
+                }
+
+                // check extension version
+                if (e.data.data.version < '2.2.0') {
+                    stepMessageCallback({
+                        id: id_counter,
+                        status: 'warning',
+                        message: '偵測到Cocomine VPN擴充版本過舊, 請更新至最新版本以獲得最佳使用體驗',
+                        timestamp: new Date().toISOString(),
+                    });
+                    removeListener();
+                    return resolve(++id_counter);
+                }
+
+                // extension is installed and up-to-date
+                stepMessageCallback({
+                    id: id_counter++,
+                    status: 'success',
+                    message: '已偵測到安裝Cocomine VPN擴充',
+                    timestamp: new Date().toISOString(),
+                });
+                await delay(1000);
+
+                // Step 3.1: Check VPN connection status through extension
+                stepMessageCallback({
+                    id: id_counter,
+                    status: 'pending',
+                    message: '透過擴充插件重新連線VPN...',
+                    timestamp: new Date().toISOString(),
+                });
+                await delay(1000);
+                window.postMessage({type: 'ConnectByExtension', ask: true});
+            }
+
+            if ((e.data.type === 'ConnectByExtension') && !e.data.ask) {
+                if (!e.data.data.connectByExtension) {
+                    stepMessageCallback({
+                        id: id_counter,
+                        status: 'warning',
+                        message: 'VPN目前未連線, 請手動嘗試連線',
+                        timestamp: new Date().toISOString(),
+                    });
+                    removeListener()
+                    return resolve(++id_counter);
+                }
+                window.postMessage({type: 'Connect', ask: true, data});
+            }
+
+            // receive connect response
+            if ((e.data.type === 'Connect') && !e.data.ask) {
+                if (e.data.data.connected) {
+                    stepMessageCallback({
+                        id: id_counter,
+                        status: 'success',
+                        message: 'VPN重新連線成功',
+                        timestamp: new Date().toISOString(),
+                    });
+                    resolve(++id_counter);
+                } else {
+                    stepMessageCallback({
+                        id: id_counter,
+                        status: 'failed',
+                        message: 'VPN重新連線失敗, 請手動嘗試連線',
+                        timestamp: new Date().toISOString(),
+                    });
+                    reject(++id_counter);
+                }
+                removeListener()
+            }
+        }
+
+        function removeListener() {
+            window.removeEventListener('message', callback);
+            clearTimeout(timer)
+        }
+
+        // timeout handler, in case no response from extension
+        timer = setTimeout(() => {
+            stepMessageCallback({
+                id: id_counter,
+                status: 'info',
+                message: '未偵測到安裝Cocomine VPN擴充',
+                timestamp: new Date().toISOString(),
+            });
+            removeListener();
+            resolve(++id_counter);
+        }, 5000); // timeout after 5 seconds
+
+        window.addEventListener('message', callback);
+        window.postMessage({type: 'ExtensionInstalled', ask: true});
+    })
 }
 
 /**

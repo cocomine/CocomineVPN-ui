@@ -478,9 +478,10 @@ body {
     overflow: hidden;
 }
 
+/* troubleshoot-step animation */
 .troubleshoot-step {
   opacity: 0;
-  animation: 0.5s fadeInUp 0.5s ease-in-out forwards;
+    animation: fadeInUp 0.5s ease-in-out forwards;
   transform: translateY(20px);
 
   @keyframes fadeInUp {
