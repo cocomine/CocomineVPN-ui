@@ -1,5 +1,6 @@
 import {
     I_Connect_PostMessageData,
+    I_ConnectByExtension_PostMessageData,
     I_ExtensionInstalled_PostMessageData,
     I_MobileAppInstalled_PostMessageData,
     I_PostVMData_PostMessageData,
@@ -199,7 +200,8 @@ export type PostMessageData =
     | I_MobileAppInstalled_PostMessageData
     | I_PostVMData_PostMessageData
     | I_VMOperationFail_PostMessageData
-    | I_RetrieveTrackedUsage_PostMessageData;
+    | I_RetrieveTrackedUsage_PostMessageData
+    | I_ConnectByExtension_PostMessageData;
 
 /**
  * Turnstile 元件的參數， `siteKey` 已移除並由組件統一注入。
@@ -210,3 +212,8 @@ export type TurnstileWidgetProps = Omit<TurnstileProps, "siteKey">;
  * Turnstile Context 函式類型，返回一個 Promise，解析為驗證 token 字串。
  */
 export type TurnstileContextType = () => Promise<string>;
+
+/**
+ * Troubleshoot status type.
+ */
+export type TroubleshootStatus = 'pending' | 'success' | 'failed' | 'info' | 'warning' | 'finished';

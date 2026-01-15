@@ -477,3 +477,21 @@ body {
     height: 100vh;
     overflow: hidden;
 }
+
+/* troubleshoot-step animation */
+.troubleshoot-step {
+  opacity: 0;
+    animation: fadeInUp 0.5s ease-in-out forwards;
+  transform: translateY(20px);
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
