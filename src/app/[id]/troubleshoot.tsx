@@ -6,13 +6,14 @@ import {TroubleshootResponse} from "../../constants/Interface";
 import {API_URL} from "../../constants/GlobalVariable";
 import {toastHttpError} from "../../components/ToastHttpError";
 import {useTurnstile} from "../../hook/Turnstile";
+import semver from "semver";
 
 /**
- * Profile component
+ * Troubleshoot component
  *
- * This component displays a modal with VPN profiles for a specific virtual machine (VM).
+ * This component displays a troubleshooting modal for VPN connection diagnostics for a specific virtual machine (VM).
  * It sets the document title based on the VM name and blocks navigation when the modal is open.
- * Path: /:id/profile
+ * Path: /:id/troubleshoot
  *
  */
 const Troubleshoot: React.FC = () => {
@@ -350,7 +351,7 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
         stepMessageCallback({
             id: id_counter,
             status: 'pending',
-            message: '檢查是否有安裝覽器VPN擴充...',
+            message: '檢查是否有安裝瀏覽器VPN擴充...',
             timestamp: new Date().toISOString(),
         });
         await delay(1000);
@@ -375,7 +376,7 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
                 }
 
                 // check extension version
-                if (e.data.data.version < '2.2.0') {
+                if (semver.lt(e.data.data.version, '2.2.0')) {
                     stepMessageCallback({
                         id: id_counter,
                         status: 'warning',

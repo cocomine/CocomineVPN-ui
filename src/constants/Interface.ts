@@ -148,7 +148,7 @@ export interface I_RetrieveTrackedUsage_PostMessageData extends I_BasePostMessag
 }
 
 /**
- * Retrieve Tracked Usage 訊息介面
+ * Connect By Extension 訊息介面 - message interface for extension connection status.
  */
 export interface I_ConnectByExtension_PostMessageData extends I_BasePostMessageData {
     type: 'ConnectByExtension';
