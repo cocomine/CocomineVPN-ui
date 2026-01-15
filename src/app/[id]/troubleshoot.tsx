@@ -19,6 +19,7 @@ const Troubleshoot: React.FC = () => {
     const [show, setShow] = useState(true);
     const {data} = useOutletContext<ProfileContextType>()
     const [steps, setSteps] = useState<TroubleshootResponse[]>([]);
+    const [finish, setFinish] = useState(false);
     const navigate = useNavigate();
     const lock = useRef(false)
     const execute = useTurnstile();
@@ -57,6 +58,7 @@ const Troubleshoot: React.FC = () => {
                     setSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
                 });
             } catch {
+                setFinish(true);
                 return; // stop further steps if internet check failed
             }
 
@@ -65,8 +67,8 @@ const Troubleshoot: React.FC = () => {
                 id_counter = await step2_ServerSideCheck(id_counter, data, execute, (step) => {
                     setSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
                 });
-                await delay(500);
             } catch {
+                setFinish(true);
                 return; // stop further steps if server-side check failed
             }
 
@@ -75,8 +77,8 @@ const Troubleshoot: React.FC = () => {
                 id_counter = await step3_ExtensionCheck(id_counter, data, (step) => {
                     setSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
                 });
-                await delay(500);
             } catch {
+                setFinish(true);
                 return; // stop further steps if server-side check failed
             }
 
@@ -88,7 +90,6 @@ const Troubleshoot: React.FC = () => {
                 timestamp: new Date().toISOString(),
             };
             setSteps(prev => [...prev, finalStep1]);
-            await delay(500);
             const finalStep2: TroubleshootResponse = {
                 id: id_counter++,
                 status: 'info',
@@ -96,6 +97,7 @@ const Troubleshoot: React.FC = () => {
                 timestamp: new Date().toISOString(),
             };
             setSteps(prev => [...prev, finalStep2]);
+            setFinish(true);
         })()
     }, [data, execute]);
 
@@ -117,6 +119,10 @@ const Troubleshoot: React.FC = () => {
                         }
                     </Row>
                 </Modal.Body>
+                {finish &&
+                    <Modal.Footer>
+                        <button className="btn btn-secondary" onClick={() => navigate('..')}>關閉</button>
+                    </Modal.Footer>}
             </Modal>
         </>
     );
@@ -129,7 +135,7 @@ const Troubleshoot: React.FC = () => {
  */
 const TroubleshootStep: React.FC<{ data: TroubleshootResponse }> = ({data}) => {
     return (
-        <Col xs={12} className={"text-center troubleshoot-step"} style={{fontSize: '1.1em'}}>
+        <Col xs={12} className={"troubleshoot-step"} style={{fontSize: '1.1em'}}>
             <div>
                 {data.status === 'pending' &&
                     <span className={'text-secondary'}><Spinner animation="border" size="sm"/> {data.message}</span>}
@@ -272,7 +278,10 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
             while (true) {
                 const {value, done} = await reader.read(); // read the chunk
                 // read complete
-                if (done) break;
+                if (done) {
+                    reject(++internal_id_counter);
+                    break;
+                }
 
                 // decode the chunk and append to buffer
                 const chunk = decoder.decode(value, {stream: true});
@@ -304,12 +313,6 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
                         }
 
                         if (data.status === 'pending') await delay(1000);
-
-                        // stop further steps on failure
-                        if (data.status === 'failed') {
-                            reject(++internal_id_counter); // stop further steps
-                            return;
-                        }
 
                     } catch (e) {
                         stepMessageCallback({
@@ -384,13 +387,13 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
                 }
 
                 // extension is installed and up-to-date
+                clearTimeout(timer);
                 stepMessageCallback({
                     id: id_counter++,
                     status: 'success',
                     message: '已偵測到安裝Cocomine VPN擴充',
                     timestamp: new Date().toISOString(),
                 });
-                await delay(1000);
 
                 // Step 3.1: Check VPN connection status through extension
                 stepMessageCallback({
