@@ -1,4 +1,4 @@
-import {Turnstile, TurnstileInstance} from '@marsidev/react-turnstile'
+import {Turnstile, TurnstileInstance} from '@marsidev/react-turnstile';
 import {Col, Row} from "react-bootstrap";
 import React, {useCallback, useRef} from "react";
 import {TurnstileContext} from "../hook/Turnstile";
@@ -51,7 +51,9 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
                 </Row>
             </div>
             <TurnstileContext.Provider value={execute}>
-                {props.children}
+                <div style={{filter: display ? 'blur(20px)' : undefined}}>
+                    {props.children}
+                </div>
             </TurnstileContext.Provider>
         </>
     )

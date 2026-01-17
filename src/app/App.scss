@@ -338,6 +338,7 @@ body {
 /* turnstile-screen */
 .turnstile-screen {
     @extend .loading-screen;
+    background-color: rgba(47, 47, 47, 0.4);
     z-index: $zindex-toast + 10;
 }
 
