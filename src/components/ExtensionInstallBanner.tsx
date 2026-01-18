@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Col, Row} from "react-bootstrap";
 import {PostMessageData} from "../constants/Type";
 import {API_URL} from "../constants/GlobalVariable";
@@ -11,7 +11,6 @@ import {useTurnstile} from "../hook/Turnstile";
 const ExtensionInstallBanner: React.FC = () => {
     const execute = useTurnstile()
     const [installed, setInstalled] = useState<boolean>(false); // check if extension is installed
-    const lock_retrieve_track = useRef(false); // to prevent multiple simultaneous sends
 
     // check if extension is installed
     useEffect(() => {
@@ -30,8 +29,7 @@ const ExtensionInstallBanner: React.FC = () => {
             }
 
             // silently retrieve tracked VPN usage from extension/mobile app
-            if (e.data.type === 'RetrieveTrackedUsage' && !e.data.ask && !lock_retrieve_track.current) {
-                lock_retrieve_track.current = true; //lock to prevent multiple sends
+            if (e.data.type === 'RetrieveTrackedUsage' && !e.data.ask) {
                 let data = e.data.data ?? [];
 
                 //merge with stored retry data if exists
