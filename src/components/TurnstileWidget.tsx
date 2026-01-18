@@ -3,6 +3,7 @@ import {Col, Row} from "react-bootstrap";
 import React, {useCallback, useRef} from "react";
 import {TurnstileContext} from "../hook/Turnstile";
 import {TurnstileWidgetProps} from "../constants/Type";
+import {NODE_ENV} from "../constants/GlobalVariable";
 
 /**
  * 提供 Turnstile 驗證流程的 Context Provider。
@@ -29,7 +30,7 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
                 }).catch((error) => {
                     setDisplay(false);
                     reject(error);
-                })
+                });
             } else {
                 reject(new Error("Turnstile ref is not available"));
             }
@@ -44,8 +45,9 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
                         <h1>確認你不是機械人</h1>
                         <p>輕輕點一下下面的驗證，證明你是活力滿滿的小夥伴!</p>
                         <Row className="justify-content-center">
-                            <Turnstile ref={ref} {...props} siteKey={process.env.REACT_APP_TURNSTILE_KEY}
-                                       children={undefined}/>
+                            {NODE_ENV !== "development" &&
+                                <Turnstile ref={ref} {...props} siteKey={process.env.REACT_APP_TURNSTILE_KEY}
+                                           children={undefined}/>}
                         </Row>
                     </Col>
                 </Row>
@@ -56,5 +58,5 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
                 </div>
             </TurnstileContext.Provider>
         </>
-    )
+    );
 };
