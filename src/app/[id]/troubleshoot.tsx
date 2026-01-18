@@ -22,7 +22,7 @@ const Troubleshoot: React.FC = () => {
     const [steps, setSteps] = useState<TroubleshootResponse[]>([]);
     const [finish, setFinish] = useState(false);
     const navigate = useNavigate();
-    const lock = useRef(false);
+    const runningIdRef = useRef<string | null>(null); // to track the running troubleshoot session
     const execute = useTurnstile();
 
     // set title
@@ -47,59 +47,64 @@ const Troubleshoot: React.FC = () => {
 
     // start troubleshoot on component mount
     useEffect(() => {
-        if (lock.current) return;
-        lock.current = true;
+        const controller = new AbortController();
+        const {signal} = controller;
 
         (async () => {
             let id_counter = 0;
 
-            // Step 1: Check internet connectivity
-            try {
-                id_counter = await step1_CheckInternet(id_counter, (step) => {
-                    setSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
-                });
-            } catch {
-                setFinish(true);
-                return; // stop further steps if internet check failed
-            }
-
-            // Step 2: Check VPN server status
-            try {
-                id_counter = await step2_ServerSideCheck(id_counter, data, execute, (step) => {
-                    setSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
-                });
-            } catch {
-                setFinish(true);
-                return; // stop further steps if server-side check failed
-            }
-
-            // Step 3: Check browser VPN extension
-            try {
-                id_counter = await step3_ExtensionCheck(id_counter, data, (step) => {
-                    setSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
-                });
-            } catch {
-                setFinish(true);
-                return; // stop further steps if server-side check failed
-            }
-
-            // Final Step: Troubleshoot complete
-            const finalStep1: TroubleshootResponse = {
-                id: id_counter++,
-                status: 'finished',
-                message: '所有診斷完成',
-                timestamp: new Date().toISOString(),
+            // safe setSteps to avoid setting state on unmounted component
+            const safeSetSteps = (updater: React.SetStateAction<TroubleshootResponse[]>) => {
+                if (!signal.aborted) setSteps(updater);
             };
-            setSteps(prev => [...prev, finalStep1]);
-            const finalStep2: TroubleshootResponse = {
-                id: id_counter++,
-                status: 'info',
-                message: '關於VPN程式的使用問題請參閱該程式的支援頁面 或 Discord Cocomine',
-                timestamp: new Date().toISOString(),
+
+            //
+            const updateCallback = (step: TroubleshootResponse) => {
+                safeSetSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
             };
-            setSteps(prev => [...prev, finalStep2]);
-            setFinish(true);
+
+            try {
+                // Step 1: Check internet connectivity
+                id_counter = await step1_CheckInternet(id_counter, updateCallback, signal);
+
+                // Step 2: Check VPN server status
+                id_counter = await step2_ServerSideCheck(id_counter, data, execute, updateCallback, signal);
+
+                // Step 3: Check browser VPN extension
+                id_counter = await step3_ExtensionCheck(id_counter, data, updateCallback, signal);
+
+                // Final Step: Troubleshoot complete
+                const finalStep1: TroubleshootResponse = {
+                    id: id_counter++,
+                    status: 'finished',
+                    message: '所有診斷完成',
+                    timestamp: new Date().toISOString(),
+                };
+                safeSetSteps(prev => [...prev, finalStep1]);
+                const finalStep2: TroubleshootResponse = {
+                    id: id_counter++,
+                    status: 'info',
+                    message: '關於VPN程式的使用問題請參閱該程式的支援頁面 或 Discord Cocomine',
+                    timestamp: new Date().toISOString(),
+                };
+                safeSetSteps(prev => [...prev, finalStep2]);
+                if (!signal.aborted) setFinish(true);
+            } catch (error: any) {
+                // handle abort separately
+                if (error.name === 'AbortError') {
+                    console.log('Troubleshoot aborted via AbortController');
+                    return; // exit silently
+                }
+
+                console.error("Troubleshoot failed:", error);
+                // Final Step: Troubleshoot failed
+                if (!signal.aborted) setFinish(true);
+            }
         })();
+
+        return () => {
+            controller.abort(); // abort ongoing troubleshoot on unmount
+        };
     }, [data, execute]);
 
     return (
@@ -159,9 +164,10 @@ const TroubleshootStep: React.FC<{ data: TroubleshootResponse }> = ({data}) => {
  * Step 1: Check internet connectivity
  * @param id_counter - Current step ID counter
  * @param stepMessageCallback - Callback to update step message
+ * @param signal
  * @returns Promise<number> - Updated step ID counter
  */
-function step1_CheckInternet(id_counter: number, stepMessageCallback: (step: TroubleshootResponse) => void) {
+function step1_CheckInternet(id_counter: number, stepMessageCallback: (step: TroubleshootResponse) => void, signal: AbortSignal) {
     return new Promise<number>((resolve, reject) => {
         (async () => {
             stepMessageCallback({
@@ -170,17 +176,19 @@ function step1_CheckInternet(id_counter: number, stepMessageCallback: (step: Tro
                 message: '檢查網絡連接...',
                 timestamp: new Date().toISOString(),
             });
-            await delay(1000);
+            await delay(1000, signal);
 
             try {
-                await fetch('https://1.1.1.1', {method: 'HEAD', mode: 'no-cors'});
+                await fetch('https://1.1.1.1', {method: 'HEAD', mode: 'no-cors', signal});
                 stepMessageCallback({
                     id: id_counter,
                     status: 'success',
                     message: '網絡連接正常',
                     timestamp: new Date().toISOString(),
                 });
-            } catch (error) {
+            } catch (error: any) {
+                if (error.name === 'AbortError') throw error; // rethrow abort error
+
                 stepMessageCallback({
                     id: id_counter,
                     status: 'failed',
@@ -202,9 +210,10 @@ function step1_CheckInternet(id_counter: number, stepMessageCallback: (step: Tro
  * @param data - VM instance data
  * @param execute - Turnstile execute function
  * @param stepMessageCallback - Callback to update step message
+ * @param signal
  * @returns Promise<number> - Updated step ID counter
  */
-function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, execute: TurnstileContextType, stepMessageCallback: (step: TroubleshootResponse) => void) {
+function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, execute: TurnstileContextType, stepMessageCallback: (step: TroubleshootResponse) => void, signal: AbortSignal) {
     return new Promise<number>((resolve, reject) => {
         (async () => {
             stepMessageCallback({
@@ -213,19 +222,26 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
                 message: '正在請求檢查節點狀態...',
                 timestamp: new Date().toISOString(),
             });
-            await delay(1000);
+            await delay(1000, signal);
 
             // Step 2.1: request server-side troubleshoot
             const serverSide = () => new Promise<Response>((resolve1, reject1) => {
                 (async () => {
                     try {
-                        const response = await fetch(API_URL + `/vpn/${data._id}/troubleshoot`);
+                        const response = await fetch(API_URL + `/vpn/${data._id}/troubleshoot`, {signal});
                         if (!response.ok) {
                             //handle turnstile challenge
                             if (response.status === 403 && response.headers.has('cf-mitigated') && response.headers.get('cf-mitigated') === 'challenge') {
                                 try {
+                                    if (signal.aborted) throw new DOMException("Aborted", "AbortError");
                                     await execute();
-                                } catch (e) {
+                                } catch (e: any) {
+                                    // aborted
+                                    if (e.name === 'AbortError') {
+                                        reject1(e);
+                                        return;
+                                    }
+
                                     stepMessageCallback({
                                         id: id_counter,
                                         status: 'failed',
@@ -282,6 +298,8 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
                 let buffer = '';
                 let internal_id_counter = id_counter;
                 while (true) {
+                    if (signal.aborted) throw new DOMException("Aborted", "AbortError"); // handle abort
+
                     const {value, done} = await reader.read(); // read the chunk
                     // read complete
                     if (done) {
@@ -318,9 +336,11 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
                                 return;
                             }
 
-                            if (data.status === 'pending') await delay(1000);
+                            if (data.status === 'pending') await delay(1000, signal);
 
-                        } catch (e) {
+                        } catch (e: any) {
+                            if (e.name === 'AbortError') throw e; // Bubble up
+
                             stepMessageCallback({
                                 id: internal_id_counter,
                                 status: 'failed',
@@ -332,7 +352,9 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
                         }
                     }
                 }
-            } catch (e) {
+            } catch (e: any) {
+                if (e.name === 'AbortError') throw e;
+
                 stepMessageCallback({
                     id: id_counter,
                     status: 'failed',
@@ -351,8 +373,9 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
  * @param id_counter
  * @param data
  * @param stepMessageCallback
+ * @param signal
  */
-function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, stepMessageCallback: (step: TroubleshootResponse) => void) {
+function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, stepMessageCallback: (step: TroubleshootResponse) => void, signal: AbortSignal) {
     return new Promise<number>((resolve, reject) => {
         (async () => {
             stepMessageCallback({
@@ -361,7 +384,7 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
                 message: '檢查是否有安裝瀏覽器VPN擴充...',
                 timestamp: new Date().toISOString(),
             });
-            await delay(1000);
+            await delay(1000, signal);
 
             // callback function
             let timer: NodeJS.Timeout;
@@ -378,7 +401,7 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
                             message: '檢查是否有安裝瀏覽器VPN擴充...',
                             timestamp: new Date().toISOString(),
                         });
-                        removeListener();
+                        clearTimer();
                         return resolve(++id_counter);
                     }
 
@@ -390,12 +413,12 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
                             message: '偵測到Cocomine VPN擴充版本過舊, 請更新至最新版本以獲得最佳使用體驗',
                             timestamp: new Date().toISOString(),
                         });
-                        removeListener();
+                        clearTimer();
                         return resolve(++id_counter);
                     }
 
                     // extension is installed and up-to-date
-                    clearTimeout(timer);
+                    clearTimer();
                     stepMessageCallback({
                         id: id_counter++,
                         status: 'success',
@@ -410,7 +433,14 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
                         message: '透過擴充插件重新連線VPN...',
                         timestamp: new Date().toISOString(),
                     });
-                    await delay(1000);
+
+                    // Asynchronous calls within callbacks require handling exceptions manually.
+                    try {
+                        await delay(1000, signal);
+                    } catch (err: any) {
+                        if (err.name === 'AbortError') return;
+                    }
+
                     window.postMessage({type: 'ConnectByExtension', ask: true});
                 }
 
@@ -422,7 +452,7 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
                             message: 'VPN目前未連線, 請手動嘗試連線',
                             timestamp: new Date().toISOString(),
                         });
-                        removeListener();
+                        clearTimer();
                         return resolve(++id_counter);
                     }
                     window.postMessage({type: 'Connect', ask: true, data});
@@ -447,12 +477,11 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
                         });
                         reject(++id_counter);
                     }
-                    removeListener();
+                    clearTimer();
                 }
             }
 
-            function removeListener() {
-                window.removeEventListener('message', callback);
+            function clearTimer() {
                 clearTimeout(timer);
             }
 
@@ -464,11 +493,12 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
                     message: '未偵測到安裝Cocomine VPN擴充',
                     timestamp: new Date().toISOString(),
                 });
-                removeListener();
+                clearTimer();
                 resolve(++id_counter);
             }, 5000); // timeout after 5 seconds
 
-            window.addEventListener('message', callback);
+            window.addEventListener('message', callback, {signal});
+            signal.addEventListener('abort', () => clearTimer(), {once: true});
             window.postMessage({type: 'ExtensionInstalled', ask: true});
         })().catch(reject);
     });
@@ -477,9 +507,24 @@ function step3_ExtensionCheck(id_counter: number, data: VMInstanceDataType, step
 /**
  * Intentionally creating delays to make the process look more comfortable.
  * @param ms - milliseconds to delay
+ * @param signal - optional AbortSignal to cancel the delay
+ * @returns Promise<void>
  */
-async function delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function delay(ms: number, signal?: AbortSignal) {
+    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+    return new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => {
+            resolve();
+            signal?.removeEventListener('abort', onAbort);
+        }, ms);
+
+        const onAbort = () => {
+            clearTimeout(timer);
+            reject(new DOMException("Aborted", "AbortError"));
+        };
+
+        signal?.addEventListener('abort', onAbort, {once: true});
+    });
 }
 
 export default Troubleshoot;
