@@ -22,21 +22,21 @@ import {useTurnstile} from "../../hook/Turnstile";
  * Path: `/:id`
  */
 const VMAction: React.FC = () => {
-    const [vm_instance_data, setVMInstanceData] = useState<VMInstanceDataType | null>(null)
+    const [vm_instance_data, setVMInstanceData] = useState<VMInstanceDataType | null>(null);
     const data = useVMData();
     const location = useLocation();
     const execute = useTurnstile();
     const navigate = useNavigate();
-    const revalidator = useRevalidator()
+    const revalidator = useRevalidator();
     const [show, setShow] = useState(true);
-    const {statusUpdateCallback} = useOutletContext<MenuContextType>()
+    const {statusUpdateCallback} = useOutletContext<MenuContextType>();
     const [is_loading, setIsLoading] = useState<boolean>(false);
     const [is_extend_time_loading, setIsExtendTimeLoading] = useState<boolean>(false);
 
     // set vm_instance_data when data changes
     useEffect(() => {
         if (data === null) return;
-        setVMInstanceData(data.data.find(v => v._id === location.pathname.split('/')[1]) || null)
+        setVMInstanceData(data.data.find(v => v._id === location.pathname.split('/')[1]) || null);
     }, [data, data?.data, location.pathname]);
 
     // power action
@@ -48,7 +48,7 @@ const VMAction: React.FC = () => {
             vm_name: vm_instance_data._name,
             vm_id: vm_instance_data._id,
             power: power ? "ON" : "OFF"
-        })
+        });
         setIsLoading(true);
 
         try {
@@ -63,20 +63,20 @@ const VMAction: React.FC = () => {
                 body: JSON.stringify({
                     target_state: power ? "START" : "STOP"
                 })
-            })
+            });
             if (!res.ok) {
                 setIsLoading(false);
-                if (res.status === 460) return toast.error(`節點只允許 ${vm_instance_data._readonly} 操作`)
-                if (res.status === 461) return toast.error(`節點已經處於${vm_instance_data._isPowerOn ? '開機' : '關機'}狀態`)
+                if (res.status === 460) return toast.error(`節點只允許 ${vm_instance_data._readonly} 操作`);
+                if (res.status === 461) return toast.error(`節點已經處於${vm_instance_data._isPowerOn ? '開機' : '關機'}狀態`);
 
                 //handle turnstile challenge
                 if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
                     try {
-                        await execute()
+                        await execute();
                         await powerAction(power); // retry
                     } catch (e) {
-                        console.error(e)
-                        toast.error("未通過驗證! 請重新嘗試!")
+                        console.error(e);
+                        toast.error("未通過驗證! 請重新嘗試!");
                     }
                     return;
                 }
@@ -84,13 +84,13 @@ const VMAction: React.FC = () => {
                 return toastHttpError(res.status); // other errors
             }
         } catch (e: any) {
-            console.error(e)
-            toastHttpError(e.status)
+            console.error(e);
+            toastHttpError(e.status);
             setIsLoading(false);
             return;
         }
 
-        statusUpdateCallback(power, vm_instance_data._id)
+        statusUpdateCallback(power, vm_instance_data._id);
     }, [vm_instance_data, statusUpdateCallback, execute]);
 
     // extend time action
@@ -101,7 +101,7 @@ const VMAction: React.FC = () => {
         ReactGA.event('vm_extend_time', {
             vm_name: vm_instance_data._name,
             vm_id: vm_instance_data._id,
-        })
+        });
         setIsExtendTimeLoading(true);
 
         try {
@@ -112,56 +112,56 @@ const VMAction: React.FC = () => {
                     "Cf-Access-Jwt-Assertion": TOKEN,
                     'X-Requested-With': 'XMLHttpRequest',
                 },
-            })
+            });
             if (!res.ok) {
                 setIsExtendTimeLoading(false);
-                if (res.status === 462) return toast.error(`只允許離線前一小時操作`)
-                if (res.status === 463) return toast.error(`節點沒有開啟`)
+                if (res.status === 462) return toast.error(`只允許離線前一小時操作`);
+                if (res.status === 463) return toast.error(`節點沒有開啟`);
                 //handle turnstile challenge
                 if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
                     try {
-                        await execute()
+                        await execute();
                         await extendTime(); // retry
                     } catch (e) {
-                        console.error(e)
-                        toast.error("未通過驗證! 請重新嘗試!")
+                        console.error(e);
+                        toast.error("未通過驗證! 請重新嘗試!");
                     }
                     return;
                 }
 
-                return toastHttpError(res.status) // other errors
+                return toastHttpError(res.status); // other errors
             } else {
                 setIsExtendTimeLoading(false);
-                toast.success("延長開放時間成功")
+                toast.success("延長開放時間成功");
 
                 // immediately update vm_instance_data._expired in UI
                 const data: { data: VMInstanceDataType } = await res.json();
                 setVMInstanceData((prev) => {
                     if (prev === null) return prev;
                     prev._expired = data.data._expired;
-                    return prev
+                    return prev;
                 });
             }
 
-            revalidator.revalidate() // revalidate data, fetch new data from server to update gobal state
+            revalidator.revalidate(); // revalidate data, fetch new data from server to update gobal state
         } catch (e: any) {
-            console.error(e)
+            console.error(e);
             setIsExtendTimeLoading(false);
-            toastHttpError(e.status)
+            toastHttpError(e.status);
         }
-    }, [vm_instance_data, revalidator, execute, is_extend_time_loading])
+    }, [vm_instance_data, revalidator, execute, is_extend_time_loading]);
 
     // block navigation when modal is open
     let blocker = useBlocker(() => {
-        setShow(false)
-        return true
+        setShow(false);
+        return true;
     });
 
     // redirect to home page after modal close animation
     useEffect(() => {
-        if (show) return
+        if (show) return;
         const id = setTimeout(() => {
-            if (blocker.state === "blocked") blocker.proceed()
+            if (blocker.state === "blocked") blocker.proceed();
         }, 150);
         return () => clearTimeout(id);
     }, [show, blocker]);
@@ -170,15 +170,15 @@ const VMAction: React.FC = () => {
     useEffect(() => {
         if (vm_instance_data === null) return;
         if (location.pathname === '/' + vm_instance_data._id) {
-            document.title = vm_instance_data._name + " - Cocomine VPN"
-            setShow(true)
+            document.title = vm_instance_data._name + " - Cocomine VPN";
+            setShow(true);
         }
     }, [location, vm_instance_data]);
 
     // set is_loading when vm_instance_data._status changes
     useEffect(() => {
         if (vm_instance_data === null) return;
-        setIsLoading(PROCESSING_STATUS_TEXT.includes(vm_instance_data._status))
+        setIsLoading(PROCESSING_STATUS_TEXT.includes(vm_instance_data._status));
     }, [vm_instance_data]);
 
     if (vm_instance_data === null) return null;
@@ -200,7 +200,8 @@ const VMAction: React.FC = () => {
                                               readonly={vm_instance_data._readonly} loading={is_loading}/>
                             </Col>
                             <Col className="border-start">
-                                <Link to={location.pathname + '/profile'} className="chooseProfile_btn">
+                                <Link to={location.pathname + '/profile'}
+                                      className="chooseProfile_btn text-decoration-none">
                                     <img src={tools} alt="Config file" className="w-100" draggable={false}/>
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
@@ -214,15 +215,16 @@ const VMAction: React.FC = () => {
                         </Row>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Link to={'troubleshoot'} className={'text-muted small'}><i
-                            className="bi bi-question-octagon-fill"></i> 排解疑難</Link>
+                        <Link to={'troubleshoot'} className={'text-muted small text-decoration-none'}>
+                            <i className="bi bi-question-circle-fill"></i> 排解疑難
+                        </Link>
                     </Modal.Footer>
                 </Modal>
             }
             <Outlet context={{data: vm_instance_data} satisfies ProfileContextType}/>
         </>
     );
-}
+};
 
 /**
  * ExtensionConnect component for connecting to a browser extension.
@@ -230,19 +232,19 @@ const VMAction: React.FC = () => {
  * @param data - The VM data.
  */
 const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
-    const [installed, setInstalled] = useState<boolean>(false)
-    const [loading, setLoading] = useState(false)
+    const [installed, setInstalled] = useState<boolean>(false);
+    const [loading, setLoading] = useState(false);
     const audio = useMemo(() => new Audio(require('../../assets/sounds/Jig 0.mp3')), []);
 
     // connect to extension
     const onClick = useCallback(() => {
-        setLoading(true)
+        setLoading(true);
 
         // Google Analytics
         ReactGA.event('extension_connect', {
             vm_name: data._name,
             vm_id: data._id,
-        })
+        });
 
         // show toast
         toast.promise(new Promise((resolve, reject) => {
@@ -254,9 +256,9 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
                 // receive connect response
                 if ((e.data.type === 'Connect') && !e.data.ask) {
                     if (e.data.data.connected) {
-                        resolve(true)
+                        resolve(true);
                     } else {
-                        reject(false)
+                        reject(false);
                     }
                     window.removeEventListener('message', callback); // remove event listener when call
                 }
@@ -268,7 +270,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
             success: "連線成功",
             error: "連線失敗"
         }).catch((err) => {
-            console.error(err)
+            console.error(err);
         });
 
         window.postMessage({type: 'Connect', ask: true, data: data}); // post message to extension for connect
@@ -285,7 +287,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
             // receive extension installed response
             if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
                 if (!(e.data.data.installed && data._profiles.some(p => p.type === "socks5"))) return;
-                setInstalled(true)
+                setInstalled(true);
             }
 
             // receive connect response
@@ -293,7 +295,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
                 if (e.data.data.connected) {
                     audio.play();
                 }
-                setLoading(false)
+                setLoading(false);
             }
         }
 
@@ -336,8 +338,8 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
                 </Button>
             </Col>
         </>
-    )
-}
+    );
+};
 
 /**
  * MobileAppConnect component
@@ -348,12 +350,12 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  * @param data - The VM data.
  */
 const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
-    const [installed, setInstalled] = useState<boolean>(false)
-    const [loading, setLoading] = useState(false)
+    const [installed, setInstalled] = useState<boolean>(false);
+    const [loading, setLoading] = useState(false);
 
     // connect to extension
     const onClick = useCallback(() => {
-        setLoading(true)
+        setLoading(true);
         window.postMessage({type: 'AppConnect', ask: true, data: data});
     }, [data]);
 
@@ -367,11 +369,11 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
 
             if ((e.data.type === 'MobileAppInstalled') && !e.data.ask) {
                 if (!(e.data.data.installed && data._profiles.some(p => p.type === "SS"))) return;
-                setInstalled(true)
+                setInstalled(true);
             }
 
             if ((e.data.type === 'AppConnect') && !e.data.ask) {
-                setLoading(false)
+                setLoading(false);
             }
         }
 
@@ -409,8 +411,8 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
                 </Button>
             </Col>
         </>
-    )
-}
+    );
+};
 
 /**
  * ExtendTime component
@@ -418,30 +420,30 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  * This component displays the remaining time until the expected offline time and allows the user to extend the time.
  */
 const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
-    const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string | null>(null)
-    const [enableExtend, setEnableExtend] = useState<boolean>(false)
+    const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string | null>(null);
+    const [enableExtend, setEnableExtend] = useState<boolean>(false);
     const location = useLocation();
 
     // update expect_offline_time_Interval every second
     useEffect(() => {
         if (expired !== null) {
             const id = setInterval(() => {
-                const expect_offline_time = moment(expired)
-                const diff = expect_offline_time.diff(Date.now())
-                const tmp = moment.utc(diff).format('HH:mm:ss')
+                const expect_offline_time = moment(expired);
+                const diff = expect_offline_time.diff(Date.now());
+                const tmp = moment.utc(diff).format('HH:mm:ss');
 
-                if (diff < 60 * 60 * 1000) setEnableExtend(true)
+                if (diff < 60 * 60 * 1000) setEnableExtend(true);
                 setExpect_offline_time_Interval(diff > 0 ? tmp : "00:00:00");
-            }, 1000)
+            }, 1000);
 
-            return () => clearInterval(id)
+            return () => clearInterval(id);
         }
     }, [expired]);
 
     // check if hash is #extendTime
     useEffect(() => {
         if (location.hash === "#extendTime") {
-            location.hash = ""
+            location.hash = "";
             onClick();
         }
     }, [onClick, location, location.hash]);
@@ -469,8 +471,8 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
                 </Button>
             </Col>
         </>
-    )
-}
+    );
+};
 
 /**
  * PowerControl component
@@ -484,20 +486,32 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
  * @param loading - Indicates if the power action is in progress
  */
 const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly, loading}) => {
-    const timeout = useRef<NodeJS.Timeout | null>(null)
+    const timeout = useRef<NodeJS.Timeout | null>(null);
+
+    const msgText = useMemo(() => {
+        if (isPower) {
+            if (readonly === "readOnly") return "節點為唯讀狀態, 無法關閉";
+            if (readonly === "startOnly") return "節點只允許啟動操作, 無法關閉";
+            return "長按關閉節點";
+        } else {
+            if (readonly === "readOnly") return "節點為唯讀狀態, 無法啟動";
+            if (readonly === "stopOnly") return "節點只允許關閉操作, 無法啟動";
+            return "長按啟動節點";
+        }
+    }, [isPower, readonly]);
 
     // on mouse down start timeout for long press event
     const onMouseDown = useCallback(() => {
         timeout.current = setTimeout(() => {
-            action(!isPower)
-        }, 2000)
+            action(!isPower);
+        }, 2000);
     }, [action, isPower]);
 
     // on mouse up clear timeout for long press event
     const onMouseUp = useCallback(() => {
         if (timeout.current) {
-            clearTimeout(timeout.current)
-            timeout.current = null
+            clearTimeout(timeout.current);
+            timeout.current = null;
         }
     }, []);
 
@@ -523,7 +537,7 @@ const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly, load
                         </svg>
                     </Button>
                 </Ratio>
-                <p className="text-center pt-2">長按關閉節點</p>
+                <p className="text-center pt-2">{msgText}</p>
             </>
         );
     }
@@ -554,10 +568,10 @@ const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly, load
                     </svg>
                 </Button>
             </Ratio>
-            <p className="text-center pt-2">長按啟動節點</p>
+            <p className="text-center pt-2">{msgText}</p>
         </>
     );
-}
+};
 
 /**
  * Loader function for Index

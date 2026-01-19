@@ -14,7 +14,6 @@ import {ErrorScreen} from "./components/ErrorScreen";
 import {LoadingScreen} from "./components/LoadingScreen";
 import Profile from "./app/[id]/profile";
 import {AnimationBackground} from "./components/AnimationBackground";
-import {AnimationBubbles} from "./components/AnimationBubbles";
 import {clarity} from "react-microsoft-clarity";
 import {TurnstileWidgetProvider} from "./components/TurnstileWidget";
 import * as Sentry from "@sentry/react";
@@ -66,13 +65,13 @@ const router = createBrowserRouter([
                 loader: async () => {
                     const redirectUrl = sessionStorage.getItem('redirect');
                     sessionStorage.removeItem('redirect');
-                    window.location.replace(redirectUrl ? redirectUrl : "/") // redirect to the original page
+                    window.location.replace(redirectUrl ? redirectUrl : "/"); // redirect to the original page
                     return null;
                 },
             }
         ]
     }
-])
+]);
 
 // create root
 const root = ReactDOM.createRoot(
@@ -92,7 +91,7 @@ figlet.text('Cocomine VPN', {
         return;
     }
     console.log(data);
-    console.log(APP_VERSION)
+    console.log(APP_VERSION);
 });
 
 clarity.init('okh6uy1ksy'); // init clarity
@@ -109,7 +108,6 @@ root.render(
                         className="iframe-background"/>
                 : <>
                     <AnimationBackground/>
-                    <AnimationBubbles/>
                 </>
             }
         </TurnstileWidgetProvider>

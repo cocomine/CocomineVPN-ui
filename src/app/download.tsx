@@ -51,7 +51,7 @@ const Download = () => {
                     </Modal.Header>
                     <Modal.Body>
                         <Container>
-                        <Row className={"g-5 justify-content-center"}>
+                            <Row className={"gy-5 gx-4 justify-content-center"}>
                             <Col lg={2} md={3} xs={4}>
                                 <a href={'https://www.softether-download.com/cn.aspx?product=softether'}
                                    target={'_blank'}
