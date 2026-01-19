@@ -95,8 +95,8 @@ const Troubleshoot: React.FC = () => {
                     return; // exit silently
                 }
 
+                // Troubleshoot failed
                 console.error("Troubleshoot failed:", error);
-                // Final Step: Troubleshoot failed
                 if (!signal.aborted) setFinish(true);
             }
         })();
