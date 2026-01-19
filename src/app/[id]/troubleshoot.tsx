@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useBlocker, useNavigate, useOutletContext} from "react-router-dom";
 import {PostMessageData, ProfileContextType, TurnstileContextType, VMInstanceDataType} from "../../constants/Type";
 import {Col, Modal, Row, Spinner} from "react-bootstrap";
@@ -22,7 +22,6 @@ const Troubleshoot: React.FC = () => {
     const [steps, setSteps] = useState<TroubleshootResponse[]>([]);
     const [finish, setFinish] = useState(false);
     const navigate = useNavigate();
-    const runningIdRef = useRef<string | null>(null); // to track the running troubleshoot session
     const execute = useTurnstile();
 
     // set title
