@@ -53,7 +53,7 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
                 </Row>
             </div>
             <TurnstileContext.Provider value={execute}>
-                <div style={{filter: display ? 'blur(20px)' : undefined}}>
+                <div style={{filter: display ? 'blur(20px)' : undefined}} className="turnstile-content">
                     {props.children}
                 </div>
             </TurnstileContext.Provider>
