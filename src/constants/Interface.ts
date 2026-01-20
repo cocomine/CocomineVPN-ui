@@ -223,5 +223,14 @@ export interface https_profile extends base_profile {
     "type": "https",
     "url": string
 }
-
 /* ========== */
+
+/**
+ * HTTPS certificate settings for VM connection.
+ */
+export interface httpsCert {
+    type: 'https',
+    vm_id: string,
+    username: string,
+    password: string
+}
