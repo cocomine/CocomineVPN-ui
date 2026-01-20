@@ -1,4 +1,11 @@
-import {ReadOnlyModeType, TroubleshootStatus, VMCountryType, VMInstanceDataType, WeatherAlertType} from "./Type";
+import {
+    ReadOnlyModeType,
+    TroubleshootStatus,
+    VMCountryType,
+    VMInstanceDataType,
+    vpnType,
+    WeatherAlertType
+} from "./Type";
 
 /**
  * Interface for the status update callback function.
@@ -185,3 +192,36 @@ export interface TroubleshootResponse {
     timestamp: string;
     status: TroubleshootStatus;
 }
+
+/* ====== profiles interface ==== */
+export interface base_profile {
+    "type": vpnType,
+    name: string
+}
+
+export interface openvpn_profile extends base_profile {
+    "type": "OpenVPN",
+    "filename": string
+}
+
+export interface softether_profile extends base_profile {
+    "type": "SoftEther",
+    "filename": string
+}
+
+export interface ss_profile extends base_profile {
+    "type": "SS",
+    "url": string
+}
+
+export interface socks5_profile extends base_profile {
+    "type": "socks5",
+    "url": string
+}
+
+export interface https_profile extends base_profile {
+    "type": "https",
+    "url": string
+}
+
+/* ========== */

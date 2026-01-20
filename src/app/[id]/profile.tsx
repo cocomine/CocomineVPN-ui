@@ -1,10 +1,11 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useBlocker, useNavigate, useOutletContext} from "react-router-dom";
-import {openvpn_profile, ProfileContextType, softether_profile, ss_profile, VPNProfileType} from "../../constants/Type";
+import {ProfileContextType, VPNProfileType} from "../../constants/Type";
 import {Button, Col, Form, InputGroup, Modal, Row} from "react-bootstrap";
 import {API_URL} from "../../constants/GlobalVariable";
 import {QRCodeSVG} from "qrcode.react";
 import ReactGA from "react-ga4";
+import {openvpn_profile, softether_profile, ss_profile} from "../../constants/Interface";
 
 
 /**
