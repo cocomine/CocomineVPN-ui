@@ -44,12 +44,45 @@ export type VMProviderType = "google" | "azure"
  * @property {string} filename - Local filename associated with the profile.
  * @property {string} [url] - Optional remote URL where profile can be downloaded.
  */
-export type VPNProfileType = {
-    "type": "OpenVPN" | "SoftEther" | "SS" | "socks5",
-    "name": string,
-    "filename": string,
-    "url"?: string
+export type VPNProfileType = openvpn_profile | softether_profile | ss_profile | socks5_profile | https_profile;
+
+/**
+ * VPN profile types.
+ */
+export type vpnType = "OpenVPN" | "SoftEther" | "SS" | "socks5" | "https";
+
+/* ====== profiles type ==== */
+export interface base_profile {
+    "type": vpnType,
+    name: string
 }
+
+export interface openvpn_profile extends base_profile {
+    "type": "OpenVPN",
+    "filename": string
+}
+
+export interface softether_profile extends base_profile {
+    "type": "SoftEther",
+    "filename": string
+}
+
+export interface ss_profile extends base_profile {
+    "type": "SS",
+    "url": string
+}
+
+export interface socks5_profile extends base_profile {
+    "type": "socks5",
+    "url": string
+}
+
+export interface https_profile extends base_profile {
+    "type": "https",
+    "url": string
+}
+
+/* ======================== */
 
 /**
  * Read-only mode controls UI action availability.
