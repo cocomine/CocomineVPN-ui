@@ -90,7 +90,7 @@ const SingleVPNProfile: React.FC<{ profile: VPNProfileType, vm_id: string }> = (
             default:
                 return null
         }
-    }, [data, profile, vm_id]);
+    }, [data, vm_id]);
 
     // update data when profile changed
     useEffect(() => {
