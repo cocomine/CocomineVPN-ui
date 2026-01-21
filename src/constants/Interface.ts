@@ -1,9 +1,9 @@
-import {
+import type {
     ReadOnlyModeType,
     TroubleshootStatus,
     VMCountryType,
     VMInstanceDataType,
-    vpnType,
+    VPNType,
     WeatherAlertType
 } from "./Type";
 
@@ -16,7 +16,7 @@ import {
  * @returns {void}
  */
 export interface I_StatusUpdateCallback {
-    (target_power: boolean, vm_id: string): void
+    (target_power: boolean, vm_id: string): void;
 }
 
 /**
@@ -58,7 +58,7 @@ export interface I_PowerControl {
 export interface I_WebSocketTicket {
     data?: {
         ticket: string
-    }
+    };
 }
 
 /**
@@ -82,7 +82,7 @@ export interface I_ExtensionInstalled_PostMessageData extends I_BasePostMessageD
     data: {
         installed: boolean;
         version: string;
-    }
+    };
 }
 
 /**
@@ -93,7 +93,7 @@ export interface I_ExtensionInstalled_PostMessageData extends I_BasePostMessageD
  */
 export interface I_PostVMData_PostMessageData extends I_BasePostMessageData {
     type: 'PostVMData';
-    data: VMInstanceDataType[]
+    data: VMInstanceDataType[];
 }
 
 /**
@@ -110,7 +110,7 @@ export interface I_Connect_PostMessageData extends I_BasePostMessageData {
     data: {
         connected: boolean;
         id: string
-    }
+    };
 }
 
 /**
@@ -121,7 +121,7 @@ export interface I_MobileAppInstalled_PostMessageData extends I_BasePostMessageD
     data: {
         installed: boolean;
         version: string;
-    }
+    };
 }
 
 /**
@@ -138,7 +138,7 @@ export interface I_VMOperationFail_PostMessageData extends I_BasePostMessageData
         message: string,
         operation: string,
         timestamp: string
-    }
+    };
 }
 
 /**
@@ -151,7 +151,7 @@ export interface I_RetrieveTrackedUsage_PostMessageData extends I_BasePostMessag
         country: VMCountryType;
         // True is connect, false is disconnect.
         isConnect: boolean;
-    }[]
+    }[];
 }
 
 /**
@@ -162,7 +162,7 @@ export interface I_ConnectByExtension_PostMessageData extends I_BasePostMessageD
     data: {
         // True is connect, false is disconnect.
         connectByExtension: boolean;
-    }
+    };
 }
 
 /**
@@ -194,43 +194,42 @@ export interface TroubleshootResponse {
 }
 
 /* ====== profiles interface ==== */
-export interface base_profile {
-    "type": vpnType,
+export interface BaseProfile {
+    type: VPNType,
     name: string
 }
 
-export interface openvpn_profile extends base_profile {
-    "type": "OpenVPN",
-    "filename": string
+export interface OpenvpnProfile extends BaseProfile {
+    type: "OpenVPN",
+    filename: string
 }
 
-export interface softether_profile extends base_profile {
-    "type": "SoftEther",
-    "filename": string
+export interface SoftetherProfile extends BaseProfile {
+    type: "SoftEther",
+    filename: string
 }
 
-export interface ss_profile extends base_profile {
-    "type": "SS",
-    "url": string
+export interface SSProfile extends BaseProfile {
+    type: "SS",
+    url: string
 }
 
-export interface socks5_profile extends base_profile {
-    "type": "socks5",
-    "url": string
+export interface Socks5Profile extends BaseProfile {
+    type: "socks5",
+    url: string
 }
 
-export interface https_profile extends base_profile {
-    "type": "https",
-    "url": string
+export interface HttpsProfile extends BaseProfile {
+    type: "https",
+    url: string
 }
+
 /* ========== */
 
 /**
  * HTTPS certificate settings for VM connection.
  */
-export interface httpsCert {
-    type: 'https',
-    vm_id: string,
+export interface HttpsCert {
     username: string,
     password: string
 }

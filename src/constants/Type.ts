@@ -1,5 +1,5 @@
-import {
-    https_profile,
+import type {
+    HttpsProfile,
     I_Connect_PostMessageData,
     I_ConnectByExtension_PostMessageData,
     I_ExtensionInstalled_PostMessageData,
@@ -9,10 +9,10 @@ import {
     I_StatusUpdateCallback,
     I_VMOperationFail_PostMessageData,
     I_WeatherAlert,
-    openvpn_profile,
-    socks5_profile,
-    softether_profile,
-    ss_profile
+    OpenvpnProfile,
+    Socks5Profile,
+    SoftetherProfile,
+    SSProfile
 } from "./Interface";
 import {TurnstileProps} from "@marsidev/react-turnstile";
 
@@ -43,13 +43,17 @@ export type VMProviderType = "google" | "azure"
 
 /**
  * VPN profile representation.
+ *
+ * Union of all supported VPN profile payload types.
+ *
+ * @typedef {OpenvpnProfile | SoftetherProfile | SSProfile | Socks5Profile | HttpsProfile} VPNProfileType
  */
-export type VPNProfileType = openvpn_profile | softether_profile | ss_profile | socks5_profile | https_profile;
+export type VPNProfileType = OpenvpnProfile | SoftetherProfile | SSProfile | Socks5Profile | HttpsProfile;
 
 /**
  * VPN profile types.
  */
-export type vpnType = "OpenVPN" | "SoftEther" | "SS" | "socks5" | "https";
+export type VPNType = "OpenVPN" | "SoftEther" | "SS" | "socks5" | "https";
 
 /**
  * Read-only mode controls UI action availability.

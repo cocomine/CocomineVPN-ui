@@ -8,7 +8,7 @@ import moment from "moment/moment";
 import {API_URL, PROCESSING_STATUS_TEXT, TOKEN} from "../../constants/GlobalVariable";
 import {MenuContextType, PostMessageData, ProfileContextType, VMInstanceDataType} from "../../constants/Type";
 import {toastHttpError} from "../../components/ToastHttpError";
-import {ExtendTimeProps, httpsCert, I_PowerControl} from "../../constants/Interface";
+import {ExtendTimeProps, HttpsCert, I_PowerControl} from "../../constants/Interface";
 import ReactGA from "react-ga4";
 import {useVMData} from "../../constants/VMDataContext";
 import {useTurnstile} from "../../hook/Turnstile";
@@ -293,7 +293,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
         } else {
             // for version >= 2.3.0
             // fetch https setting
-            let https_setting: httpsCert;
+            let https_setting: HttpsCert;
             try {
                 const res = await fetch(API_URL + "/vpn/" + data._id + "/profile?type=https", {
                     method: "GET",
