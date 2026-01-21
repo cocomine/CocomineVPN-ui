@@ -5,6 +5,7 @@ import {Button, Col, Form, InputGroup, Modal, Row} from "react-bootstrap";
 import {API_URL} from "../../constants/GlobalVariable";
 import {QRCodeSVG} from "qrcode.react";
 import ReactGA from "react-ga4";
+import {OpenvpnProfile, SoftetherProfile, SSProfile} from "../../constants/Interface";
 
 
 /**
@@ -51,7 +52,7 @@ const Profile: React.FC = () => {
                 <Modal.Body>
                     <Row className={"g-5 justify-content-center"}>
                         {data._profiles.map((profile) =>
-                            <SingleVPNProfile key={profile.filename} profile={profile} vm_id={data._id}/>)}
+                            <SingleVPNProfile key={profile.name} profile={profile} vm_id={data._id}/>)}
                     </Row>
                 </Modal.Body>
             </Modal>
@@ -70,20 +71,26 @@ const Profile: React.FC = () => {
  * @param {string} props.vm_id - The ID of the virtual machine
  */
 const SingleVPNProfile: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile, vm_id}) => {
-    const [data, setData] = useState<VPNProfileType>(profile);
+    const [data, setData] = useState(profile);
 
     const elm = useMemo(() => {
         switch (data.type) {
             case "OpenVPN":
-                return (<OpenVPN profile={profile} vm_id={vm_id}/>)
+                return (<OpenVPN profile={data} vm_id={vm_id}/>);
             case "SoftEther":
-                return (<SoftEther profile={profile} vm_id={vm_id}/>)
+                return (<SoftEther profile={data} vm_id={vm_id}/>);
             case "SS":
-                return (<SS profile={profile}/>)
+                return (<SS profile={data}/>);
+            case "socks5":
+                // socks5 profiles are currently not rendered in this component
+                return null;
+            case "https":
+                // https profiles are currently not rendered in this component
+                return null;
             default:
                 return null
         }
-    }, [data, profile, vm_id]);
+    }, [data, vm_id]);
 
     // update data when profile changed
     useEffect(() => {
@@ -107,8 +114,8 @@ const SingleVPNProfile: React.FC<{ profile: VPNProfileType, vm_id: string }> = (
  * @param {VPNProfileType} props.profile - The VPN profile data
  * @param {string} props.vm_id - The ID of the virtual machine
  */
-const OpenVPN: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile, vm_id}) => {
-    const [data, setData] = useState<VPNProfileType>(profile);
+const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile, vm_id}) => {
+    const [data, setData] = useState(profile);
     const a_ref = useRef<any>(null);
     const [show, setShow] = useState<JSX.Element | null>(null);
 
@@ -169,8 +176,8 @@ const OpenVPN: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile,
  * @param {VPNProfileType} props.profile - The VPN profile data
  * @param {string} props.vm_id - The ID of the virtual machine
  */
-const SoftEther: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profile, vm_id}) => {
-    const [data, setData] = useState<VPNProfileType>(profile);
+const SoftEther: React.FC<{ profile: SoftetherProfile, vm_id: string }> = ({profile, vm_id}) => {
+    const [data, setData] = useState(profile);
     const a_ref = useRef<any>(null);
     const [show, setShow] = useState<JSX.Element | null>(null);
 
@@ -231,8 +238,8 @@ const SoftEther: React.FC<{ profile: VPNProfileType, vm_id: string }> = ({profil
  * @param {Object} props - The component props
  * @param {VPNProfileType} props.profile - The VPN profile data
  */
-const SS: React.FC<{ profile: VPNProfileType }> = ({profile}) => {
-    const [data, setData] = useState<VPNProfileType>(profile);
+const SS: React.FC<{ profile: SSProfile }> = ({profile}) => {
+    const [data, setData] = useState(profile);
     const [show, setShow] = useState(false);
     const [isCopy, setIsCopy] = useState(false);
 

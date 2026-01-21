@@ -8,10 +8,11 @@ import moment from "moment/moment";
 import {API_URL, PROCESSING_STATUS_TEXT, TOKEN} from "../../constants/GlobalVariable";
 import {MenuContextType, PostMessageData, ProfileContextType, VMInstanceDataType} from "../../constants/Type";
 import {toastHttpError} from "../../components/ToastHttpError";
-import {ExtendTimeProps, I_PowerControl} from "../../constants/Interface";
+import {ExtendTimeProps, HttpsCert, I_PowerControl} from "../../constants/Interface";
 import ReactGA from "react-ga4";
 import {useVMData} from "../../constants/VMDataContext";
 import {useTurnstile} from "../../hook/Turnstile";
+import semver from "semver";
 
 /**
  * VMAction component
@@ -85,8 +86,8 @@ const VMAction: React.FC = () => {
             }
         } catch (e: any) {
             console.error(e);
-            toastHttpError(e.status);
             setIsLoading(false);
+            toastHttpError(e.status);
             return;
         }
 
@@ -234,10 +235,12 @@ const VMAction: React.FC = () => {
 const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
     const [installed, setInstalled] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
-    const audio = useMemo(() => new Audio(require('../../assets/sounds/Jig 0.mp3')), []);
+    const execute = useTurnstile();
+    const [version, setVersion] = useState<string | null>(null);
 
     // connect to extension
-    const onClick = useCallback(() => {
+    const onClick = useCallback(async () => {
+        if (version === null) return;
         setLoading(true);
 
         // Google Analytics
@@ -246,35 +249,100 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
             vm_id: data._id,
         });
 
-        // show toast
-        toast.promise(new Promise((resolve, reject) => {
+        // extracted function for showing toast and handling post message
+        function showToast() {
+            toast.promise(new Promise((resolve, reject) => {
 
-            // onMessage event callback function
-            function callback(e: MessageEvent<PostMessageData>) {
-                if (e.source !== window) return;
+                // onMessage event callback function
+                function callback(e: MessageEvent<PostMessageData>) {
+                    if (e.source !== window) return;
+                    const audio = new Audio(require('../../assets/sounds/Jig 0.mp3'));
 
-                // receive connect response
-                if ((e.data.type === 'Connect') && !e.data.ask) {
-                    if (e.data.data.connected) {
-                        resolve(true);
-                    } else {
-                        reject(false);
+                    // receive connect response
+                    if ((e.data.type === 'Connect') && !e.data.ask) {
+                        if (e.data.data.connected) {
+                            resolve(true);
+                            audio.play();
+                        } else {
+                            reject(false);
+                        }
+                        window.removeEventListener('message', callback); // remove event listener when call
                     }
-                    window.removeEventListener('message', callback); // remove event listener when call
                 }
+
+                window.addEventListener('message', callback); // add event listener on message
+            }), {
+                pending: {render: <>連接檢查中... <br/>檢查需時, 請耐心等候</>},
+                success: "連線成功",
+                error: "連線失敗"
+            }).catch((err) => {
+                console.error(err);
+            });
+        }
+
+        if (semver.lt(version, '2.3.0')) {
+            //NOTE: backward compatibility
+            showToast();
+
+            // post message to extension for connect
+            window.postMessage({
+                type: 'Connect',
+                ask: true,
+                data: data
+            });
+        } else {
+            // for version >= 2.3.0
+            // fetch https setting
+            let https_setting: HttpsCert;
+            try {
+                const res = await fetch(API_URL + "/vpn/" + data._id + "/profile?type=https", {
+                    method: "GET",
+                    credentials: "include",
+                    headers: {
+                        "Cf-Access-Jwt-Assertion": TOKEN,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                if (!res.ok) {
+                    if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
+                        try {
+                            await execute();
+                            await onClick(); // retry
+                        } catch (e: any) {
+                            console.error(e);
+                        }
+                        return;
+                    }
+                    toastHttpError(res.status);
+                    setLoading(false);
+                    return;
+                }
+
+                https_setting = (await res.json()).data;
+            } catch (e: any) {
+                console.error(e);
+                setLoading(false);
+                toastHttpError(e.status);
+                return;
             }
 
-            window.addEventListener('message', callback); // add event listener on message
-        }), {
-            pending: {render: <>連接檢查中... <br/>檢查需時, 請耐心等候</>},
-            success: "連線成功",
-            error: "連線失敗"
-        }).catch((err) => {
-            console.error(err);
-        });
+            // check if https_setting is valid
+            if (!https_setting) {
+                toast.error("獲取 HTTPS 設定失敗");
+                setLoading(false);
+                return;
+            }
 
-        window.postMessage({type: 'Connect', ask: true, data: data}); // post message to extension for connect
-    }, [data]);
+            showToast();
+
+            // post message to extension for connect
+            window.postMessage({
+                type: 'Connect',
+                ask: true,
+                data: {setting: https_setting, vm_data: data} //NOTE: backward compatibility
+            });
+        }
+    }, [data, execute, version]);
 
     // check if extension is installed
     useEffect(() => {
@@ -286,15 +354,13 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
 
             // receive extension installed response
             if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
-                if (!(e.data.data.installed && data._profiles.some(p => p.type === "socks5"))) return;
+                if (!(e.data.data.installed && data._profiles.some(p => p.type === "https"))) return;
                 setInstalled(true);
+                setVersion(e.data.data.version);
             }
 
             // receive connect response
             if ((e.data.type === 'Connect') && !e.data.ask) {
-                if (e.data.data.connected) {
-                    audio.play();
-                }
                 setLoading(false);
             }
         }
@@ -304,7 +370,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
         window.postMessage({type: 'ExtensionInstalled', ask: true});
 
         return () => window.removeEventListener('message', callback);
-    }, [data, audio]);
+    }, [data]);
 
     if (!installed) return null;
     return (

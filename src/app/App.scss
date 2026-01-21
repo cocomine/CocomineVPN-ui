@@ -540,7 +540,6 @@ body {
         transform: translateX(-100%);
     }
 }
-
 /* bubbles end */
 
 /* danger-border */
@@ -584,5 +583,33 @@ body {
             opacity: 1;
             transform: translateY(0);
         }
+    }
+}
+
+/* slide-top animation (for Toast) */
+.slide-top {
+    animation: slide-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+@keyframes slide-top {
+    0% {
+        transform: translateY(100%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* slide-bottom animation (for Toast) */
+.slide-bottom {
+    animation: slide-bottom 0.5s cubic-bezier(0.550, 0.055, 0.675, 0.190) both;
+}
+
+@keyframes slide-bottom {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(100%);
     }
 }

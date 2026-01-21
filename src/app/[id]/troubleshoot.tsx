@@ -178,7 +178,7 @@ function step1_CheckInternet(id_counter: number, stepMessageCallback: (step: Tro
             await delay(1000, signal);
 
             try {
-                await fetch('https://1.1.1.1', {method: 'HEAD', mode: 'no-cors', signal});
+                await fetch('https://example.com', {method: 'HEAD', mode: 'no-cors', signal});
                 stepMessageCallback({
                     id: id_counter,
                     status: 'success',

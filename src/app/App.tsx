@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import './App.scss';
 import {Alert, Container} from "react-bootstrap";
 import {Menu} from "./(Menu)";
-import {ToastContainer} from "react-toastify";
+import {cssTransition, ToastContainer} from "react-toastify";
 import {useLoaderData, useLocation, useNavigation, useRevalidator} from "react-router-dom";
 import {LoadingScreen} from "../components/LoadingScreen";
 import {UserProfileType, VMDataType, WeatherDataType, WebSocketDataType} from "../constants/Type";
@@ -12,6 +12,14 @@ import {GTAG_TAG_ID} from "../constants/GlobalVariable";
 import {clarity} from "react-microsoft-clarity";
 import {VMDataContext} from "../constants/VMDataContext";
 import useWebSocket from "../hook/useWebSocks";
+
+// slide transition for toastify
+const Slide = cssTransition({
+    enter: "slide-top",
+    exit: "slide-bottom",
+    collapse: false,
+    collapseDuration: 600,
+});
 
 /**
  * App component
@@ -37,7 +45,7 @@ function App() {
 
     // set title
     useEffect(() => {
-        if (location.pathname === "/") document.title = "Home - Cocomine VPN"
+        if (location.pathname === "/") document.title = "Home - Cocomine VPN";
         clarity.identify(userProfile.email, {
             'custom-session-id': Math.floor(Math.random() * (999999 + 1)),
             "custom-page-id": location.key,
@@ -51,7 +59,7 @@ function App() {
             if (document.visibilityState === "visible") {
                 revalidator.revalidate();
             }
-        }
+        };
         document.addEventListener("visibilitychange", handleVisibilityChange);
         return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
     }, [revalidator]);
@@ -65,7 +73,7 @@ function App() {
 
         // websocket message handler
         const handleMessage = (event: MessageEvent<string>) => {
-            const web_socket_data: WebSocketDataType = JSON.parse(event.data)
+            const web_socket_data: WebSocketDataType = JSON.parse(event.data);
 
             // VM data update
             if (web_socket_data.url === "/vpn/vm") {
@@ -83,7 +91,7 @@ function App() {
                         ...prev,
                         data: newVMData
                     };
-                })
+                });
             }
 
             if (web_socket_data.url === "/vpn/vm/error") {
@@ -92,9 +100,9 @@ function App() {
                     type: 'VMOperationFail',
                     ask: false,
                     data: web_socket_data.data
-                })
+                });
             }
-        }
+        };
 
         // update VM data when received message from websocket
         websocket.addEventListener('message', handleMessage);
@@ -108,7 +116,7 @@ function App() {
 
     // update VM data when loader data changes
     useEffect(() => {
-        setVMData(data)
+        setVMData(data);
     }, [data]);
 
     return (
@@ -127,6 +135,7 @@ function App() {
                             newestOnTop={false}
                             closeOnClick
                             rtl={false}
+                            transition={Slide}
                             draggable
                             pauseOnFocusLoss={false}
                             theme="colored"/>
@@ -138,7 +147,7 @@ function App() {
  * Loader for menu
  */
 const loader = async () => {
-    const data = await fetchVPNData()
+    const data = await fetchVPNData();
     const userProfile = await fetchProfileData();
     const WeatherData = await fetchWeatherData();
 
@@ -150,13 +159,13 @@ const loader = async () => {
     });
     clarity.consent(); // consent clarity
 
-    console.debug(data, userProfile, WeatherData) //debug
+    console.debug(data, userProfile, WeatherData); //debug
     return {
         data,
         userProfile,
         WeatherData
-    }
-}
+    };
+};
 
 export default App;
 export {loader};
