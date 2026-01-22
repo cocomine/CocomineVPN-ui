@@ -5,7 +5,7 @@ import {toast} from "react-toastify";
 import power from "../../assets/images/svg/power.svg";
 import tools from "../../assets/images/svg/tools.svg";
 import moment from "moment/moment";
-import {API_URL, PROCESSING_STATUS_TEXT, TOKEN} from "../../constants/GlobalVariable";
+import {API_URL, APP_VERSION, PROCESSING_STATUS_TEXT, TOKEN} from "../../constants/GlobalVariable";
 import {MenuContextType, PostMessageData, ProfileContextType, VMInstanceDataType} from "../../constants/Type";
 import {toastHttpError} from "../../components/ToastHttpError";
 import {ExtendTimeProps, HttpsCert, I_PowerControl} from "../../constants/Interface";
@@ -354,7 +354,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
 
             // receive extension installed response
             if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
-                if (!(e.data.data.installed && data._profiles.some(p => p.type === "https"))) return;
+                if (!e.data.data.installed) return;
                 setInstalled(true);
                 setVersion(e.data.data.version);
             }
@@ -367,7 +367,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
 
         // add event listener
         window.addEventListener('message', callback);
-        window.postMessage({type: 'ExtensionInstalled', ask: true});
+        window.postMessage({type: 'ExtensionInstalled', ask: true, data: {version: APP_VERSION}});
 
         return () => window.removeEventListener('message', callback);
     }, [data]);
