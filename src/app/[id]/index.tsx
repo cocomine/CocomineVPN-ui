@@ -1,6 +1,15 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Button, Col, Modal, Placeholder, Ratio, Row, Spinner} from "react-bootstrap";
-import {Link, Outlet, useBlocker, useLocation, useNavigate, useOutletContext, useRevalidator} from "react-router-dom";
+import {
+    BlockerFunction,
+    Link,
+    Outlet,
+    useBlocker,
+    useLocation,
+    useNavigate,
+    useOutletContext,
+    useRevalidator
+} from "react-router-dom";
 import {toast} from "react-toastify";
 import power from "../../assets/images/svg/power.svg";
 import tools from "../../assets/images/svg/tools.svg";
@@ -13,6 +22,7 @@ import ReactGA from "react-ga4";
 import {useVMData} from "../../constants/VMDataContext";
 import {useTurnstile} from "../../hook/Turnstile";
 import semver from "semver";
+import {captureException} from "@sentry/react";
 
 /**
  * VMAction component
@@ -87,7 +97,8 @@ const VMAction: React.FC = () => {
         } catch (e: any) {
             console.error(e);
             setIsLoading(false);
-            toastHttpError(e.status);
+            toastHttpError(0);
+            captureException(e);
             return;
         }
 
@@ -148,15 +159,20 @@ const VMAction: React.FC = () => {
         } catch (e: any) {
             console.error(e);
             setIsExtendTimeLoading(false);
-            toastHttpError(e.status);
+            toastHttpError(0);
+            captureException(e);
         }
     }, [vm_instance_data, revalidator, execute, is_extend_time_loading]);
 
     // block navigation when modal is open
-    let blocker = useBlocker(() => {
-        setShow(false);
-        return true;
-    });
+    const shouldBlock = useCallback<BlockerFunction>(({currentLocation}) => {
+        if (vm_instance_data !== null && currentLocation.pathname.toLowerCase().endsWith('/' + vm_instance_data._id)) {
+            setShow(false);
+            return true;
+        }
+        return false;
+    }, [vm_instance_data?._id]);
+    let blocker = useBlocker(shouldBlock);
 
     // redirect to home page after modal close animation
     useEffect(() => {
@@ -217,7 +233,7 @@ const VMAction: React.FC = () => {
                     </Modal.Body>
                     <Modal.Footer>
                         <Link to={'troubleshoot'} className={'text-muted small text-decoration-none'}>
-                            <i className="bi bi-question-circle-fill"></i> 排解疑難
+                            <i className="bi bi-question-circle-fill me-1"></i> 排解疑難
                         </Link>
                     </Modal.Footer>
                 </Modal>
@@ -638,21 +654,6 @@ const PowerControl: React.FC<I_PowerControl> = ({isPower, action, readonly, load
         </>
     );
 };
-
-/**
- * Loader function for Index
- *  @deprecated Not used anymore
- */
-// const loader = async ({params}: any) => {
-//     try {
-//         const VMData = await fetchVMData(params.id);
-//         console.debug(VMData)
-//         return {vmData: VMData.data}
-//     } catch (e: any) {
-//         toastHttpError(e.status)
-//         throw e
-//     }
-// }
 
 /**
  * VMActionErrorElement component

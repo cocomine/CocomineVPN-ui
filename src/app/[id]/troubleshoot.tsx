@@ -7,6 +7,7 @@ import {API_URL} from "../../constants/GlobalVariable";
 import {toastHttpError} from "../../components/ToastHttpError";
 import {useTurnstile} from "../../hook/Turnstile";
 import semver from "semver";
+import {captureException} from "@sentry/react";
 
 /**
  * Troubleshoot component
@@ -96,8 +97,9 @@ const Troubleshoot: React.FC = () => {
                 }
 
                 // Troubleshoot failed
-                console.error("Troubleshoot failed:", error);
                 if (!signal.aborted) setFinish(true);
+                console.error("Troubleshoot failed:", error);
+                captureException(error);
             }
         })();
 
