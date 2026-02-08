@@ -12,6 +12,7 @@ import {GTAG_TAG_ID} from "../constants/GlobalVariable";
 import {clarity} from "react-microsoft-clarity";
 import {VMDataContext} from "../constants/VMDataContext";
 import useWebSocket from "../hook/useWebSocks";
+import {setUser as sentrySetUser} from "@sentry/react";
 
 // slide transition for toastify
 const Slide = cssTransition({
@@ -158,6 +159,12 @@ const loader = async () => {
         }
     });
     clarity.consent(); // consent clarity
+
+    // set user info for Sentry
+    sentrySetUser({
+        fullName: userProfile.name,
+        email: userProfile.email,
+    });
 
     console.debug(data, userProfile, WeatherData); //debug
     return {
