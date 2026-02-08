@@ -1,6 +1,6 @@
 {
   "name": "cocominevpn-ui",
-  "version": "1.16.12",
+  "version": "1.17.0",
   "private": true,
   "dependencies": {
     "@marsidev/react-turnstile": "^1.4.0",

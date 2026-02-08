@@ -23,11 +23,13 @@ export const SS: React.FC = () => {
 
     // set profile data
     useEffect(() => {
-        const index = parseInt(location.hash.substring(1));
+        const index = parseInt(location.hash.substring(1)); // get index from url hash
         let tmp;
+        // if index is invalid, find the first SS profile in data
         if (isNaN(index) || index < 0 || index >= data.length) {
             tmp = data.find((item) => item.type === 'SS');
         } else {
+            // if index is valid, use it to get the profile, but still need to check if it's SS type
             if (data[index].type === 'SS') {
                 tmp = data[index];
             }

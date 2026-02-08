@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from "react";
-import {useBlocker, useNavigate, useOutletContext} from "react-router-dom";
+import React, {useCallback, useEffect, useState} from "react";
+import {BlockerFunction, useBlocker, useNavigate, useOutletContext} from "react-router-dom";
 import {PostMessageData, ProfileContextType, TurnstileContextType, VMInstanceDataType} from "../../constants/Type";
 import {Col, Modal, Row, Spinner} from "react-bootstrap";
 import {TroubleshootResponse} from "../../constants/Interface";
@@ -30,11 +30,14 @@ const Troubleshoot: React.FC = () => {
         document.title = data._name + " Troubleshoot - Cocomine VPN";
     }, [data]);
 
-    // block navigation when modal is open
-    let blocker = useBlocker(() => {
-        setShow(false);
-        return true;
-    });
+    const shouldBlock = useCallback<BlockerFunction>(({currentLocation}) => {
+        if (currentLocation.pathname.toLowerCase().endsWith('/troubleshoot')) {
+            setShow(false);
+            return true;
+        }
+        return false;
+    }, []);
+    let blocker = useBlocker(shouldBlock);
 
     // redirect to home page after modal close animation
     useEffect(() => {
