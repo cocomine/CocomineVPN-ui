@@ -171,7 +171,7 @@ const VMAction: React.FC = () => {
             return true;
         }
         return false;
-    }, [vm_instance_data?._id]);
+    }, [vm_instance_data]);
     let blocker = useBlocker(shouldBlock);
 
     // redirect to home page after modal close animation

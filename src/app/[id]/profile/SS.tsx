@@ -44,7 +44,7 @@ export const SS: React.FC = () => {
             return;
         }
         setProfile(tmp as SSProfile);
-    }, [data]);
+    }, [data, location.hash, navigate]);
 
     // set title
     useEffect(() => {

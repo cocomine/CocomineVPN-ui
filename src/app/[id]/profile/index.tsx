@@ -79,15 +79,19 @@ const Profile: React.FC = () => {
  * This component renders a single VPN profile based on the profile type.
  * It updates the profile data when the profile prop changes and selects the appropriate VPN component to render.
  *
- * @param {Object} props - The component props
- * @param {VPNProfileType} props.profile - The VPN profile data
- * @param {string} props.vm_id - The ID of the virtual machine
+ * @param profile - The VPN profile data
+ * @param vm_id - The ID of the virtual machine
+ * @param profilesIndex - The index of the profile in the profiles array (used for SS profiles)
  */
-const SingleVPNProfile: React.FC<{ profile: VPNProfileType, vm_id: string, profilesIndex?: number }> = ({
-                                                                                                            profile,
-                                                                                                            vm_id,
-                                                                                                            profilesIndex = 0
-                                                                                                        }) => {
+const SingleVPNProfile: React.FC<{
+    profile: VPNProfileType,
+    vm_id: string,
+    profilesIndex?: number
+}> = ({
+          profile,
+          vm_id,
+          profilesIndex = 0
+      }) => {
     const [data, setData] = useState(profile);
 
     const elm = useMemo(() => {
@@ -127,7 +131,7 @@ const SingleVPNProfile: React.FC<{ profile: VPNProfileType, vm_id: string, profi
             default:
                 return null;
         }
-    }, [data, vm_id]);
+    }, [data, vm_id, profilesIndex]);
 
     // update data when profile changed
     useEffect(() => {

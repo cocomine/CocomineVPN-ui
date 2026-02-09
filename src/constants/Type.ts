@@ -239,7 +239,7 @@ export type TurnstileWidgetProps = Omit<TurnstileProps, "siteKey">;
 /**
  * Turnstile Context 函式類型，返回一個 Promise，解析為驗證 token 字串。
  */
-export type TurnstileContextType = () => Promise<string>;
+export type TurnstileContextType = (signal?: AbortSignal) => Promise<string>;
 
 /**
  * Troubleshoot status type.
