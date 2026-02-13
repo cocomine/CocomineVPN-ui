@@ -122,7 +122,7 @@ export const V2rayN: React.FC = () => {
         return () => {
             controller.abort();
         };
-    }, [execute]);
+    }, [execute, userProfile?.custom?.name, userProfile?.name]);
 
     // set title
     useEffect(() => {
@@ -200,7 +200,7 @@ export const V2rayN: React.FC = () => {
             }
         };
         await createURL();
-    }, [execute]);
+    }, [execute, userProfile?.custom?.name, userProfile?.name]);
 
     // recreate subscription URL, show confirmation modal first
     const recreateSubscriptionURL = useCallback(async () => {
