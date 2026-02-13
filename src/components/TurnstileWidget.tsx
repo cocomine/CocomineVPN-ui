@@ -19,11 +19,19 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
      * @returns Promise<string> 驗證成功的 token。
      * @throws Error 當 ref 尚未就緒時拋出錯誤。
      */
-    const execute = useCallback(() => {
+    const execute = useCallback((signal?: AbortSignal) => {
         return new Promise<string>((resolve, reject) => {
             if (ref.current) {
                 setDisplay(true);
                 ref.current.reset();
+
+                // 監聽 signal 的 abort 事件，當驗證過程被取消時隱藏 Turnstile 視窗並拒絕 Promise。
+                signal && signal.addEventListener('abort', () => {
+                    setDisplay(false);
+                    reject(new DOMException("Turnstile aborted", "AbortError"));
+                }, {once: true});
+
+                // 等待 Turnstile 驗證完成，成功時解析 token，失敗時捕獲錯誤。
                 ref.current.getResponsePromise().then((token) => {
                     setDisplay(false);
                     resolve(token);
