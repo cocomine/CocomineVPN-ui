@@ -19,7 +19,7 @@ import {MenuContextType, PostMessageData, ProfileContextType, VMInstanceDataType
 import {toastHttpError} from "../../components/ToastHttpError";
 import {ExtendTimeProps, HttpsCert, I_PowerControl} from "../../constants/Interface";
 import ReactGA from "react-ga4";
-import {useVMData} from "../../constants/VMDataContext";
+import {useVMData} from "../../hook/VMDataContext";
 import {useTurnstile} from "../../hook/Turnstile";
 import semver from "semver";
 import {captureException} from "@sentry/react";

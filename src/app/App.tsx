@@ -10,9 +10,10 @@ import {fetchProfileData, fetchVPNData, fetchWeatherData} from "../hook/Loader";
 import ReactGA from "react-ga4";
 import {GTAG_TAG_ID} from "../constants/GlobalVariable";
 import {clarity} from "react-microsoft-clarity";
-import {VMDataContext} from "../constants/VMDataContext";
+import {VMDataContext} from "../hook/VMDataContext";
 import useWebSocket from "../hook/useWebSocks";
 import {setUser as sentrySetUser} from "@sentry/react";
+import {UserProfileContext} from "../hook/UserProfileContext";
 
 // slide transition for toastify
 const Slide = cssTransition({
@@ -43,6 +44,7 @@ function App() {
     };
     const [wsDisconnected, setWsDisconnected] = React.useState<boolean>(false);
     const [vm_data, setVMData] = useState<VMDataType>(data);
+    const [userProfileData, setUserProfileData] = useState<UserProfileType>(userProfile);
 
     // set title
     useEffect(() => {
@@ -120,13 +122,20 @@ function App() {
         setVMData(data);
     }, [data]);
 
+    // update user profile data when loader data changes
+    useEffect(() => {
+        setUserProfileData(userProfile);
+    }, [userProfile]);
+
     return (
         <>
             <Alert variant={"warning"} show={wsDisconnected} className="wsDisconnected">
                 與伺服器的連線中斷! 正在重新連線...</Alert>
             <Container className="content h-100" data-bs-theme="dark">
                 <VMDataContext.Provider value={vm_data}>
-                    <Menu userProfile={userProfile} weatherData={WeatherData}/>
+                    <UserProfileContext.Provider value={userProfileData}>
+                        <Menu weatherData={WeatherData}/>
+                    </UserProfileContext.Provider>
                 </VMDataContext.Provider>
             </Container>
             <LoadingScreen display={navigation.state === "loading"}/>
@@ -162,7 +171,7 @@ const loader = async () => {
 
     // set user info for Sentry
     sentrySetUser({
-        fullName: userProfile.name,
+        username: userProfile.name,
         email: userProfile.email,
     });
 

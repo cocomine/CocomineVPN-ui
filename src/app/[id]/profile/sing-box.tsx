@@ -9,6 +9,7 @@ import SingboxSVG from "../../../assets/images/svg/Sing-box.svg";
 import {API_URL} from "../../../constants/GlobalVariable";
 import {useTurnstile} from "../../../hook/Turnstile";
 import {toastHttpError} from "../../../components/ToastHttpError";
+import {useUserProfile} from "../../../hook/UserProfileContext";
 
 /**
  * SingBox component
@@ -26,6 +27,7 @@ export const SingBox: React.FC = () => {
     const [confirm, setConfirm] = useState(false);
     const execute = useTurnstile();
     const navigate = useNavigate();
+    const userProfile = useUserProfile();
 
     // generate information alert based on status
     const information = useMemo(() => {
@@ -66,7 +68,7 @@ export const SingBox: React.FC = () => {
         // fetch subscription URL, if 403 with cf-mitigated:challenge, trigger turnstile verification and retry
         const fetchURL = async () => {
             try {
-                const response = await fetch(API_URL + '/vpn/singbox', {
+                const response = await fetch(API_URL + '/vpn/sub', {
                     method: 'GET',
                     credentials: 'include',
                     signal: controller.signal,
@@ -75,8 +77,16 @@ export const SingBox: React.FC = () => {
                     if (response.status === 200) {
                         const res = await response.json();
                         const token = res.data.token;
-                        const url = new URL("sing-box://import-remote-profile#CocomineVPN");
-                        url.searchParams.set('url', API_URL + '/vpn/singbox/' + token);
+                        //const url = new URL("sing-box://import-remote-profile");
+                        //url.searchParams.set('url', API_URL + '/vpn/sub/' + token + '/singbox');
+                        //url.host = "192.168.0.170"//DEBUG
+                        //url.hash = `CocomineVPN(${userProfile?.name ?? userProfile?.custom?.name ?? ""})`
+
+                        //todo
+                        const url = new URL(API_URL + '/vpn/sub/' + token);
+                        url.host = "192.168.0.170";//DEBUG
+                        url.hash = `CocomineVPN(${userProfile?.name ?? userProfile?.custom?.name ?? ""})`;
+
                         setSubscriptionURL(url);
                         setStatus('exist-token');
                     }
@@ -96,10 +106,13 @@ export const SingBox: React.FC = () => {
 
                             console.error(e);
                             toast.error("未通過驗證! 請重新嘗試!");
+                            setStatus('error');
                         }
                         return;
                     }
-                    return toastHttpError(response.status); // other errors
+                    setStatus('error');
+                    toastHttpError(response.status); // other errors
+                    return;
                 }
             } catch (e: any) {
                 if (e.name === 'AbortError') {
@@ -121,7 +134,7 @@ export const SingBox: React.FC = () => {
 
     // set title
     useEffect(() => {
-        document.title = profile?.name + " - Cocomine VPN";
+        document.title = (profile?.name ?? "") + " - Cocomine VPN";
     }, [profile?.name]);
 
     // block navigation when modal is open
@@ -185,6 +198,7 @@ export const SingBox: React.FC = () => {
                         return;
                     }
                     toastHttpError(response.status);
+                    setStatus('error');
                 }
             } catch (e: any) {
                 console.error(e);
@@ -195,6 +209,7 @@ export const SingBox: React.FC = () => {
         await createURL();
     }, [execute]);
 
+    // recreate subscription URL, show confirmation modal first
     const recreateSubscriptionURL = useCallback(async () => {
         setConfirm(true);
     }, []);

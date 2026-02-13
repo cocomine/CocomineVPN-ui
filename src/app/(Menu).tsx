@@ -15,16 +15,10 @@ import download_svg from "../assets/images/svg/download.svg";
 import {toast} from "react-toastify";
 import {APP_VERSION, DANGER_WEATHER_ALERT, PROCESSING_STATUS_TEXT} from "../constants/GlobalVariable";
 import {I_StatusUpdateCallback} from "../constants/Interface";
-import {
-    AlertMemoType,
-    MenuContextType,
-    PostMessageData,
-    UserProfileType,
-    VMInstanceDataType,
-    WeatherDataType
-} from "../constants/Type";
+import {AlertMemoType, MenuContextType, PostMessageData, VMInstanceDataType, WeatherDataType} from "../constants/Type";
 import ExtensionInstallBanner from "../components/ExtensionInstallBanner";
-import {useVMData} from "../constants/VMDataContext";
+import {useVMData} from "../hook/VMDataContext";
+import {useUserProfile} from "../hook/UserProfileContext";
 
 /**
  * Menu component
@@ -39,14 +33,14 @@ import {useVMData} from "../constants/VMDataContext";
  * @param props.weatherData - The weather data
  */
 const Menu: React.FC<{
-    userProfile: UserProfileType,
     weatherData: WeatherDataType
-}> = ({userProfile, weatherData}) => {
+}> = ({weatherData}) => {
     const data = useVMData();
     const [vm_data, setVMData] = useState<VMInstanceDataType[]>([]);
     const [nextUpdateInterval, setNextUpdateInterval] = useState("--:--");
     const [lastUpdate, setLastUpdate] = useState("00:00");
     const [nextUpdate, setNextUpdate] = useState(moment());
+    const userProfile = useUserProfile();
     let revalidator = useRevalidator();
 
     // fetch data when data is changed
@@ -160,7 +154,7 @@ const Menu: React.FC<{
                 <Col xs={12} className="pt-5">
                     <Row className="justify-content-between align-items-center">
                         <Col xs="auto">
-                            <h1 className="text-truncate">Welcome {userProfile.name ?? userProfile.custom?.name} !</h1>
+                            <h1 className="text-truncate">Welcome {userProfile?.name ?? userProfile?.custom?.name ?? ""} !</h1>
                         </Col>
                         <Col xs="auto">
                             <Button variant="danger" href="/cdn-cgi/access/logout">

@@ -38,7 +38,7 @@ export const SS: React.FC = () => {
         if (!tmp) {
             // This should never happen, but just in case
             // redirect to profile page and show error message
-            console.error("No SingBox profile found in data");
+            console.error("No ShadowSocks (SS) profile found in data");
             toast.error("節點不提供ShadowSocks設定檔");
             navigate('..', {replace: true});
             return;
@@ -48,7 +48,7 @@ export const SS: React.FC = () => {
 
     // set title
     useEffect(() => {
-        document.title = profile?.name + " - Cocomine VPN";
+        document.title = (profile?.name ?? "") + " - Cocomine VPN";
     }, [profile?.name]);
 
     // block navigation when modal is open
