@@ -33,7 +33,7 @@ export const SingBox: React.FC = () => {
     const information = useMemo(() => {
         const msg = [];
         if (status === 'no-exist-token') {
-            msg.push(<Alert variant={"warning"} key={0}>你未創建Sing-box訂閱連結, 請先創建訂閱連結</Alert>);
+            msg.push(<Alert variant={"warning"} key={0}>你未創建訂閱連結, 請先創建訂閱連結</Alert>);
         }
         if (status === 'new-token') {
             msg.push(<Alert variant={"success"} key={1}>成功創建Sing-box訂閱連結, 連結有效期為90天</Alert>);

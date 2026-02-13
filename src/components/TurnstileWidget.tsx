@@ -21,7 +21,16 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
      */
     const execute = useCallback((signal?: AbortSignal) => {
         return new Promise<string>((resolve, reject) => {
+            // 如果驗證過程已經被取消，立即拒絕 Promise。
+            if (signal?.aborted) {
+                reject(new DOMException("Turnstile aborted", "AbortError"));
+                return;
+            }
+
+            // 顯示 Turnstile 視窗並重置驗證狀態。
             if (ref.current) {
+                const localAbortController = new AbortController(); // 用於監聽 Turnstile 驗證過程的取消事件。
+
                 setDisplay(true);
                 ref.current.reset();
 
@@ -29,15 +38,17 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
                 signal && signal.addEventListener('abort', () => {
                     setDisplay(false);
                     reject(new DOMException("Turnstile aborted", "AbortError"));
-                }, {once: true});
+                }, {once: true, signal: localAbortController.signal});
 
                 // 等待 Turnstile 驗證完成，成功時解析 token，失敗時捕獲錯誤。
                 ref.current.getResponsePromise().then((token) => {
                     setDisplay(false);
                     resolve(token);
+                    localAbortController.abort('Turnstile completed');
                 }).catch((error) => {
                     setDisplay(false);
                     reject(error);
+                    localAbortController.abort('Turnstile error');
                 });
             } else {
                 reject(new Error("Turnstile ref is not available"));
