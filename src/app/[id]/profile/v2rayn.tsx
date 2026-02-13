@@ -52,8 +52,8 @@ export const V2rayN: React.FC = () => {
         if (!tmp) {
             // This should never happen, but just in case
             // redirect to profile page and show error message
-            console.error("No Shadowrocket profile found in data");
-            toast.error("節點不提供Shadowrocket設定檔");
+            console.error("No V2rayN (sing-box) profile found in data");
+            toast.error("節點不提供V2rayN設定檔");
             navigate('..', {replace: true});
             return;
         }
