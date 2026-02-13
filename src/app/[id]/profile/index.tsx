@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {BlockerFunction, Link, Outlet, useBlocker, useLocation, useNavigate, useOutletContext} from "react-router-dom";
 import {IndividualProfileContextType, ProfileContextType, VPNProfileType} from "../../../constants/Type";
-import {Col, Modal, Row} from "react-bootstrap";
+import {Col, Container, Modal, Row} from "react-bootstrap";
 import {API_URL} from "../../../constants/GlobalVariable";
 import ReactGA from "react-ga4";
 import {OpenvpnProfile, SoftetherProfile} from "../../../constants/Interface";
@@ -53,18 +53,21 @@ const Profile: React.FC = () => {
     return (
         <>
             {location.pathname.toLowerCase().endsWith('/profile') &&
-                <Modal show={show} centered onHide={() => navigate('..', {replace: true})} size="lg">
+                <Modal show={show} centered onHide={() => navigate('..', {replace: true})} size="lg"
+                       fullscreen={'sm-down'}>
                     <Modal.Header closeButton>
                         <Modal.Title>下載設定檔 <small style={{color: "darkgray", fontSize: "x-small"}}>
                             ({data._name})
                         </small></Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <Row className={"gy-5 gx-4 justify-content-center"}>
-                            {data._profiles.map((profile, index) =>
-                                <SingleVPNProfile key={profile.name} profile={profile} vm_id={data._id}
-                                                  profilesIndex={index}/>)}
-                        </Row>
+                        <Container>
+                            <Row className={"gy-5 gx-4 justify-content-center"}>
+                                {data._profiles.map((profile, index) =>
+                                    <SingleVPNProfile key={profile.name} profile={profile} vm_id={data._id}
+                                                      profilesIndex={index}/>)}
+                            </Row>
+                        </Container>
                     </Modal.Body>
                 </Modal>
             }
@@ -97,20 +100,24 @@ const SingleVPNProfile: React.FC<{
     const elm = useMemo(() => {
         switch (data.type) {
             case "OpenVPN":
-                return (<OpenVPN profile={data} vm_id={vm_id}/>);
+                return [
+                    <OpenVPN profile={data} vm_id={vm_id}/>
+                ];
             case "SoftEther":
-                return (<SoftEther profile={data} vm_id={vm_id}/>);
+                return [
+                    <SoftEther profile={data} vm_id={vm_id}/>
+                ];
             case "SS":
-                return (
+                return [
                     <Link
-                        className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+                        className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2"
                         to={'ss#' + profilesIndex}>
                         <img src={require("../../../assets/images/webp/SS.webp")} alt="ShadowSocks"
                              className="rounded-4 profileImg"
                              draggable={false}/>
                         <p className="text-center pt-2">{data.name}</p>
                     </Link>
-                );
+                ];
             case "socks5":
                 // socks5 profiles are currently not rendered in this component
                 return null;
@@ -118,16 +125,32 @@ const SingleVPNProfile: React.FC<{
                 // https profiles are currently not rendered in this component
                 return null;
             case "sing-box":
-                return (
+                return [
                     <Link
-                        className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+                        className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2"
                         to={'sing-box'}>
                         <img src={SingboxSVG} alt="Sing-box"
                              className="rounded-4 profileImg"
                              draggable={false}/>
-                        <p className="text-center pt-2">{data.name}</p>
+                        <p className="text-center pt-2">{data.name} (Sing-box)</p>
+                    </Link>,
+                    <Link
+                        className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2"
+                        to={'shadowrocket'}>
+                        <img src={require('../../../assets/images/webp/shadowrocket.webp')} alt="Shadowrocket"
+                             className="rounded-4 profileImg"
+                             draggable={false}/>
+                        <p className="text-center pt-2">{data.name} (Shadowrocket)</p>
+                    </Link>,
+                    <Link
+                        className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2"
+                        to={'v2rayn'}>
+                        <img src={require('../../../assets/images/webp/v2rayn.webp')} alt="Shadowrocket"
+                             className="rounded-4 profileImg"
+                             draggable={false}/>
+                        <p className="text-center pt-2">{data.name} (V2rayN)</p>
                     </Link>
-                );
+                ];
             default:
                 return null;
         }
@@ -140,9 +163,9 @@ const SingleVPNProfile: React.FC<{
 
     if (elm === null) return null;
     return (
-        <Col lg={2} md={3} xs={4}>
-            {elm}
-        </Col>
+        <>
+            {elm.map((profile, index) => <Col lg={2} md={3} xs={4} key={index}>{profile}</Col>)}
+        </>
     );
 };
 
@@ -198,7 +221,7 @@ const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile,
         <>
             <a href={API_URL + '/vpn/' + vm_id + '/profile/?type=' + data.type} download={data.filename}
                rel="noreferrer noopener"
-               className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+               className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2"
                onClick={onClick}>
                 <img src={require("../../../assets/images/webp/openvpn.webp")} alt="OpenVPN"
                      className="rounded-4 profileImg"
@@ -262,7 +285,7 @@ const SoftEther: React.FC<{ profile: SoftetherProfile, vm_id: string }> = ({prof
         <>
             <a href={API_URL + '/vpn/' + vm_id + '/profile/?type=' + data.type} download={data.filename}
                rel="noreferrer noopener"
-               className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+               className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2"
                onClick={onClick}>
                 <img src={require("../../../assets/images/webp/softether.webp")} alt="SoftEther"
                      className="rounded-4 profileImg"

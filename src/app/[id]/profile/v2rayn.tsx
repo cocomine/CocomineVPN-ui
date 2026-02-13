@@ -5,7 +5,6 @@ import {QRCodeSVG} from "qrcode.react";
 import {BlockerFunction, useBlocker, useNavigate, useOutletContext} from "react-router-dom";
 import {IndividualProfileContextType} from "../../../constants/Type";
 import {toast} from "react-toastify";
-import SingboxSVG from "../../../assets/images/svg/Sing-box.svg";
 import {API_URL} from "../../../constants/GlobalVariable";
 import {useTurnstile} from "../../../hook/Turnstile";
 import {toastHttpError} from "../../../components/ToastHttpError";
@@ -16,12 +15,12 @@ import {useUserProfile} from "../../../hook/UserProfileContext";
  *
  * This component renders the SingBox profile image and handles the download animation and QR code display.
  */
-export const SingBox: React.FC = () => {
+export const V2rayN: React.FC = () => {
     const {data} = useOutletContext<IndividualProfileContextType>();
     const [profile, setProfile] = useState<SingboxProfile | null>(null);
     const [show, setShow] = useState(true);
     const [isCopy, setIsCopy] = useState(false);
-    const [subURL, setSubURL] = useState<URL>(new URL('sing-box://import-remote-profile' + 'x'.repeat(100)));
+    const [subURL, setSubURL] = useState<URL>(new URL('https://' + 'x'.repeat(100)));
     const [status, setStatus] = useState<'loading' | 'no-exist-token' | 'exist-token' | 'new-token' | 'error'>('loading');
     const [hidden, setHidden] = useState(true);
     const [confirm, setConfirm] = useState(false);
@@ -53,8 +52,8 @@ export const SingBox: React.FC = () => {
         if (!tmp) {
             // This should never happen, but just in case
             // redirect to profile page and show error message
-            console.error("No SingBox profile found in data");
-            toast.error("節點不提供Sing-box設定檔");
+            console.error("No Shadowrocket profile found in data");
+            toast.error("節點不提供Shadowrocket設定檔");
             navigate('..', {replace: true});
             return;
         }
@@ -78,8 +77,7 @@ export const SingBox: React.FC = () => {
                         const res = await response.json();
                         const token = res.data.token;
 
-                        const url = new URL("sing-box://import-remote-profile");
-                        url.searchParams.set('url', API_URL + '/vpn/sub/' + token + '/singbox');
+                        const url = new URL(API_URL + '/vpn/sub/' + token);
                         url.hash = `CocomineVPN(${userProfile?.name ?? userProfile?.custom?.name ?? ""})`;
                         setSubURL(url);
                         setStatus('exist-token');
@@ -128,12 +126,12 @@ export const SingBox: React.FC = () => {
 
     // set title
     useEffect(() => {
-        document.title = (profile?.name ?? "") + " (Sing-box) - Cocomine VPN";
+        document.title = (profile?.name ?? "") + " (Shadowrocket) - Cocomine VPN";
     }, [profile?.name]);
 
     // block navigation when modal is open
     const shouldBlock = useCallback<BlockerFunction>(({currentLocation}) => {
-        if (currentLocation.pathname.toLowerCase().endsWith('/sing-box')) {
+        if (currentLocation.pathname.toLowerCase().endsWith('/v2rayn')) {
             setShow(false);
             return true;
         }
@@ -175,8 +173,7 @@ export const SingBox: React.FC = () => {
                     const res = await response.json();
                     const token = res.data.token;
 
-                    const url = new URL("sing-box://import-remote-profile");
-                    url.searchParams.set('url', API_URL + '/vpn/sub/' + token + '/singbox');
+                    const url = new URL(API_URL + '/vpn/sub/' + token);
                     url.hash = `CocomineVPN(${userProfile?.name ?? userProfile?.custom?.name ?? ""})`;
                     setSubURL(url);
                     setStatus('new-token');
@@ -214,7 +211,7 @@ export const SingBox: React.FC = () => {
         <>
             <Modal show={show && !confirm} onHide={() => navigate('..', {replace: true})}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{profile?.name ?? ""} (Sing-box)</Modal.Title>
+                    <Modal.Title>{profile?.name ?? ""} (V2rayN)</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {information}
@@ -237,7 +234,7 @@ export const SingBox: React.FC = () => {
                                                        level={'Q'}
                                                        className={'rounded-5'}
                                                        imageSettings={{
-                                                           src: SingboxSVG,
+                                                           src: require('../../../assets/images/webp/v2rayn.webp'),
                                                            height: 240 / 4,
                                                            width: 240 / 4,
                                                            excavate: true

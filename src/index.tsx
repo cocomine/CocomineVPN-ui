@@ -17,7 +17,7 @@ import figlet from "figlet";
 import Download from "./app/download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import {connectWebsocket} from "./hook/useWebSocks";
-import {APP_VERSION} from "./constants/GlobalVariable";
+import {APP_VERSION, NODE_ENV} from "./constants/GlobalVariable";
 import {ErrorScreen} from "./components/ErrorScreen";
 import {LoadingScreen} from "./components/LoadingScreen";
 import Profile from "./app/[id]/profile";
@@ -27,6 +27,8 @@ import {TurnstileWidgetProvider} from "./components/TurnstileWidget";
 import Troubleshoot from "./app/[id]/troubleshoot";
 import {SS} from "./app/[id]/profile/SS";
 import {SingBox} from "./app/[id]/profile/sing-box";
+import {Shadowrocket} from "./app/[id]/profile/shadowrocket";
+import {V2rayN} from "./app/[id]/profile/v2rayn";
 
 Sentry.init({
     dsn: process.env.REACT_APP_SENTRY_DSN,
@@ -50,6 +52,7 @@ Sentry.init({
     // Session Replay
     replaysSessionSampleRate: 0.2,
     replaysOnErrorSampleRate: 1.0,
+    environment: NODE_ENV,
 });
 
 // create router
@@ -77,6 +80,12 @@ const router = sentryCreateBrowserRouter([
                             }, {
                                 path: 'sing-box',
                                 element: <SingBox/>,
+                            }, {
+                                path: 'shadowrocket',
+                                element: <Shadowrocket/>,
+                            }, {
+                                path: 'v2rayn',
+                                element: <V2rayN/>,
                             }
                         ]
                     }, {
