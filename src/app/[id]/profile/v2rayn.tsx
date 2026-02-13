@@ -11,9 +11,9 @@ import {toastHttpError} from "../../../components/ToastHttpError";
 import {useUserProfile} from "../../../hook/UserProfileContext";
 
 /**
- * SingBox component
+ * V2rayN component
  *
- * This component renders the SingBox profile image and handles the download animation and QR code display.
+ * This component renders the V2rayN subscription/profile view and handles the download, copy, and QR code display logic.
  */
 export const V2rayN: React.FC = () => {
     const {data} = useOutletContext<IndividualProfileContextType>();
