@@ -145,7 +145,7 @@ const SingleVPNProfile: React.FC<{
                     <Link
                         className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2"
                         to={'v2rayn'}>
-                        <img src={require('../../../assets/images/webp/v2rayn.webp')} alt="Shadowrocket"
+                        <img src={require('../../../assets/images/webp/v2rayn.webp')} alt="V2rayN"
                              className="rounded-4 profileImg"
                              draggable={false}/>
                         <p className="text-center pt-2">{data.name} (V2rayN)</p>
