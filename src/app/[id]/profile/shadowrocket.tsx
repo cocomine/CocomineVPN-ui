@@ -11,9 +11,10 @@ import {toastHttpError} from "../../../components/ToastHttpError";
 import {useUserProfile} from "../../../hook/UserProfileContext";
 
 /**
- * SingBox component
+ * Shadowrocket profile component
  *
- * This component renders the SingBox profile image and handles the download animation and QR code display.
+ * This component renders and manages the Shadowrocket subscription/profile, including QR code display,
+ * subscription link handling, and related status messages.
  */
 export const Shadowrocket: React.FC = () => {
     const {data} = useOutletContext<IndividualProfileContextType>();
