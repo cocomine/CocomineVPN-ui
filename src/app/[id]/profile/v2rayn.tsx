@@ -126,7 +126,7 @@ export const V2rayN: React.FC = () => {
 
     // set title
     useEffect(() => {
-        document.title = (profile?.name ?? "") + " (Shadowrocket) - Cocomine VPN";
+        document.title = (profile?.name ?? "") + " (V2rayN) - Cocomine VPN";
     }, [profile?.name]);
 
     // block navigation when modal is open
