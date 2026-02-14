@@ -36,7 +36,7 @@ export const Shadowrocket: React.FC = () => {
             msg.push(<Alert variant={"warning"} key={0}>你未創建訂閱連結, 請先創建訂閱連結</Alert>);
         }
         if (status === 'new-token') {
-            msg.push(<Alert variant={"success"} key={1}>成功創建Sing-box訂閱連結, 連結有效期為90天</Alert>);
+            msg.push(<Alert variant={"success"} key={1}>成功創建訂閱連結, 連結有效期為90天</Alert>);
         }
         if (status === 'exist-token' || status === 'new-token') {
             msg.push(<Alert variant={"info"} key={2}>此訂閱連結已包含所有節點,毋須逐個節點匯入</Alert>);
