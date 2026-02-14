@@ -19,6 +19,7 @@ import {AlertMemoType, MenuContextType, PostMessageData, VMInstanceDataType, Wea
 import ExtensionInstallBanner from "../components/ExtensionInstallBanner";
 import {useVMData} from "../hook/VMDataContext";
 import {useUserProfile} from "../hook/UserProfileContext";
+import AnnouncementBanner from "../components/AnnouncementBanner";
 
 /**
  * Menu component
@@ -29,8 +30,7 @@ import {useUserProfile} from "../hook/UserProfileContext";
  * Parent component: App@src/app/App.tsx
  *
  * @param props - The component props
- * @param props.userProfile - The user profile data
- * @param props.weatherData - The weather data
+ * @param weatherData - The weather data
  */
 const Menu: React.FC<{
     weatherData: WeatherDataType
@@ -56,7 +56,7 @@ const Menu: React.FC<{
     // check update every 5 second
     useEffect(() => {
         const id = setInterval(async () => {
-            const diff = nextUpdate.diff(moment())
+            const diff = nextUpdate.diff(moment());
 
             // update data if next update time is passed
             if (diff < 0) {
@@ -76,7 +76,7 @@ const Menu: React.FC<{
             type: 'PostVMData',
             ask: false,
             data: vm_data
-        })
+        });
     }, [vm_data]);
 
     // audio element for playing sound when status changed
@@ -102,7 +102,7 @@ const Menu: React.FC<{
 
                     if (data[index]._isPowerOn === target) {
                         SuccessAudio.play();
-                        resolve("Success")
+                        resolve("Success");
                         timeout && clearTimeout(timeout); //clear timeout
                         window.removeEventListener("message", callback); // remove event listener
                     }
@@ -113,7 +113,7 @@ const Menu: React.FC<{
                     const data = event.data.data;
                     if (data.id === vm_id) {
                         FailAudio.play();
-                        reject(data.reason)
+                        reject(data.reason);
                         timeout && clearTimeout(timeout); //clear timeout
                         window.removeEventListener("message", callback); // remove event listener
                     }
@@ -126,7 +126,7 @@ const Menu: React.FC<{
             // timeout for 2 minutes
             timeout = setTimeout(() => {
                 FailAudio.play();
-                reject("Timeout")
+                reject("Timeout");
                 window.removeEventListener("message", callback); // remove event listener
             }, 2 * 60 * 1000);
 
@@ -139,12 +139,12 @@ const Menu: React.FC<{
                         節點{(target ? '開機' : '關機')}失敗!<br/>
                         {data === 'CPU_QUOTA' ?
                             <small className={'text-muted'}>雲端供應商 CPU 配額不足, 請稍後再試</small> : null}
-                    </>)
+                    </>);
                 }
             },
             }
         ).catch((err) => {
-            console.error(err)
+            console.error(err);
         });
     }, [SuccessAudio, FailAudio]);
 
@@ -206,9 +206,12 @@ const Menu: React.FC<{
                         <Col xs={12}>
                             <ExtensionInstallBanner/>
                         </Col>
+                        <Col xs={12}>
+                            <AnnouncementBanner/>
+                        </Col>
                         {/*<Col xs={12}>
                             <AppInstallBanner/>
-                         </Col>*/}
+                        </Col>*/}
                     </Row>
                 </Col>
                 <Col xs={12}>
@@ -235,7 +238,7 @@ const Menu: React.FC<{
             <Outlet context={{statusUpdateCallback} satisfies MenuContextType}/>
         </>
     );
-}
+};
 
 /**
  * Weather element for menu
@@ -245,13 +248,13 @@ const Weather: React.FC<{ weatherData: WeatherDataType }> = ({weatherData}) => {
 
     const alert: AlertMemoType = useMemo(() => {
         return data.alert.map((item) => {
-            return [require("../assets/weather alert/" + item.code + ".webp"), item.code]
-        })
+            return [require("../assets/weather alert/" + item.code + ".webp"), item.code];
+        });
     }, [data.alert]);
 
     //update weather data
     useEffect(() => {
-        setData(weatherData)
+        setData(weatherData);
     }, [weatherData]);
 
     return (
@@ -304,9 +307,9 @@ const Weather: React.FC<{ weatherData: WeatherDataType }> = ({weatherData}) => {
                 </p></div>
             </Col>
         </Row>
-    )
+    );
 
-}
+};
 
 /**
  * Flag element for menu
@@ -371,7 +374,7 @@ const Flag: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
 
     // update data when vm_data is changed
     useEffect(() => {
-        setVm_data(data)
+        setVm_data(data);
     }, [data]);
 
     if (spinner === null) {
@@ -389,7 +392,7 @@ const Flag: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
                     </Ratio>
                 </Link>
             </Col>
-        )
+        );
     } else {
         return (
             <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
@@ -403,8 +406,8 @@ const Flag: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
                     </div>
                 </Ratio>
             </Col>
-        )
+        );
     }
-}
+};
 
 export {Menu};
