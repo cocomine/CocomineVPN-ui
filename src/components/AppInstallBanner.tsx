@@ -42,7 +42,7 @@ const AppInstallBanner: React.FC = () => {
                     <Col xs="auto">
                         <img
                             src={require('../assets/images/webp/GetItOnGooglePlay_Badge_Web_color_Chinese-TW.webp')}
-                            alt={'Git it on Google Play!'}
+                            alt={'Get it on Google Play!'}
                         />
                     </Col>
                     <Col style={{minWidth: "20rem"}} className={'mt-3 mt-md-0'}>
