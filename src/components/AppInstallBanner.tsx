@@ -35,7 +35,7 @@ const AppInstallBanner: React.FC = () => {
 
     if (installed) return null;
     return (
-        <a href={'.'} target={'_blank'} rel={'noreferrer'}
+        <a href="https://play.google.com/store" target={'_blank'} rel={'noreferrer'}
            className="link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
             <div className="banner rounded p-3 border">
                 <Row className="align-items-center align-content-center">
