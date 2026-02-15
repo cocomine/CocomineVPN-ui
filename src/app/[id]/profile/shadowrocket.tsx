@@ -21,7 +21,7 @@ export const Shadowrocket: React.FC = () => {
     const [profile, setProfile] = useState<SingboxProfile | null>(null);
     const [show, setShow] = useState(true);
     const [isCopy, setIsCopy] = useState(false);
-    const [subURL, setSubURL] = useState<URL>(new URL('sub://' + 'x'.repeat(100)));
+    const [subURL, setSubURL] = useState<string>('sub://' + 'x'.repeat(100));
     const [status, setStatus] = useState<'loading' | 'no-exist-token' | 'exist-token' | 'new-token' | 'error'>('loading');
     const [hidden, setHidden] = useState(true);
     const [confirm, setConfirm] = useState(false);
@@ -78,9 +78,7 @@ export const Shadowrocket: React.FC = () => {
                         const res = await response.json();
                         const token = res.data.token;
 
-                        const url = new URL("sub://" + btoa(API_URL + '/vpn/sub/' + token));
-                        url.hash = `CocomineVPN(${userProfile?.name ?? userProfile?.custom?.name ?? ""})`;
-                        setSubURL(url);
+                        setSubURL(`sub://${btoa(API_URL + '/vpn/sub/' + token)}#CocomineVPN(${userProfile?.name ?? userProfile?.custom?.name ?? ""})`);
                         setStatus('exist-token');
                     }
                     if (response.status === 204) {
@@ -174,9 +172,7 @@ export const Shadowrocket: React.FC = () => {
                     const res = await response.json();
                     const token = res.data.token;
 
-                    const url = new URL("sub://" + btoa(API_URL + '/vpn/sub/' + token));
-                    url.hash = `CocomineVPN(${userProfile?.name ?? userProfile?.custom?.name ?? ""})`;
-                    setSubURL(url);
+                    setSubURL(`sub://${btoa(API_URL + '/vpn/sub/' + token)}#CocomineVPN(${userProfile?.name ?? userProfile?.custom?.name ?? ""})`);
                     setStatus('new-token');
                 } else {
                     //handle turnstile challenge

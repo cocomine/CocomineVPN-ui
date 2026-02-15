@@ -42,10 +42,12 @@ export const TurnstileWidgetProvider: React.FC<React.PropsWithChildren<Turnstile
 
                 // 等待 Turnstile 驗證完成，成功時解析 token，失敗時捕獲錯誤。
                 ref.current.getResponsePromise().then((token) => {
+                    if (signal?.aborted) return;
                     setDisplay(false);
                     resolve(token);
                     localAbortController.abort('Turnstile completed');
                 }).catch((error) => {
+                    if (signal?.aborted) return;
                     setDisplay(false);
                     reject(error);
                     localAbortController.abort('Turnstile error');

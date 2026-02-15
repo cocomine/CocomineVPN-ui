@@ -84,7 +84,6 @@ const Menu: React.FC<{
     const FailAudio = useMemo(() => new Audio(require("../assets/sounds/Error.mp3")), []);
 
     // status update callback function for child component to update status and show toast message when status changed successfully or failed to change status
-    //const timeout = useRef<NodeJS.Timeout | null>(null);
     const statusUpdateCallback = useCallback<I_StatusUpdateCallback>(async (target, vm_id) => {
         // show toast message
         await toast.promise(new Promise((resolve, reject) => {
