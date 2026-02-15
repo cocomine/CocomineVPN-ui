@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {Col, Container, Modal, Row} from "react-bootstrap";
-import {useBlocker, useLocation, useNavigate} from "react-router-dom";
+import {BlockerFunction, useBlocker, useLocation, useNavigate} from "react-router-dom";
 
 /**
  * Download component
@@ -18,11 +18,14 @@ const Download = () => {
     const [show, setShow] = useState(true);
     const navigate = useNavigate();
 
-    // block navigation when modal is open
-    let blocker = useBlocker(() => {
-        setShow(false)
-        return true
-    });
+    const shouldBlock = useCallback<BlockerFunction>(({currentLocation}) => {
+        if (currentLocation.pathname === '/download') {
+            setShow(false);
+            return true;
+        }
+        return false;
+    }, []);
+    let blocker = useBlocker(shouldBlock);
 
     // redirect to home page after modal close animation
     useEffect(() => {

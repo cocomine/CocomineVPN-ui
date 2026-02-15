@@ -46,3 +46,9 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+---
+Windows: V2rayN https://github.com/2dust/v2rayN/releases
+Android: singbox https://play.google.com/store/apps/details?id=io.nekohasekai.sfa
+iOS: shadowrocket https://apps.apple.com/us/app/shadowrocket/id932747118
+Mac: shadowrocket https://apps.apple.com/us/app/shadowrocket/id932747118

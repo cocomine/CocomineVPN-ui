@@ -224,6 +224,10 @@ export interface HttpsProfile extends BaseProfile {
     url: string
 }
 
+export interface SingboxProfile extends BaseProfile {
+    type: 'sing-box',
+}
+
 /* ========== */
 
 /**

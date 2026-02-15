@@ -4,5 +4,6 @@ declare namespace NodeJS {
         // Add your custom variables here
         readonly REACT_APP_TURNSTILE_KEY: string;
         readonly REACT_APP_SENTRY_DSN: string;
+        readonly REACT_APP_API_URL: string;
     }
 }
