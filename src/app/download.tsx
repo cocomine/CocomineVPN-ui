@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Col, Container, Modal, Row} from "react-bootstrap";
 import {BlockerFunction, useBlocker, useLocation, useNavigate} from "react-router-dom";
+import SingBoxSVG from "../assets/images/svg/Sing-box.svg";
 
 /**
  * Download component
@@ -77,62 +78,6 @@ const Download = () => {
                                 </a>
                             </Col>
                             <Col lg={2} md={3} xs={4}>
-                                <a href={'https://github.com/shadowsocks/shadowsocks-windows/releases'}
-                                   target={'_blank'}
-                                   rel="noreferrer noopener"
-                                   className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
-                                    <img src={require("../assets/images/webp/SS windows.webp")}
-                                         alt="ShadowSocks (Windows)"
-                                         className="rounded-4 profileImg"
-                                         draggable={false}/>
-                                    <p className="text-center pt-2">ShadowSocks (Windows)</p>
-                                </a>
-                            </Col>
-                            <Col lg={2} md={3} xs={4}>
-                                <a href={'https://play.google.com/store/apps/details?id=com.github.shadowsocks'}
-                                   target={'_blank'}
-                                   rel="noreferrer noopener"
-                                   className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
-                                    <img src={require("../assets/images/webp/SS Android.webp")}
-                                         alt="ShadowSocks (Android)"
-                                         className="rounded-4 profileImg"
-                                         draggable={false}/>
-                                    <p className="text-center pt-2">ShadowSocks (Android)</p>
-                                </a>
-                            </Col>
-                            <Col lg={2} md={3} xs={4}>
-                                <a href={'https://play.google.com/store/apps/details?id=com.github.shadowsocks.tv'}
-                                   target={'_blank'}
-                                   rel="noreferrer noopener"
-                                   className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
-                                    <img src={require("../assets/images/webp/SS Androidtv.webp")}
-                                         alt="ShadowSocks (Android TV)"
-                                         className="rounded-4 profileImg"
-                                         draggable={false}/>
-                                    <p className="text-center pt-2">ShadowSocks (Android TV)</p>
-                                </a>
-                            </Col>
-                            <Col lg={2} md={3} xs={4}>
-                                <a href={'https://github.com/shadowsocks/ShadowsocksX-NG/releases/'} target={'_blank'}
-                                   rel="noreferrer noopener"
-                                   className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
-                                    <img src={require("../assets/images/webp/SS mac.webp")} alt="ShadowSocks (MacOS)"
-                                         className="rounded-4 profileImg"
-                                         draggable={false}/>
-                                    <p className="text-center pt-2">ShadowSocks (MacOS)</p>
-                                </a>
-                            </Col>
-                            <Col lg={2} md={3} xs={4}>
-                                <a href={'https://apps.apple.com/us/app/shadowrocket/id932747118'} target={'_blank'}
-                                   rel="noreferrer noopener"
-                                   className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
-                                    <img src={require("../assets/images/webp/SS ios.webp")} alt="ShadowSocks (ios)"
-                                         className="rounded-4 profileImg"
-                                         draggable={false}/>
-                                    <p className="text-center pt-2">ShadowSocks (ios)</p>
-                                </a>
-                            </Col>
-                            <Col lg={2} md={3} xs={4}>
                                 <a href={'https://chromewebstore.google.com/detail/cocomine-vpn-extension/cgmahkkfajhojihmidpkcmcdjmjniihk'}
                                    target={'_blank'}
                                    rel="noreferrer noopener"
@@ -143,6 +88,50 @@ const Download = () => {
                                     <p className="text-center pt-2">瀏覽器擴充</p>
                                 </a>
                             </Col>
+                                <Col lg={2} md={3} xs={4}>
+                                    <a href={'https://github.com/2dust/v2rayN/releases'}
+                                       target={'_blank'}
+                                       rel="noreferrer noopener"
+                                       className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
+                                        <img src={require("../assets/images/webp/v2rayn.webp")} alt="V2rayN"
+                                             className="rounded-4 profileImg"
+                                             draggable={false}/>
+                                        <p className="text-center pt-2">V2rayN</p>
+                                    </a>
+                                </Col>
+                                <Col lg={2} md={3} xs={4}>
+                                    <a href={'https://play.google.com/store/apps/details?id=io.nekohasekai.sfa'}
+                                       target={'_blank'}
+                                       rel="noreferrer noopener"
+                                       className="chooseProfile_btn link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
+                                        <img src={SingBoxSVG} alt="Sing-box"
+                                             className="rounded-4 profileImg"
+                                             draggable={false}/>
+                                        <p className="text-center pt-2">Sing-box</p>
+                                    </a>
+                                </Col>
+                                <Col lg={2} md={3} xs={4}>
+                                    <a href={'https://apps.apple.com/us/app/shadowrocket/id932747118'}
+                                       target={'_blank'}
+                                       rel="noreferrer noopener"
+                                       className="chooseProfile_btn link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
+                                        <img src={require("../assets/images/webp/shadowrocket.webp")} alt="Shadowrocket"
+                                             className="rounded-4 profileImg"
+                                             draggable={false}/>
+                                        <p className="text-center pt-2">Shadowrocket</p>
+                                    </a>
+                                </Col>
+                                <Col lg={2} md={3} xs={4}>
+                                    <a href={'https://play.google.com/store/apps/details?id=io.nekohasekai.sfa'}
+                                       target={'_blank'}
+                                       rel="noreferrer noopener"
+                                       className="chooseProfile_btn link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
+                                        <img src={require("../assets/images/webp/shadowrocket.webp")} alt="Shadowrocket"
+                                             className="rounded-4 profileImg"
+                                             draggable={false}/>
+                                        <p className="text-center pt-2">翻墻軟件教學</p>
+                                    </a>
+                                </Col>
                         </Row>
                         </Container>
                     </Modal.Body>
