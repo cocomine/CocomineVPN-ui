@@ -132,11 +132,11 @@ figlet.text('Cocomine VPN', {
     }
     console.log(data);
     console.log(APP_VERSION);
-});
+}).then();
 
 clarity.init('okh6uy1ksy'); // init clarity
 
-connectWebsocket(); // connect websocket
+connectWebsocket().then(); // connect websocket
 
 // render app
 root.render(

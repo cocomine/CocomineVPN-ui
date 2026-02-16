@@ -91,7 +91,7 @@ const ExtensionInstallBanner: React.FC = () => {
                     }
                 };
 
-                sendToBackend();
+                sendToBackend().then();
             }
         }
 

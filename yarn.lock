@@ -5107,9 +5107,9 @@ __metadata:
     lottie-react: "npm:^2.4.0"
     moment: "npm:^2.29.4"
     qrcode.react: "npm:^3.1.0"
-    react: "npm:^18.2.0"
+    react: "npm:^18.3.0"
     react-bootstrap: "npm:^2.9.1"
-    react-dom: "npm:^18.2.0"
+    react-dom: "npm:^18.3.0"
     react-ga4: "npm:^2.1.0"
     react-microsoft-clarity: "npm:^1.2.0"
     react-router-dom: "npm:^6.21.0"
@@ -11775,7 +11775,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^18.2.0":
+"react-dom@npm:^18.3.0":
   version: 18.3.1
   resolution: "react-dom@npm:18.3.1"
   dependencies:
@@ -11961,7 +11961,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^18.2.0":
+"react@npm:^18.3.0":
   version: 18.3.1
   resolution: "react@npm:18.3.1"
   dependencies:

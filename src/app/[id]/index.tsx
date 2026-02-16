@@ -526,7 +526,7 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
     useEffect(() => {
         if (location.hash === "#extendTime") {
             location.hash = "";
-            onClick();
+            onClick().then();
         }
     }, [onClick, location, location.hash]);
 

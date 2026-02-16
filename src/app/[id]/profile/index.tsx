@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, {ReactElement, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {BlockerFunction, Link, Outlet, useBlocker, useLocation, useNavigate, useOutletContext} from "react-router-dom";
 import {IndividualProfileContextType, ProfileContextType, VPNProfileType} from "../../../constants/Type";
 import {Col, Container, Modal, Row} from "react-bootstrap";
@@ -181,7 +181,7 @@ const SingleVPNProfile: React.FC<{
 const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile, vm_id}) => {
     const [data, setData] = useState(profile);
     const a_ref = useRef<any>(null);
-    const [show, setShow] = useState<JSX.Element | null>(null);
+    const [show, setShow] = useState<ReactElement | null>(null);
 
     // update data when profile changed
     useEffect(() => {
@@ -245,7 +245,7 @@ const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile,
 const SoftEther: React.FC<{ profile: SoftetherProfile, vm_id: string }> = ({profile, vm_id}) => {
     const [data, setData] = useState(profile);
     const a_ref = useRef<any>(null);
-    const [show, setShow] = useState<JSX.Element | null>(null);
+    const [show, setShow] = useState<ReactElement | null>(null);
 
     // update data when profile changed
     useEffect(() => {
