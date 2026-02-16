@@ -6,7 +6,7 @@ import {toast} from "react-toastify";
  */
 const toastHttpError = (status: number) => {
     const audio = new Audio(require('../assets/sounds/Error.mp3'));
-    audio.play();
+    audio.play().then();
 
     switch (status) {
         case 400:

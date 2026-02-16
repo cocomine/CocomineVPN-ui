@@ -26,7 +26,7 @@ export const fetchVPNData = async (abortController: AbortController = new AbortC
  * @returns {Promise<UserProfileType>}
  */
 export const fetchProfileData = async (abortController: AbortController = new AbortController()): Promise<UserProfileType> => {
-    const res = await fetch(`${API_URL}/userinfo`, {
+    const res = await fetch(`${API_URL}/auth/userinfo`, {
         method: "GET",
         credentials: "include",
         signal: abortController.signal,

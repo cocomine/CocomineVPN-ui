@@ -1,41 +1,65 @@
+import * as Sentry from "@sentry/react";
+import {
+    createBrowserRouter,
+    createRoutesFromChildren,
+    matchRoutes,
+    Navigate,
+    RouterProvider,
+    useLocation,
+    useNavigationType
+} from "react-router-dom";
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.scss';
 import App, {loader} from './app/App';
-import reportWebVitals from './reportWebVitals';
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import VMAction from "./app/[id]";
 import figlet from "figlet";
 import Download from "./app/download";
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import {connectWebsocket} from "./hook/useWebSocks";
-import {APP_VERSION} from "./constants/GlobalVariable";
+import {APP_VERSION, NODE_ENV} from "./constants/GlobalVariable";
 import {ErrorScreen} from "./components/ErrorScreen";
 import {LoadingScreen} from "./components/LoadingScreen";
 import Profile from "./app/[id]/profile";
 import {AnimationBackground} from "./components/AnimationBackground";
 import {clarity} from "react-microsoft-clarity";
 import {TurnstileWidgetProvider} from "./components/TurnstileWidget";
-import * as Sentry from "@sentry/react";
 import Troubleshoot from "./app/[id]/troubleshoot";
+import {SS} from "./app/[id]/profile/SS";
+import {SingBox} from "./app/[id]/profile/sing-box";
+import {Shadowrocket} from "./app/[id]/profile/shadowrocket";
+import {V2rayN} from "./app/[id]/profile/v2rayn";
 
 Sentry.init({
     dsn: process.env.REACT_APP_SENTRY_DSN,
     // Setting this option to true will send default PII data to Sentry.
     // For example, automatic IP address collection on events
+    enableLogs: true,
     sendDefaultPii: true,
     integrations: [
+        Sentry.consoleLoggingIntegration({levels: ["error"]}),
         Sentry.replayIntegration({
             blockAllMedia: false,
-        })
+        }),
+        Sentry.reactRouterV6BrowserTracingIntegration({
+            useEffect: React.useEffect,
+            useLocation,
+            useNavigationType,
+            createRoutesFromChildren,
+            matchRoutes,
+        }),
     ],
     // Session Replay
     replaysSessionSampleRate: 0.2,
-    replaysOnErrorSampleRate: 1.0
+    replaysOnErrorSampleRate: 1.0,
+    environment: NODE_ENV,
 });
 
 // create router
-const router = createBrowserRouter([
+const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6(
+    createBrowserRouter,
+);
+const router = sentryCreateBrowserRouter([
     {
         path: '/',
         element: <App/>,
@@ -49,6 +73,21 @@ const router = createBrowserRouter([
                     {
                         path: 'profile',
                         element: <Profile/>,
+                        children: [
+                            {
+                                path: 'ss',
+                                element: <SS/>,
+                            }, {
+                                path: 'sing-box',
+                                element: <SingBox/>,
+                            }, {
+                                path: 'shadowrocket',
+                                element: <Shadowrocket/>,
+                            }, {
+                                path: 'v2rayn',
+                                element: <V2rayN/>,
+                            }
+                        ]
                     }, {
                         path: 'troubleshoot',
                         element: <Troubleshoot/>,
@@ -70,7 +109,8 @@ const router = createBrowserRouter([
                 },
             }
         ]
-    }
+    },
+    {path: '*', element: <Navigate to="/" replace={true}/>, errorElement: <ErrorScreen/>}
 ]);
 
 // create root
@@ -92,11 +132,11 @@ figlet.text('Cocomine VPN', {
     }
     console.log(data);
     console.log(APP_VERSION);
-});
+}).then();
 
 clarity.init('okh6uy1ksy'); // init clarity
 
-connectWebsocket(); // connect websocket
+connectWebsocket().then(); // connect websocket
 
 // render app
 root.render(
@@ -136,4 +176,4 @@ serviceWorkerRegistration.register();
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+//reportWebVitals();

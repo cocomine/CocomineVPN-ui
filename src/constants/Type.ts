@@ -10,6 +10,7 @@ import type {
     I_VMOperationFail_PostMessageData,
     I_WeatherAlert,
     OpenvpnProfile,
+    SingboxProfile,
     Socks5Profile,
     SoftetherProfile,
     SSProfile
@@ -18,6 +19,7 @@ import {TurnstileProps} from "@marsidev/react-turnstile";
 
 /**
  * Type definition for the context.
+ * Only for path: /
  *
  * @property {I_StatusUpdateCallback} statusUpdateCallback - The status update callback function.
  */
@@ -25,8 +27,24 @@ export type MenuContextType = {
     statusUpdateCallback: I_StatusUpdateCallback
 }
 
+/**
+ * Type definition for the profile context.
+ * Only for path: /:id/profile
+ *
+ * @property {VMInstanceDataType} data - The VM instance data.
+ */
 export type ProfileContextType = {
     data: VMInstanceDataType
+}
+
+/**
+ * Type definition for the individual profile context.
+ * Only for path: /:id/profile/*
+ *
+ * @property {VPNProfileType[]} data - The array of VPN profiles associated with the VM.
+ */
+export type IndividualProfileContextType = {
+    data: VPNProfileType[]
 }
 
 /**
@@ -48,12 +66,18 @@ export type VMProviderType = "google" | "azure"
  *
  * @typedef {OpenvpnProfile | SoftetherProfile | SSProfile | Socks5Profile | HttpsProfile} VPNProfileType
  */
-export type VPNProfileType = OpenvpnProfile | SoftetherProfile | SSProfile | Socks5Profile | HttpsProfile;
+export type VPNProfileType =
+    OpenvpnProfile
+    | SoftetherProfile
+    | SSProfile
+    | Socks5Profile
+    | HttpsProfile
+    | SingboxProfile;
 
 /**
  * VPN profile types.
  */
-export type VPNType = "OpenVPN" | "SoftEther" | "SS" | "socks5" | "https";
+export type VPNType = "OpenVPN" | "SoftEther" | "SS" | "socks5" | "https" | "sing-box";
 
 /**
  * Read-only mode controls UI action availability.
@@ -215,7 +239,7 @@ export type TurnstileWidgetProps = Omit<TurnstileProps, "siteKey">;
 /**
  * Turnstile Context 函式類型，返回一個 Promise，解析為驗證 token 字串。
  */
-export type TurnstileContextType = () => Promise<string>;
+export type TurnstileContextType = (signal?: AbortSignal) => Promise<string>;
 
 /**
  * Troubleshoot status type.

@@ -1,5 +1,5 @@
 import {createContext, useContext} from 'react';
-import {VMDataType} from "./Type";
+import {VMDataType} from "../constants/Type";
 
 /**
  * Context to hold the Virtual Machine (VM) data.
