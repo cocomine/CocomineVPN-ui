@@ -126,7 +126,7 @@ const Download = () => {
                                        target={'_blank'}
                                        rel="noreferrer noopener"
                                        className="chooseProfile_btn link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">
-                                        <img src={require("../assets/images/webp/shadowrocket.webp")} alt="Shadowrocket"
+                                        <img src={require("../assets/images/webp/teaching.webp")} alt="Shadowrocket"
                                              className="rounded-4 profileImg"
                                              draggable={false}/>
                                         <p className="text-center pt-2">翻墻軟件教學</p>

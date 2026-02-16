@@ -12,7 +12,7 @@ const AnnouncementBanner: React.FC = () => {
             <div className="banner rounded p-3 border">
                 <Row className="align-items-center align-content-center">
                     <Col xs="auto">
-                        <img src={'https://placehold.co/600x400'} alt="將網頁安裝為APP"
+                        <img src={require('../assets/images/webp/AnnouncementBanner.webp')} alt="將網頁安裝為APP"
                              style={{height: "6rem"}}/>
                     </Col>
                     <Col style={{minWidth: "20rem"}} className={'mt-3 mt-md-0'}>
