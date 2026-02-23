@@ -305,7 +305,7 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
                     const {value, done} = await reader.read(); // read the chunk
                     // read complete
                     if (done) {
-                        reject();
+                        reject(new Error("ReadableStream ended without receiving a 'finished' status."));
                         break;
                     }
 
