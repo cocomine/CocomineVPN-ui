@@ -122,7 +122,7 @@ const Download = () => {
                                     </a>
                                 </Col>
                                 <Col lg={2} md={3} xs={4}>
-                                    <a href={'https://play.google.com/store/apps/details?id=io.nekohasekai.sfa'}
+                                    <a href={'https://github.com/cocomine/CocomineVPN-ui/wiki'}
                                        target={'_blank'}
                                        rel="noreferrer noopener"
                                        className="chooseProfile_btn link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2">

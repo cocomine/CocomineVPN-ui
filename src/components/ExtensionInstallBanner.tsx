@@ -113,11 +113,11 @@ const ExtensionInstallBanner: React.FC = () => {
                         <img src={require('../assets/images/webp/icon with extension.webp')} alt="安裝瀏覽器擴充"
                              style={{height: "6rem"}}/>
                     </Col>
-                    <Col style={{minWidth: "20rem"}}>
-                        <h5 className="fw-bold text-info">
-                            安裝瀏覽器擴充
-                            <Badge pill bg={'primary'} className="ms-2">立即安裝!</Badge>
-                        </h5>
+                    <Col className={'mt-3 mt-md-0'} xs={12} md={true}>
+                        <div className="fw-bold text-info align-bottom fs-5 mb-3">
+                            <span>安裝瀏覽器擴充</span>
+                            <Badge bg={'success'} pill className="ms-2">點擊立即安裝!</Badge>
+                        </div>
                         <p className="m-0 text-white">在公用電腦上不方便安裝軟件? 嘗試使用瀏覽器擴充無需授權直接在瀏覽器中使用!
                             一鍵連線更加方便!</p>
                     </Col>

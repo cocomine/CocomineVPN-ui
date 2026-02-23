@@ -15,11 +15,11 @@ const AnnouncementBanner: React.FC = () => {
                         <img src={require('../assets/images/webp/AnnouncementBanner.webp')} alt="將網頁安裝為APP"
                              style={{height: "6rem"}}/>
                     </Col>
-                    <Col style={{minWidth: "20rem"}} className={'mt-3 mt-md-0'}>
-                        <h5 className="fw-bold text-info align-bottom">
-                            舊版 shadowsocks 方法將停用
+                    <Col className={'mt-3 mt-md-0'} xs={12} md={true}>
+                        <div className="fw-bold text-info align-bottom fs-5 mb-3">
+                            <span>舊版 shadowsocks 方法將停用</span>
                             <Badge bg={'danger'} pill className="ms-2">立即更換!</Badge>
-                        </h5>
+                        </div>
                         <p className={'text-white'}>
                             隨著防火長城的持續更新，舊版 shadowsocks 方法已經無法穩定使用以及防火長城有效偵測。
                         </p>

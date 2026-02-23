@@ -42,17 +42,17 @@ const AppInstallBanner: React.FC = () => {
                     <Col xs="auto">
                         <img
                             src={require('../assets/images/webp/GetItOnGooglePlay_Badge_Web_color_Chinese-TW.webp')}
-                            alt={'Get it on Google Play!'}
+                            alt={'Get it on Google Play!'} style={{height: "4rem"}}
                         />
                     </Col>
-                    <Col style={{minWidth: "20rem"}} className={'mt-3 mt-md-0'}>
-                        <h5 className="fw-bold text-info">
-                            下載手機應用程式
-                            <Badge pill bg={'primary'} className="ms-2">立即下載!</Badge>
-                        </h5>
+                    <Col className={'mt-3 mt-md-0'} xs={12} md={true}>
+                        <div className="fw-bold text-info align-bottom fs-5 mb-3">
+                            <span>下載手機應用程式</span>
+                            <Badge bg={'primary'} pill className="ms-2">立即下載!</Badge>
+                        </div>
                         <p className="m-0 text-white">
                             想喺手機上面使用VPN? 現有嘅方法操作太過繁瑣? 立即嘗試手機程式啦!
-                            一鍵連線省卻繁鎖操作! 並且使用世界上最熱門的VPN協議, 安全可靠!
+                            一鍵連線省卻繁鎖操作!
                         </p>
                     </Col>
                 </Row>

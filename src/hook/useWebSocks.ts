@@ -52,7 +52,7 @@ const connectWebsocket = async () => {
         console.warn("WebSocket Disconnected. Reconnect in 1s.")
         websocket = null; // 清空
         listeners.forEach(l => l(null as any)); // 通知斷線 (如果需要處理斷線狀態)
-        setTimeout(connectWebsocket, 1000) //reconnect at 5s
+        setTimeout(connectWebsocket, 1000); //reconnect at 1s
     });
     tmp_ws.addEventListener('message', (event) => {
         const data: WebSocketDataType = JSON.parse(event.data);
