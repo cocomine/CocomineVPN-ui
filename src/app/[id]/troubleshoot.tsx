@@ -7,7 +7,6 @@ import {API_URL} from "../../constants/GlobalVariable";
 import {toastHttpError} from "../../components/ToastHttpError";
 import {useTurnstile} from "../../hook/Turnstile";
 import semver from "semver";
-import {captureException} from "@sentry/react";
 
 /**
  * Troubleshoot component
@@ -102,7 +101,6 @@ const Troubleshoot: React.FC = () => {
                 // Troubleshoot failed
                 if (!signal.aborted) setFinish(true);
                 console.error("Troubleshoot failed:", error);
-                captureException(error);
             }
         })();
 
@@ -200,7 +198,7 @@ function step1_CheckInternet(id_counter: number, stepMessageCallback: (step: Tro
                     timestamp: new Date().toISOString(),
                 });
                 console.error(error);
-                reject(++id_counter); // stop further steps
+                reject(error); // stop further steps
                 return;
             }
             resolve(++id_counter); // proceed to next step
@@ -307,7 +305,7 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
                     const {value, done} = await reader.read(); // read the chunk
                     // read complete
                     if (done) {
-                        reject(++internal_id_counter);
+                        reject(new Error("ReadableStream ended without receiving a 'finished' status."));
                         break;
                     }
 
@@ -351,7 +349,7 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
                                 message: '伺服器回應格式錯誤, 請稍後再試',
                                 timestamp: new Date().toISOString(),
                             });
-                            reject(++internal_id_counter); // stop further steps
+                            reject(e); // stop further steps
                             return;
                         }
                     }
@@ -365,7 +363,7 @@ function step2_ServerSideCheck(id_counter: number, data: VMInstanceDataType, exe
                     message: '無法解析伺服器回應, 請稍後再試',
                     timestamp: new Date().toISOString(),
                 });
-                reject(++id_counter); // stop further steps
+                reject(e); // stop further steps
                 return;
             }
         })().catch(reject);
