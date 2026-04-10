@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {BlockerFunction, useBlocker, useNavigate, useOutletContext} from "react-router-dom";
 import {PostMessageData, ProfileContextType, TurnstileContextType, VMInstanceDataType} from "../../constants/Type";
 import {Col, Modal, Row, Spinner} from "react-bootstrap";
@@ -23,6 +23,7 @@ const Troubleshoot: React.FC = () => {
     const [finish, setFinish] = useState(false);
     const navigate = useNavigate();
     const execute = useTurnstile();
+    const lock = useRef(false);
 
     // set title
     useEffect(() => {
@@ -49,6 +50,7 @@ const Troubleshoot: React.FC = () => {
 
     // main troubleshoot function, executed on component mount
     const startTroubleshoot = useCallback(async (signal: AbortSignal) => {
+        lock.current = true;
         let id_counter = 0;
 
         // safe setSteps to avoid setting state on unmounted component
@@ -98,16 +100,19 @@ const Troubleshoot: React.FC = () => {
             if (!signal.aborted) setFinish(true);
             console.error("Troubleshoot failed:", error);
         }
-    }, [data]);
+        lock.current = false;
+    }, [data, execute]);
 
     // start troubleshoot on component mount
     useEffect(() => {
+        if (lock.current) return;
+
         const controller = new AbortController();
         startTroubleshoot(controller.signal).then();
         return () => {
             controller.abort(); // abort ongoing troubleshoot on unmount
         };
-    }, [execute]);
+    }, [startTroubleshoot]);
 
     return (
         <>
