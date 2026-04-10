@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {BlockerFunction, useBlocker, useNavigate, useOutletContext} from "react-router-dom";
 import {PostMessageData, ProfileContextType, TurnstileContextType, VMInstanceDataType} from "../../constants/Type";
 import {Col, Modal, Row, Spinner} from "react-bootstrap";
@@ -23,6 +23,7 @@ const Troubleshoot: React.FC = () => {
     const [finish, setFinish] = useState(false);
     const navigate = useNavigate();
     const execute = useTurnstile();
+    const lock = useRef(false);
 
     // set title
     useEffect(() => {
@@ -47,67 +48,72 @@ const Troubleshoot: React.FC = () => {
         return () => clearTimeout(id);
     }, [show, blocker]);
 
+    // main troubleshoot function, executed on component mount
+    const startTroubleshoot = useCallback(async (signal: AbortSignal) => {
+        lock.current = true;
+        let id_counter = 0;
+
+        // safe setSteps to avoid setting state on unmounted component
+        const safeSetSteps = (updater: React.SetStateAction<TroubleshootResponse[]>) => {
+            if (!signal.aborted) setSteps(updater);
+        };
+
+        //
+        const updateCallback = (step: TroubleshootResponse) => {
+            safeSetSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
+        };
+
+        try {
+            // Step 1: Check internet connectivity
+            id_counter = await step1_CheckInternet(id_counter, updateCallback, signal);
+
+            // Step 2: Check VPN server status
+            id_counter = await step2_ServerSideCheck(id_counter, data, execute, updateCallback, signal);
+
+            // Step 3: Check browser VPN extension
+            id_counter = await step3_ExtensionCheck(id_counter, data, updateCallback, signal);
+
+            // Final Step: Troubleshoot complete
+            const finalStep1: TroubleshootResponse = {
+                id: id_counter++,
+                status: "finished",
+                message: "所有診斷完成",
+                timestamp: new Date().toISOString(),
+            };
+            safeSetSteps(prev => [...prev, finalStep1]);
+            const finalStep2: TroubleshootResponse = {
+                id: id_counter++,
+                status: "info",
+                message: "關於VPN程式的使用問題請參閱該程式的支援頁面 或 Discord Cocomine",
+                timestamp: new Date().toISOString(),
+            };
+            safeSetSteps(prev => [...prev, finalStep2]);
+            if (!signal.aborted) setFinish(true);
+        } catch (error: any) {
+            // handle abort separately
+            if (error.name === "AbortError") {
+                console.log("Troubleshoot aborted via AbortController");
+                return; // exit silently
+            }
+
+            // Troubleshoot failed
+            if (!signal.aborted) setFinish(true);
+            console.error("Troubleshoot failed:", error);
+        } finally {
+            lock.current = false;
+        }
+    }, [data, execute]);
+
     // start troubleshoot on component mount
     useEffect(() => {
+        if (lock.current) return;
+
         const controller = new AbortController();
-        const {signal} = controller;
-
-        (async () => {
-            let id_counter = 0;
-
-            // safe setSteps to avoid setting state on unmounted component
-            const safeSetSteps = (updater: React.SetStateAction<TroubleshootResponse[]>) => {
-                if (!signal.aborted) setSteps(updater);
-            };
-
-            //
-            const updateCallback = (step: TroubleshootResponse) => {
-                safeSetSteps(prev => [...prev.filter(s => s.id !== step.id), step]);
-            };
-
-            try {
-                // Step 1: Check internet connectivity
-                id_counter = await step1_CheckInternet(id_counter, updateCallback, signal);
-
-                // Step 2: Check VPN server status
-                id_counter = await step2_ServerSideCheck(id_counter, data, execute, updateCallback, signal);
-
-                // Step 3: Check browser VPN extension
-                id_counter = await step3_ExtensionCheck(id_counter, data, updateCallback, signal);
-
-                // Final Step: Troubleshoot complete
-                const finalStep1: TroubleshootResponse = {
-                    id: id_counter++,
-                    status: 'finished',
-                    message: '所有診斷完成',
-                    timestamp: new Date().toISOString(),
-                };
-                safeSetSteps(prev => [...prev, finalStep1]);
-                const finalStep2: TroubleshootResponse = {
-                    id: id_counter++,
-                    status: 'info',
-                    message: '關於VPN程式的使用問題請參閱該程式的支援頁面 或 Discord Cocomine',
-                    timestamp: new Date().toISOString(),
-                };
-                safeSetSteps(prev => [...prev, finalStep2]);
-                if (!signal.aborted) setFinish(true);
-            } catch (error: any) {
-                // handle abort separately
-                if (error.name === 'AbortError') {
-                    console.log('Troubleshoot aborted via AbortController');
-                    return; // exit silently
-                }
-
-                // Troubleshoot failed
-                if (!signal.aborted) setFinish(true);
-                console.error("Troubleshoot failed:", error);
-            }
-        })();
-
+        startTroubleshoot(controller.signal).then();
         return () => {
             controller.abort(); // abort ongoing troubleshoot on unmount
         };
-    }, [data, execute]);
+    }, [startTroubleshoot]);
 
     return (
         <>
