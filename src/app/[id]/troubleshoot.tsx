@@ -99,8 +99,9 @@ const Troubleshoot: React.FC = () => {
             // Troubleshoot failed
             if (!signal.aborted) setFinish(true);
             console.error("Troubleshoot failed:", error);
+        } finally {
+            lock.current = false;
         }
-        lock.current = false;
     }, [data, execute]);
 
     // start troubleshoot on component mount
