@@ -17,15 +17,13 @@ const AnnouncementBanner: React.FC = () => {
                     </Col>
                     <Col className={'mt-3 mt-md-0'} xs={12} md={true}>
                         <div className="fw-bold text-info align-bottom fs-5 mb-3">
-                            <span>舊版 shadowsocks 方法將停用</span>
-                            <Badge bg={'danger'} pill className="ms-2">立即更換!</Badge>
+                            <span>中國大陸地區使用VPN指引</span>
+                            <Badge bg={"danger"} pill className="ms-2">立即嘗試!</Badge>
                         </div>
                         <p className={'text-white'}>
-                            隨著防火長城的持續更新，舊版 shadowsocks 方法已經無法穩定使用以及防火長城有效偵測。
+                            於大陸地區使用請選用機場方式進行連接，該方式是針對於大陸防火牆而設計的。使用其他連接方式極大機率無法成功連接。
                         </p>
-                        <p className={'text-white'}>為了確保服務的穩定性和安全性，我們將在<b
-                            className={'text-warning'}>2月28日</b>停用舊版 shadowsocks 方法
-                            ，請盡快切換到新的連接方式以確保服務的持續使用。</p>
+                        <p className={"text-white"}>建議出發前購入一張香港漫遊電話卡作為後備，亦可以加入本人微信隨時聯絡。</p>
                         <Badge bg={'primary'} pill className={'fs-6'}>點擊查看使用教學</Badge>
                     </Col>
                 </Row>
