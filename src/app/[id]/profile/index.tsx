@@ -64,14 +64,14 @@ const Profile: React.FC = () => {
                         <Container>
                             <Row className={"gy-5 gx-4 justify-content-center"}>
                                 <Col lg={2} md={3} xs={4}>
-                                    <Link
+                                    <a
                                         className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2"
-                                        to={"https://netbird.cocomine.cc/"} target={"_blank"}>
-                                        <img src={require("../../../assets/images/webp/netbird.webp")} alt="ShadowSocks"
+                                        href={"https://netbird.cocomine.cc/"} target={"_blank"}>
+                                        <img src={require("../../../assets/images/webp/netbird.webp")} alt="Netbird"
                                              className="rounded-4 profileImg"
                                              draggable={false}/>
                                         <p className="text-center pt-2">NetBird</p>
-                                    </Link>
+                                    </a>
                                 </Col>
                                 {data._profiles.map((profile, index) =>
                                     <SingleVPNProfile key={profile.name} profile={profile} vm_id={data._id}

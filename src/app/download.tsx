@@ -61,7 +61,7 @@ const Download = () => {
                                        target={"_blank"}
                                        rel="noreferrer noopener"
                                        className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
-                                        <img src={require("../assets/images/webp/netbird.webp")} alt="SoftEther"
+                                        <img src={require("../assets/images/webp/netbird.webp")} alt="Netbird"
                                              className="rounded-4 profileImg"
                                              draggable={false}/>
                                         <p className="text-center pt-2">NetBird</p>

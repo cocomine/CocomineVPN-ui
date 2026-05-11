@@ -12,7 +12,8 @@ const OpenVPNBanner: React.FC = () => {
             <div className="banner rounded p-3 border">
                 <Row className="align-items-center align-content-center">
                     <Col xs="auto">
-                        <img src={require("../assets/images/webp/OpenVPNBanner.webp")} alt="立即使用Netbird"
+                        <img src={require("../assets/images/webp/OpenVPNBanner.webp")}
+                             alt="OpenVPN 停止服務，請盡快遷移至 NetBird"
                              style={{height: "6rem"}}/>
                     </Col>
                     <Col className={"mt-3 mt-md-0"} xs={12} md={true}>

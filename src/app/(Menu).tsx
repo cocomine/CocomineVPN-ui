@@ -192,14 +192,14 @@ const Menu: React.FC<{
                     </Link>
                 </Col>
                 <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
-                    <Link to={`https://netbird.cocomine.cc/`} target={"_blank"} rel={"noreferrer"}>
+                    <a href={`https://netbird.cocomine.cc/`} target={"_blank"} rel={"noreferrer"}>
                         <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
                             <div>
                                 <img src={require("../assets/images/webp/netbird.webp")} alt="Netbird" className="flag"
                                      draggable={false}/>
                             </div>
                         </Ratio>
-                    </Link>
+                    </a>
                 </Col>
                 <Col xs={12}>
                     <Row className="justify-content-between align-items-center">
