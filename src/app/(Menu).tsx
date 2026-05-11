@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {Button, Col, Placeholder, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
-import 'react-toastify/dist/ReactToastify.min.css';
+import "react-toastify/dist/ReactToastify.min.css";
 import {Link, Outlet, useRevalidator} from "react-router-dom";
 import us_flag from "../assets/images/svg/us.svg";
 import uk_flag from "../assets/images/svg/uk.svg";
@@ -19,7 +19,8 @@ import {AlertMemoType, MenuContextType, PostMessageData, VMInstanceDataType, Wea
 import ExtensionInstallBanner from "../components/ExtensionInstallBanner";
 import {useVMData} from "../hook/VMDataContext";
 import {useUserProfile} from "../hook/UserProfileContext";
-import AnnouncementBanner from "../components/AnnouncementBanner";
+import NetBirdBanner from "../components/NetbirdBanner";
+import OpenVPNBanner from "../components/OpenVPNBanner";
 
 /**
  * Menu component
@@ -190,6 +191,16 @@ const Menu: React.FC<{
                         </Ratio>
                     </Link>
                 </Col>
+                <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
+                    <Link to={`https://netbird.cocomine.cc/`} target={"_blank"} rel={"noreferrer"}>
+                        <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
+                            <div>
+                                <img src={require("../assets/images/webp/netbird.webp")} alt="Netbird" className="flag"
+                                     draggable={false}/>
+                            </div>
+                        </Ratio>
+                    </Link>
+                </Col>
                 <Col xs={12}>
                     <Row className="justify-content-between align-items-center">
                         <Col xs={12}>
@@ -206,11 +217,11 @@ const Menu: React.FC<{
                             <ExtensionInstallBanner/>
                         </Col>
                         <Col xs={12}>
-                            <AnnouncementBanner/>
+                            <NetBirdBanner/>
                         </Col>
-                        {/*<Col xs={12}>
-                            <AppInstallBanner/>
-                        </Col>*/}
+                        <Col xs={12}>
+                            <OpenVPNBanner/>
+                        </Col>
                     </Row>
                 </Col>
                 <Col xs={12}>
