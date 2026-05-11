@@ -14,9 +14,9 @@ const ErrorScreen: React.FC = () => {
     //const execute = useTurnstile();
     const [status, setStatus] = useState(0);
     const error_Elm = useMemo(() => {
-        console.error(error)
+        console.error(error);
         if (isRouteErrorResponse(error)) {
-            setStatus(error.status)
+            setStatus(error.status);
             switch (error.status) {
                 case 400:
                     return (<>
@@ -93,7 +93,7 @@ const ErrorScreen: React.FC = () => {
                             style={{width: "300px", height: "300px"}}/>
                 </Row>
                 <p>網絡出現問題! 檢查一下</p>
-            </>)
+            </>);
         }
         return (<>
             <h1>出事啦!</h1>
@@ -102,15 +102,15 @@ const ErrorScreen: React.FC = () => {
                         style={{width: "400px", height: "300px"}}/>
             </Row>
             <p>發生了一些不能遇見的錯誤! 不如再試一試?</p>
-        </>)
+        </>);
     }, [error]);
     const [loading, setLoading] = useState(false);
     let location = useLocation();
 
     const loginCallback = useCallback(() => {
-        setLoading(true)
-        sessionStorage.setItem('redirect', location.pathname)
-        window.location.replace("/login")
+        setLoading(true);
+        sessionStorage.setItem("redirect", location.pathname);
+        window.location.replace("/login");
     }, [location.pathname]);
 
     // todo: 另外尋找解決方法
@@ -127,8 +127,8 @@ const ErrorScreen: React.FC = () => {
 
     return (
         <div className="error-screen">
-            <Row className="h-100 justify-content-center align-content-center">
-                <Col xs={12} className="text-center">
+            <Row className="h-100 justify-content-center align-content-center gy-3">
+                <Col className="text-center">
                     {error_Elm}
                 </Col>
                 {((status === 401) || (status === 403) || (status === 400)) ?
@@ -153,11 +153,16 @@ const ErrorScreen: React.FC = () => {
                             </Col>
                     )
                 }
+                <Col xs={12} className="text-center">
+                    <a href={"https://netbird.cocomine.cc/"} target={"_blank"} rel={"noreferrer"}>
+                        <img src={require("../assets/images/webp/netbird_2.webp")} style={{height: 24}}
+                             alt={"Netbird"}/>點我 直接前往 Netbird</a>
+                </Col>
             </Row>
             <audio autoPlay>
-                <source src={require('../assets/sounds/Error.mp3')} type="audio/mpeg"/>
+                <source src={require("../assets/sounds/Error.mp3")} type="audio/mpeg"/>
             </audio>
         </div>
     );
-}
+};
 export {ErrorScreen};

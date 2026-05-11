@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {Button, Col, Placeholder, Ratio, Row, Spinner} from "react-bootstrap";
 import "./App.scss";
 import moment from "moment";
-import 'react-toastify/dist/ReactToastify.min.css';
+import "react-toastify/dist/ReactToastify.min.css";
 import {Link, Outlet, useRevalidator} from "react-router-dom";
 import us_flag from "../assets/images/svg/us.svg";
 import uk_flag from "../assets/images/svg/uk.svg";
@@ -19,7 +19,8 @@ import {AlertMemoType, MenuContextType, PostMessageData, VMInstanceDataType, Wea
 import ExtensionInstallBanner from "../components/ExtensionInstallBanner";
 import {useVMData} from "../hook/VMDataContext";
 import {useUserProfile} from "../hook/UserProfileContext";
-import AnnouncementBanner from "../components/AnnouncementBanner";
+import NetBirdBanner from "../components/NetbirdBanner";
+import OpenVPNBanner from "../components/OpenVPNBanner";
 
 /**
  * Menu component
@@ -73,7 +74,7 @@ const Menu: React.FC<{
     // post message to content script when vm_data is changed
     useEffect(() => {
         window.postMessage({
-            type: 'PostVMData',
+            type: "PostVMData",
             ask: false,
             data: vm_data
         });
@@ -130,14 +131,14 @@ const Menu: React.FC<{
             }, 2 * 60 * 1000);
 
             }), {
-                pending: `正在${target ? '開機' : '關機'}中...`,
-                success: '節點已成功' + (target ? '開機' : '關機') + '!',
+            pending: `正在${target ? "開機" : "關機"}中...`,
+            success: "節點已成功" + (target ? "開機" : "關機") + "!",
             error: {
                 render({data}) {
                     return (<>
-                        節點{(target ? '開機' : '關機')}失敗!<br/>
-                        {data === 'CPU_QUOTA' ?
-                            <small className={'text-muted'}>雲端供應商 CPU 配額不足, 請稍後再試</small> : null}
+                        節點{(target ? "開機" : "關機")}失敗!<br/>
+                        {data === "CPU_QUOTA" ?
+                            <small className={"text-muted"}>雲端供應商 CPU 配額不足, 請稍後再試</small> : null}
                     </>);
                 }
             },
@@ -166,11 +167,11 @@ const Menu: React.FC<{
                     </Row>
                 </Col>
                 {vm_data.length <= 0 ?
-                    Array(7).fill('').map((_, index) =>
+                    Array(7).fill("").map((_, index) =>
                         <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4" key={index}>
                             <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
                                 <div>
-                                    <Placeholder as={'div'} animation="glow" className="w-100 h-100">
+                                    <Placeholder as={"div"} animation="glow" className="w-100 h-100">
                                         <Placeholder xs={12} className="flag"/>
                                     </Placeholder>
                                 </div>
@@ -190,6 +191,16 @@ const Menu: React.FC<{
                         </Ratio>
                     </Link>
                 </Col>
+                <Col xl={2} lg={3} md={4} sm={5} xs={6} className="mx-xl-4">
+                    <a href={`https://netbird.cocomine.cc/`} target={"_blank"} rel={"noreferrer"}>
+                        <Ratio aspectRatio="1x1" onClick={() => null} className="flagHover">
+                            <div>
+                                <img src={require("../assets/images/webp/netbird.webp")} alt="Netbird" className="flag"
+                                     draggable={false}/>
+                            </div>
+                        </Ratio>
+                    </a>
+                </Col>
                 <Col xs={12}>
                     <Row className="justify-content-between align-items-center">
                         <Col xs={12}>
@@ -201,16 +212,16 @@ const Menu: React.FC<{
                     </Row>
                 </Col>
                 <Col xs={12}>
-                    <Row className={'gy-2'}>
+                    <Row className={"gy-2"}>
                         <Col xs={12}>
                             <ExtensionInstallBanner/>
                         </Col>
                         <Col xs={12}>
-                            <AnnouncementBanner/>
+                            <NetBirdBanner/>
                         </Col>
-                        {/*<Col xs={12}>
-                            <AppInstallBanner/>
-                        </Col>*/}
+                        <Col xs={12}>
+                            <OpenVPNBanner/>
+                        </Col>
                     </Row>
                 </Col>
                 <Col xs={12}>
@@ -263,11 +274,11 @@ const Weather: React.FC<{ weatherData: WeatherDataType }> = ({weatherData}) => {
             </Col>
             <Col xs={"auto"}>
                 <img src={`https://www.hko.gov.hk/images/HKOWxIconOutline/pic${data.icon}.png`} alt="weather"
-                     style={{width: '40px'}}/>
+                     style={{width: "40px"}}/>
                 <span>{data.temperature}°C</span>
             </Col>
             <Col xs={"auto"}>
-                <img src={moisture} alt="weather" style={{width: '20px'}} className="me-1 pb-1"/>
+                <img src={moisture} alt="weather" style={{width: "20px"}} className="me-1 pb-1"/>
                 <span>{data.humidity}%</span>
             </Col>
             {data.uv_index !== 0 ? <Col xs={"auto"}>
@@ -284,7 +295,7 @@ const Weather: React.FC<{ weatherData: WeatherDataType }> = ({weatherData}) => {
             <Col xs={"auto"}>
                 {alert.map(([item, code], index) =>
                     <img src={item} key={index} alt={"weather alert"} style={{width: "40px"}}
-                         className={'me-2 ' + (DANGER_WEATHER_ALERT.includes(code) ? 'danger-border' : '')}/>
+                         className={"me-2 " + (DANGER_WEATHER_ALERT.includes(code) ? "danger-border" : "")}/>
                 )}
             </Col>
             <Col style={{minWidth: "20rem"}}>
