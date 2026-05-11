@@ -66,7 +66,7 @@ const Profile: React.FC = () => {
                                 <Col lg={2} md={3} xs={4}>
                                     <a
                                         className="chooseProfile_btn position-relative link-underline link-underline-opacity-0 link-underline-opacity-75-hover link-offset-2"
-                                        href={"https://netbird.cocomine.cc/"} target={"_blank"}>
+                                        href={"https://netbird.cocomine.cc/"} target={"_blank"} rel="noreferrer">
                                         <img src={require("../../../assets/images/webp/netbird.webp")} alt="Netbird"
                                              className="rounded-4 profileImg"
                                              draggable={false}/>
