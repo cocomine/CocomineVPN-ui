@@ -111,6 +111,7 @@ export type VMDataType = {
  * @property {string} _id - Unique VM identifier.
  * @property {string} _zone - Zone or region where VM is located.
  * @property {string} _url - Access URL for VM.
+ * @property {boolean} _notExpire - Whether the VM has not expired.
  * @property {VMCountryType} _country - Country/region code for VM.
  * @property {VPNProfileType[]} _profiles - Array of associated VPN profiles.
  * @property {VMProviderType} _provider - Cloud/provider for the VM.
@@ -124,6 +125,7 @@ export type VMInstanceDataType = {
     readonly _id: string;
     readonly _zone: string;
     readonly _url: string;
+    readonly _notExpire: boolean;
     readonly _country: VMCountryType;
     readonly _profiles: VPNProfileType[];
     readonly _provider: VMProviderType;

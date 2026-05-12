@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {Button, Col, Modal, Placeholder, Ratio, Row, Spinner} from "react-bootstrap";
 import {
     BlockerFunction,
@@ -228,7 +228,8 @@ const VMAction: React.FC = () => {
                                 <MobileAppConnect data={vm_instance_data}/>
                             </>}
                             <ExtendTime expired={vm_instance_data._isPowerOn ? vm_instance_data._expired : null}
-                                        onClick={extendTime} loading={is_extend_time_loading}/>
+                                        onClick={extendTime} loading={is_extend_time_loading}
+                                        notExpire={vm_instance_data._notExpire}/>
                         </Row>
                     </Modal.Body>
                     <Modal.Footer>
@@ -501,14 +502,14 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  *
  * This component displays the remaining time until the expected offline time and allows the user to extend the time.
  */
-const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
+const ExtendTime: React.FC<ExtendTimeProps> = ({expired, notExpire = false, onClick, loading}) => {
     const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string | null>(null);
     const [enableExtend, setEnableExtend] = useState<boolean>(false);
     const location = useLocation();
 
     // update expect_offline_time_Interval every second
     useEffect(() => {
-        if (expired !== null) {
+        if (expired !== null && !notExpire) {
             const id = setInterval(() => {
                 const expect_offline_time = moment(expired);
                 const diff = expect_offline_time.diff(Date.now());
@@ -520,15 +521,19 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
 
             return () => clearInterval(id);
         }
-    }, [expired]);
+    }, [expired, notExpire]);
 
     // check if hash is #extendTime
     useEffect(() => {
         if (location.hash === "#extendTime") {
             location.hash = "";
-            onClick().then();
+            if (!notExpire) {
+                onClick().then();
+            } else {
+                toast.info("長期開放無需延長時間");
+            }
         }
-    }, [onClick, location, location.hash]);
+    }, [onClick, location, location.hash, notExpire]);
 
     if (expired === null) return null;
     return (
@@ -538,7 +543,7 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
             </Col>
             <Col xs={12} className="text-center">
                 {expect_offline_time_Interval ? (
-                    <h3>{expect_offline_time_Interval}</h3>
+                    <h3>{notExpire ? "24/7 開放" : expect_offline_time_Interval}</h3>
                 ) : (
                     <Placeholder animation="wave" as={'h3'}>
                         <Placeholder xs={3} className={'rounded'}/>
@@ -547,9 +552,9 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
                 <p className="small text-muted">距離預計離線</p>
                 <Button variant={enableExtend ? "primary" : "outline-primary"}
                         className="w-100 rounded-5" onClick={onClick}
-                        disabled={!enableExtend || loading}>
+                        disabled={!enableExtend || loading || notExpire}>
                     {loading && <Spinner animation="grow" size="sm" className="me-2"/>}
-                    {enableExtend ? "延長開放時間" : "離線前一小時可以延長開放時間"}
+                    {notExpire ? "無需延長開放時間" : (enableExtend ? "延長開放時間" : "離線前一小時可以延長開放時間")}
                 </Button>
             </Col>
         </>

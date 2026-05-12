@@ -176,6 +176,7 @@ export interface ExtendTimeProps {
     expired: string | null,
     loading: boolean,
     onClick: () => Promise<any>
+    notExpire?: boolean
 }
 
 /**
