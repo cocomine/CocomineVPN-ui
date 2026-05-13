@@ -127,6 +127,7 @@ const VMAction: React.FC = () => {
             });
             if (!res.ok) {
                 setIsExtendTimeLoading(false);
+                if (res.status === 409) return toast.warning("節點長期開放無需延長時間");
                 if (res.status === 462) return toast.error(`只允許離線前一小時操作`);
                 if (res.status === 463) return toast.error(`節點沒有開啟`);
                 //handle turnstile challenge
@@ -530,7 +531,7 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, notExpire = false, onCl
             if (!notExpire) {
                 onClick().then();
             } else {
-                toast.info("長期開放無需延長時間");
+                toast.warning("節點長期開放無需延長時間");
             }
         }
     }, [onClick, location, location.hash, notExpire]);
@@ -542,8 +543,8 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, notExpire = false, onCl
                 <div className="border-top w-100"></div>
             </Col>
             <Col xs={12} className="text-center">
-                {expect_offline_time_Interval ? (
-                    <h3>{notExpire ? "24/7 開放" : expect_offline_time_Interval}</h3>
+                {expect_offline_time_Interval || notExpire ? (
+                    <h3>{notExpire ? "24/7長期開放" : expect_offline_time_Interval}</h3>
                 ) : (
                     <Placeholder animation="wave" as={'h3'}>
                         <Placeholder xs={3} className={'rounded'}/>
