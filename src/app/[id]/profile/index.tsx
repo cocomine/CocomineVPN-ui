@@ -187,6 +187,7 @@ const SingleVPNProfile: React.FC<{
  * @param {Object} props - The component props
  * @param {VPNProfileType} props.profile - The VPN profile data
  * @param {string} props.vm_id - The ID of the virtual machine
+ * @deprecated At 2026/06/30
  */
 const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile, vm_id}) => {
     const [data, setData] = useState(profile);
