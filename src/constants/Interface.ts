@@ -171,11 +171,12 @@ export interface I_ConnectByExtension_PostMessageData extends I_BasePostMessageD
  * @property {string | null} expired - The expiration time as a string or null.
  * @property {boolean} loading - Indicates if the operation is in progress.
  * @property {() => Promise<any>} onClick - The click handler function that returns a Promise.
+ * @property {boolean} notExpire - Optional property indicating if the item does not expire. If true, the expiration time is not applicable.
  */
 export interface ExtendTimeProps {
     expired: string | null,
     loading: boolean,
-    onClick: () => Promise<any>
+    onClick: () => Promise<any>,
     notExpire?: boolean
 }
 
