@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {Button, Col, Modal, Placeholder, Ratio, Row, Spinner} from "react-bootstrap";
 import {
     BlockerFunction,
@@ -47,7 +47,7 @@ const VMAction: React.FC = () => {
     // set vm_instance_data when data changes
     useEffect(() => {
         if (data === null) return;
-        setVMInstanceData(data.data.find(v => v._id === location.pathname.split('/')[1]) || null);
+        setVMInstanceData(data.data.find(v => v._id === location.pathname.split("/")[1]) || null);
     }, [data, data?.data, location.pathname]);
 
     // power action
@@ -55,7 +55,7 @@ const VMAction: React.FC = () => {
         if (vm_instance_data === null) return;
 
         // Google Analytics
-        ReactGA.event('vm_power_action', {
+        ReactGA.event("vm_power_action", {
             vm_name: vm_instance_data._name,
             vm_id: vm_instance_data._id,
             power: power ? "ON" : "OFF"
@@ -69,7 +69,7 @@ const VMAction: React.FC = () => {
                 headers: {
                     "Content-Type": "application/json",
                     "Cf-Access-Jwt-Assertion": TOKEN,
-                    'X-Requested-With': 'XMLHttpRequest'
+                    "X-Requested-With": "XMLHttpRequest"
                 },
                 body: JSON.stringify({
                     target_state: power ? "START" : "STOP"
@@ -78,10 +78,10 @@ const VMAction: React.FC = () => {
             if (!res.ok) {
                 setIsLoading(false);
                 if (res.status === 460) return toast.error(`節點只允許 ${vm_instance_data._readonly} 操作`);
-                if (res.status === 461) return toast.error(`節點已經處於${vm_instance_data._isPowerOn ? '開機' : '關機'}狀態`);
+                if (res.status === 461) return toast.error(`節點已經處於${vm_instance_data._isPowerOn ? "開機" : "關機"}狀態`);
 
                 //handle turnstile challenge
-                if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
+                if (res.status === 403 && res.headers.has("cf-mitigated") && res.headers.get("cf-mitigated") === "challenge") {
                     try {
                         await execute();
                         await powerAction(power); // retry
@@ -110,7 +110,7 @@ const VMAction: React.FC = () => {
         if (vm_instance_data === null || is_extend_time_loading) return;
 
         // Google Analytics
-        ReactGA.event('vm_extend_time', {
+        ReactGA.event("vm_extend_time", {
             vm_name: vm_instance_data._name,
             vm_id: vm_instance_data._id,
         });
@@ -122,15 +122,16 @@ const VMAction: React.FC = () => {
                 credentials: "include",
                 headers: {
                     "Cf-Access-Jwt-Assertion": TOKEN,
-                    'X-Requested-With': 'XMLHttpRequest',
+                    "X-Requested-With": "XMLHttpRequest",
                 },
             });
             if (!res.ok) {
                 setIsExtendTimeLoading(false);
+                if (res.status === 409) return toast.warning("節點長期開放無需延長時間");
                 if (res.status === 462) return toast.error(`只允許離線前一小時操作`);
                 if (res.status === 463) return toast.error(`節點沒有開啟`);
                 //handle turnstile challenge
-                if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
+                if (res.status === 403 && res.headers.has("cf-mitigated") && res.headers.get("cf-mitigated") === "challenge") {
                     try {
                         await execute();
                         await extendTime(); // retry
@@ -166,7 +167,7 @@ const VMAction: React.FC = () => {
 
     // block navigation when modal is open
     const shouldBlock = useCallback<BlockerFunction>(({currentLocation}) => {
-        if (vm_instance_data !== null && currentLocation.pathname.toLowerCase().endsWith('/' + vm_instance_data._id)) {
+        if (vm_instance_data !== null && currentLocation.pathname.toLowerCase().endsWith("/" + vm_instance_data._id)) {
             setShow(false);
             return true;
         }
@@ -186,7 +187,7 @@ const VMAction: React.FC = () => {
     // set title
     useEffect(() => {
         if (vm_instance_data === null) return;
-        if (location.pathname === '/' + vm_instance_data._id) {
+        if (location.pathname === "/" + vm_instance_data._id) {
             document.title = vm_instance_data._name + " - Cocomine VPN";
             setShow(true);
         }
@@ -201,8 +202,8 @@ const VMAction: React.FC = () => {
     if (vm_instance_data === null) return null;
     return (
         <>
-            {location.pathname === '/' + vm_instance_data._id &&
-                <Modal show={show} centered onHide={() => navigate('..', {replace: true})}>
+            {location.pathname === "/" + vm_instance_data._id &&
+                <Modal show={show} centered onHide={() => navigate("..", {replace: true})}>
                     <Modal.Header closeButton>
                         <Modal.Title>你想? <small
                             style={{
@@ -217,7 +218,7 @@ const VMAction: React.FC = () => {
                                               readonly={vm_instance_data._readonly} loading={is_loading}/>
                             </Col>
                             <Col className="border-start">
-                                <Link to={location.pathname + '/profile'}
+                                <Link to={location.pathname + "/profile"}
                                       className="chooseProfile_btn text-decoration-none">
                                     <img src={tools} alt="Config file" className="w-100" draggable={false}/>
                                     <p className="text-center pt-2">下載設定檔</p>
@@ -228,11 +229,12 @@ const VMAction: React.FC = () => {
                                 <MobileAppConnect data={vm_instance_data}/>
                             </>}
                             <ExtendTime expired={vm_instance_data._isPowerOn ? vm_instance_data._expired : null}
-                                        onClick={extendTime} loading={is_extend_time_loading}/>
+                                        onClick={extendTime} loading={is_extend_time_loading}
+                                        notExpire={vm_instance_data._notExpire}/>
                         </Row>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Link to={'troubleshoot'} className={'text-muted small text-decoration-none'}>
+                        <Link to={"troubleshoot"} className={"text-muted small text-decoration-none"}>
                             <i className="bi bi-question-circle-fill me-1"></i> 排解疑難
                         </Link>
                     </Modal.Footer>
@@ -260,7 +262,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
         setLoading(true);
 
         // Google Analytics
-        ReactGA.event('extension_connect', {
+        ReactGA.event("extension_connect", {
             vm_name: data._name,
             vm_id: data._id,
         });
@@ -272,21 +274,21 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
                 // onMessage event callback function
                 function callback(e: MessageEvent<PostMessageData>) {
                     if (e.source !== window) return;
-                    const audio = new Audio(require('../../assets/sounds/Jig 0.mp3'));
+                    const audio = new Audio(require("../../assets/sounds/Jig 0.mp3"));
 
                     // receive connect response
-                    if ((e.data.type === 'Connect') && !e.data.ask) {
+                    if ((e.data.type === "Connect") && !e.data.ask) {
                         if (e.data.data.connected) {
                             resolve(true);
                             audio.play();
                         } else {
                             reject(false);
                         }
-                        window.removeEventListener('message', callback); // remove event listener when call
+                        window.removeEventListener("message", callback); // remove event listener when call
                     }
                 }
 
-                window.addEventListener('message', callback); // add event listener on message
+                window.addEventListener("message", callback); // add event listener on message
             }), {
                 pending: {render: <>連接檢查中... <br/>檢查需時, 請耐心等候</>},
                 success: "連線成功",
@@ -296,13 +298,13 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
             });
         }
 
-        if (semver.lt(version, '2.3.0')) {
+        if (semver.lt(version, "2.3.0")) {
             //NOTE: backward compatibility
             showToast();
 
             // post message to extension for connect
             window.postMessage({
-                type: 'Connect',
+                type: "Connect",
                 ask: true,
                 data: data
             });
@@ -316,11 +318,11 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
                     credentials: "include",
                     headers: {
                         "Cf-Access-Jwt-Assertion": TOKEN,
-                        'X-Requested-With': 'XMLHttpRequest',
+                        "X-Requested-With": "XMLHttpRequest",
                     },
                 });
                 if (!res.ok) {
-                    if (res.status === 403 && res.headers.has('cf-mitigated') && res.headers.get('cf-mitigated') === 'challenge') {
+                    if (res.status === 403 && res.headers.has("cf-mitigated") && res.headers.get("cf-mitigated") === "challenge") {
                         try {
                             await execute();
                             await onClick(); // retry
@@ -353,7 +355,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
 
             // post message to extension for connect
             window.postMessage({
-                type: 'Connect',
+                type: "Connect",
                 ask: true,
                 data: {setting: https_setting, vm_data: data} //NOTE: backward compatibility
             });
@@ -369,23 +371,23 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
             }
 
             // receive extension installed response
-            if ((e.data.type === 'ExtensionInstalled') && !e.data.ask) {
+            if ((e.data.type === "ExtensionInstalled") && !e.data.ask) {
                 if (!e.data.data.installed) return;
                 setInstalled(true);
                 setVersion(e.data.data.version);
             }
 
             // receive connect response
-            if ((e.data.type === 'Connect') && !e.data.ask) {
+            if ((e.data.type === "Connect") && !e.data.ask) {
                 setLoading(false);
             }
         }
 
         // add event listener
-        window.addEventListener('message', callback);
-        window.postMessage({type: 'ExtensionInstalled', ask: true, data: {version: APP_VERSION}});
+        window.addEventListener("message", callback);
+        window.postMessage({type: "ExtensionInstalled", ask: true, data: {version: APP_VERSION}});
 
-        return () => window.removeEventListener('message', callback);
+        return () => window.removeEventListener("message", callback);
     }, [data]);
 
     if (!installed) return null;
@@ -397,7 +399,7 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
             <Col xs={12}>
                 <Row className="justify-content-center align-items-center g-2 pb-2">
                     <Col xs={"auto"}>
-                        <img src={require('../../assets/images/webp/icon with extension.webp')} alt="extension"
+                        <img src={require("../../assets/images/webp/icon with extension.webp")} alt="extension"
                              className="img-fluid"
                              style={{width: "4rem"}}/>
                     </Col>
@@ -438,7 +440,7 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
     // connect to extension
     const onClick = useCallback(() => {
         setLoading(true);
-        window.postMessage({type: 'AppConnect', ask: true, data: data});
+        window.postMessage({type: "AppConnect", ask: true, data: data});
     }, [data]);
 
     // check if extension is installed
@@ -449,21 +451,21 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
                 return;
             }
 
-            if ((e.data.type === 'MobileAppInstalled') && !e.data.ask) {
+            if ((e.data.type === "MobileAppInstalled") && !e.data.ask) {
                 if (!(e.data.data.installed && data._profiles.some(p => p.type === "SS"))) return;
                 setInstalled(true);
             }
 
-            if ((e.data.type === 'AppConnect') && !e.data.ask) {
+            if ((e.data.type === "AppConnect") && !e.data.ask) {
                 setLoading(false);
             }
         }
 
         // add event listener
-        window.addEventListener('message', callback);
-        window.postMessage({type: 'MobileAppInstalled', ask: true});
+        window.addEventListener("message", callback);
+        window.postMessage({type: "MobileAppInstalled", ask: true});
 
-        return () => window.removeEventListener('message', callback);
+        return () => window.removeEventListener("message", callback);
     }, [data]);
 
     if (!installed) return null;
@@ -500,35 +502,46 @@ const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
  * ExtendTime component
  *
  * This component displays the remaining time until the expected offline time and allows the user to extend the time.
+ * This component uses {@link ExtendTimeProps}.
+ *
+ * Note: **Must `expired !== null` when need to display.**
  */
-const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
+const ExtendTime: React.FC<ExtendTimeProps> = ({expired, notExpire = false, onClick, loading}) => {
     const [expect_offline_time_Interval, setExpect_offline_time_Interval] = useState<string | null>(null);
     const [enableExtend, setEnableExtend] = useState<boolean>(false);
     const location = useLocation();
 
     // update expect_offline_time_Interval every second
     useEffect(() => {
-        if (expired !== null) {
+        if (expired !== null && !notExpire) {
             const id = setInterval(() => {
                 const expect_offline_time = moment(expired);
                 const diff = expect_offline_time.diff(Date.now());
-                const tmp = moment.utc(diff).format('HH:mm:ss');
+                const tmp = moment.utc(diff).format("HH:mm:ss");
 
-                if (diff < 60 * 60 * 1000) setEnableExtend(true);
+                if (diff < 60 * 60 * 1000) {
+                    setEnableExtend(true);
+                } else {
+                    setEnableExtend(false);
+                }
                 setExpect_offline_time_Interval(diff > 0 ? tmp : "00:00:00");
             }, 1000);
 
             return () => clearInterval(id);
         }
-    }, [expired]);
+    }, [expired, notExpire]);
 
     // check if hash is #extendTime
     useEffect(() => {
         if (location.hash === "#extendTime") {
             location.hash = "";
-            onClick().then();
+            if (!notExpire) {
+                onClick().then();
+            } else {
+                toast.warning("節點長期開放無需延長時間");
+            }
         }
-    }, [onClick, location, location.hash]);
+    }, [onClick, location, location.hash, notExpire]);
 
     if (expired === null) return null;
     return (
@@ -537,19 +550,19 @@ const ExtendTime: React.FC<ExtendTimeProps> = ({expired, onClick, loading}) => {
                 <div className="border-top w-100"></div>
             </Col>
             <Col xs={12} className="text-center">
-                {expect_offline_time_Interval ? (
-                    <h3>{expect_offline_time_Interval}</h3>
+                {expect_offline_time_Interval || notExpire ? (
+                    <h3>{notExpire ? "24/7長期開放" : expect_offline_time_Interval}</h3>
                 ) : (
-                    <Placeholder animation="wave" as={'h3'}>
-                        <Placeholder xs={3} className={'rounded'}/>
+                    <Placeholder animation="wave" as={"h3"}>
+                        <Placeholder xs={3} className={"rounded"}/>
                     </Placeholder>
                 )}
                 <p className="small text-muted">距離預計離線</p>
                 <Button variant={enableExtend ? "primary" : "outline-primary"}
                         className="w-100 rounded-5" onClick={onClick}
-                        disabled={!enableExtend || loading}>
+                        disabled={!enableExtend || loading || notExpire}>
                     {loading && <Spinner animation="grow" size="sm" className="me-2"/>}
-                    {enableExtend ? "延長開放時間" : "離線前一小時可以延長開放時間"}
+                    {notExpire ? "無需延長開放時間" : (enableExtend ? "延長開放時間" : "離線前一小時可以延長開放時間")}
                 </Button>
             </Col>
         </>
