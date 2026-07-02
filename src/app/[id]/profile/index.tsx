@@ -4,7 +4,7 @@ import {IndividualProfileContextType, ProfileContextType, VPNProfileType} from "
 import {Col, Container, Modal, Row} from "react-bootstrap";
 import {API_URL} from "../../../constants/GlobalVariable";
 import ReactGA from "react-ga4";
-import {OpenvpnProfile, SoftetherProfile} from "../../../constants/Interface";
+import {SoftetherProfile} from "../../../constants/Interface";
 import SingboxSVG from "../../../assets/images/svg/Sing-box.svg";
 
 
@@ -185,7 +185,7 @@ const SingleVPNProfile: React.FC<{
  * @param {string} props.vm_id - The ID of the virtual machine
  * @deprecated At 2026-06-30
  */
-const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile, vm_id}) => {
+/*const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile, vm_id}) => {
     const [data, setData] = useState(profile);
     const a_ref = useRef<any>(null);
     const [show, setShow] = useState<ReactElement | null>(null);
@@ -238,7 +238,7 @@ const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile,
             {show}
         </>
     );
-};
+};*/
 
 /**
  * SoftEther component
