@@ -109,10 +109,6 @@ const SingleVPNProfile: React.FC<{
 
     const elm = useMemo(() => {
         switch (data.type) {
-            case "OpenVPN":
-                return [
-                    <OpenVPN profile={data} vm_id={vm_id}/>
-                ];
             case "SoftEther":
                 return [
                     <SoftEther profile={data} vm_id={vm_id}/>
@@ -187,7 +183,7 @@ const SingleVPNProfile: React.FC<{
  * @param {Object} props - The component props
  * @param {VPNProfileType} props.profile - The VPN profile data
  * @param {string} props.vm_id - The ID of the virtual machine
- * @deprecated At 2026/06/30
+ * @deprecated At 2026-06-30
  */
 const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile, vm_id}) => {
     const [data, setData] = useState(profile);
