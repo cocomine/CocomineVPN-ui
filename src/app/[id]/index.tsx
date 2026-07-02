@@ -224,10 +224,9 @@ const VMAction: React.FC = () => {
                                     <p className="text-center pt-2">下載設定檔</p>
                                 </Link>
                             </Col>
-                            {vm_instance_data._isPowerOn && <>
+                            {vm_instance_data._isPowerOn &&
                                 <ExtensionConnect data={vm_instance_data}/>
-                                <MobileAppConnect data={vm_instance_data}/>
-                            </>}
+                            }
                             <ExtendTime expired={vm_instance_data._isPowerOn ? vm_instance_data._expired : null}
                                         onClick={extendTime} loading={is_extend_time_loading}
                                         notExpire={vm_instance_data._notExpire}/>
@@ -416,79 +415,6 @@ const ExtensionConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
                                 {loading ? <><Spinner animation="grow" size="sm" className="me-2"/> 連線中...</> :
                                     <><i className="bi bi-link-45deg me-2"></i> 一鍵連線</>
                                 }
-                            </Col>
-                        </Row>
-                    </div>
-                </Button>
-            </Col>
-        </>
-    );
-};
-
-/**
- * MobileAppConnect component
- *
- * This component handles the connection to a mobile app for the VPN.
- * It checks if the mobile app is installed and allows the user to connect to it.
- *
- * @param data - The VM data.
- */
-const MobileAppConnect: React.FC<{ data: VMInstanceDataType }> = ({data}) => {
-    const [installed, setInstalled] = useState<boolean>(false);
-    const [loading, setLoading] = useState(false);
-
-    // connect to extension
-    const onClick = useCallback(() => {
-        setLoading(true);
-        window.postMessage({type: "AppConnect", ask: true, data: data});
-    }, [data]);
-
-    // check if extension is installed
-    useEffect(() => {
-        // callback function
-        function callback(e: MessageEvent<PostMessageData>) {
-            if (e.source !== window) {
-                return;
-            }
-
-            if ((e.data.type === "MobileAppInstalled") && !e.data.ask) {
-                if (!(e.data.data.installed && data._profiles.some(p => p.type === "SS"))) return;
-                setInstalled(true);
-            }
-
-            if ((e.data.type === "AppConnect") && !e.data.ask) {
-                setLoading(false);
-            }
-        }
-
-        // add event listener
-        window.addEventListener("message", callback);
-        window.postMessage({type: "MobileAppInstalled", ask: true});
-
-        return () => window.removeEventListener("message", callback);
-    }, [data]);
-
-    if (!installed) return null;
-    return (
-        <>
-            <Col xs={12} className="text-center">
-                <div className="border-top w-100"></div>
-            </Col>
-            <Col xs={12}>
-                <Row className="justify-content-center align-items-center g-2 pb-2">
-                    <Col xs={"auto"} className="text-center">
-                        <h5>Cocomine VPN 手機程式</h5>
-                        <span className="text-muted small">你已經安裝了手機程式, 可以使用一鍵連線功能</span>
-                    </Col>
-                </Row>
-                <Button variant="primary" className="w-100 rounded-5 rainbow-btn border-0" onClick={onClick}
-                        disabled={loading}>
-                    <div className="rounded-5">
-                        <Row className="justify-content-center align-content-center h-100">
-                            <Col xs="auto">
-                                {loading ? <Spinner animation="grow" size="sm" className="me-2"/> :
-                                    <i className="bi bi-link-45deg me-2"></i>}
-                                一鍵連線
                             </Col>
                         </Row>
                     </div>

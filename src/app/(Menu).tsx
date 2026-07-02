@@ -20,7 +20,6 @@ import ExtensionInstallBanner from "../components/ExtensionInstallBanner";
 import {useVMData} from "../hook/VMDataContext";
 import {useUserProfile} from "../hook/UserProfileContext";
 import NetBirdBanner from "../components/NetbirdBanner";
-import OpenVPNBanner from "../components/OpenVPNBanner";
 
 /**
  * Menu component
@@ -218,9 +217,6 @@ const Menu: React.FC<{
                         </Col>
                         <Col xs={12}>
                             <NetBirdBanner/>
-                        </Col>
-                        <Col xs={12}>
-                            <OpenVPNBanner/>
                         </Col>
                     </Row>
                 </Col>

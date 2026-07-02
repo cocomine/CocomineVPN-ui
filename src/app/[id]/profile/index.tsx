@@ -4,7 +4,7 @@ import {IndividualProfileContextType, ProfileContextType, VPNProfileType} from "
 import {Col, Container, Modal, Row} from "react-bootstrap";
 import {API_URL} from "../../../constants/GlobalVariable";
 import ReactGA from "react-ga4";
-import {OpenvpnProfile, SoftetherProfile} from "../../../constants/Interface";
+import {SoftetherProfile} from "../../../constants/Interface";
 import SingboxSVG from "../../../assets/images/svg/Sing-box.svg";
 
 
@@ -109,10 +109,6 @@ const SingleVPNProfile: React.FC<{
 
     const elm = useMemo(() => {
         switch (data.type) {
-            case "OpenVPN":
-                return [
-                    <OpenVPN profile={data} vm_id={vm_id}/>
-                ];
             case "SoftEther":
                 return [
                     <SoftEther profile={data} vm_id={vm_id}/>
@@ -187,8 +183,9 @@ const SingleVPNProfile: React.FC<{
  * @param {Object} props - The component props
  * @param {VPNProfileType} props.profile - The VPN profile data
  * @param {string} props.vm_id - The ID of the virtual machine
+ * @deprecated At 2026-06-30
  */
-const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile, vm_id}) => {
+/*const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile, vm_id}) => {
     const [data, setData] = useState(profile);
     const a_ref = useRef<any>(null);
     const [show, setShow] = useState<ReactElement | null>(null);
@@ -241,7 +238,7 @@ const OpenVPN: React.FC<{ profile: OpenvpnProfile, vm_id: string }> = ({profile,
             {show}
         </>
     );
-};
+};*/
 
 /**
  * SoftEther component
